@@ -3,7 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:open_filex/open_filex.dart';
+import 'package:android_package_installer/android_package_installer.dart';
 import 'package:logger/logger.dart';
 import '../../../core/utils/route_utils.dart';
 import '../widgets/update_screen.dart';
@@ -18,6 +18,7 @@ class UpdateService {
   
   static const String _githubRepo = 'soilzhu/chilleast';
   static const String _apiUrl = 'https://api.github.com/repos/$_githubRepo/releases/latest';
+  static const String _downloadUrl = 'https://eastchill-apk.soilzhu.su/latest/app-release.apk';
 
   /// 检查更新
   Future<void> checkUpdate(BuildContext context, {bool showNoUpdate = false}) async {
@@ -26,7 +27,7 @@ class UpdateService {
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
       
-      // 2. 获取最新版本信息
+      // 2. 获取最新版本信息 (从 GitHub 获取版本号和更新日志)
       final response = await _dio.get(_apiUrl);
       if (response.statusCode != 200) {
         throw Exception('无法获取版本信息');
@@ -35,24 +36,6 @@ class UpdateService {
       final data = response.data;
       final latestVersion = (data['tag_name'] as String).replaceAll('v', '');
       final releaseNotes = data['body'] as String;
-      
-      // 查找 APK 资源
-      final List assets = data['assets'];
-      final apkAsset = assets.firstWhere(
-        (asset) => (asset['name'] as String).endsWith('.apk'),
-        orElse: () => null,
-      );
-      
-      if (apkAsset == null) {
-        if (showNoUpdate && context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('未发现可用的 APK 更新')),
-          );
-        }
-        return;
-      }
-      
-      final downloadUrl = apkAsset['browser_download_url'] as String;
       
       // 3. 比较版本
       if (_isNewerVersion(latestVersion, currentVersion)) {
@@ -68,7 +51,7 @@ class UpdateService {
                 onPressed: () => Navigator.push(context, createSlideUpRoute(UpdateScreen(
                   version: latestVersion,
                   releaseNotes: releaseNotes,
-                  downloadUrl: downloadUrl,
+                  downloadUrl: _downloadUrl,
                 ))),
               ),
             ),
@@ -79,7 +62,7 @@ class UpdateService {
             Navigator.push(context, createSlideUpRoute(UpdateScreen(
               version: latestVersion,
               releaseNotes: releaseNotes,
-              downloadUrl: downloadUrl,
+              downloadUrl: _downloadUrl,
             )));
           }
         }
@@ -155,9 +138,10 @@ class UpdateService {
 
   Future<void> _installApk(String path) async {
     try {
-      final result = await OpenFilex.open(path);
-      if (result.type != ResultType.done) {
-        _logger.e('Install APK failed: ${result.message}');
+      final statusCode = await AndroidPackageInstaller.installApk(apkFilePath: path);
+      if (statusCode != null) {
+        PackageInstallerStatus installationStatus = PackageInstallerStatus.byCode(statusCode);
+        _logger.i('Install APK status: ${installationStatus.name}');
       }
     } catch (e) {
       _logger.e('Install APK error: $e');

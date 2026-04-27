@@ -21,13 +21,21 @@ class NotificationService {
     tz.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Shanghai'));
 
-    // 2. 安卓初始化设置
+    // 2. 平台初始化设置
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('@mipmap/ic_launcher');
+
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
 
     // 3. 整体初始化
     const InitializationSettings initializationSettings = InitializationSettings(
       android: initializationSettingsAndroid,
+      iOS: initializationSettingsIOS,
     );
 
     await _notificationsPlugin.initialize(
@@ -103,7 +111,7 @@ class NotificationService {
         if (reminderTime.isAfter(now.add(const Duration(days: 14)))) continue;
 
         // 生成通知 ID (课程使用1开头)
-        final int notificationId = 100000000 + (course.hashCode.abs() + reminderTime.millisecondsSinceEpoch ~/ 60000).toInt() % 100000000;
+        final int notificationId = 100000000 + (course.id.hashCode.abs() + reminderTime.millisecondsSinceEpoch ~/ 60000).toInt() % 100000000;
 
         final timeStr = '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}';
 
@@ -122,7 +130,7 @@ class NotificationService {
               showWhen: true,
             ),
           ),
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
           uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
           payload: 'course_${course.id}',
         );
@@ -184,7 +192,7 @@ class NotificationService {
             showWhen: true,
           ),
         ),
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation: UILocalNotificationDateInterpretation.absoluteTime,
         payload: 'homework_${hw.id}',
       );

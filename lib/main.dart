@@ -6,7 +6,6 @@ import 'core/network/dio_client.dart';
 import 'core/network/cookie_manager.dart';
 import 'features/home/screens/main_scaffold.dart';
 import 'features/auth/screens/login_screen.dart';
-import 'features/timetable/screens/timetable_sync_prompt_screen.dart';
 import 'core/state/auth_state.dart';
 import 'core/services/notification_service.dart';
 
@@ -16,12 +15,16 @@ void main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   
-  // 初始化通知服务
-  await NotificationService().init();
-  
+  try {
+    // 初始化通知服务
+    await NotificationService().init().timeout(const Duration(seconds: 5));
+  } catch (e) {
+    debugPrint('⚠️ Notification initialization failed: $e');
+  }
+
   // 初始化中文日期格式化环境
   await initializeDateFormatting('zh_CN', null);
-  
+
   try {
     // 初始化 DioClient (包含 CookieManager)
     await DioClient().initialize().timeout(const Duration(seconds: 5));
@@ -157,8 +160,8 @@ class LiveHunauApp extends ConsumerWidget {
         appBarTheme: const AppBarTheme(
           centerTitle: false,
           elevation: 0,
-          backgroundColor: Color(0xFF1E1E1E),
-          surfaceTintColor: Color(0xFF1E1E1E),
+          backgroundColor: Color(0xFF121212),
+          surfaceTintColor: Color(0xFF121212),
           titleTextStyle: TextStyle(
             color: Colors.white,
             fontSize: 18,
@@ -252,12 +255,6 @@ class LiveHunauApp extends ConsumerWidget {
   }
 
   Widget _buildHome(BuildContext context, WidgetRef ref, AuthState authState) {
-    if (authState.status == AuthStatus.authenticated && authState.needsTimetablePrompt) {
-      return TimetableSyncPromptScreen(
-        key: const ValueKey('prompt'),
-        onSkip: () => ref.read(authStateProvider.notifier).completeTimetablePrompt(),
-      );
-    }
 
     if (!authState.hasAccount && !authState.isGuestMode) {
       return LoginScreen(
