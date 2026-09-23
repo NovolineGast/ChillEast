@@ -1,5 +1,11 @@
+import 'dart:convert';
+import 'dart:io';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../l10n/app_localizations.dart';
+import '../state/locale_provider.dart';
 import '../mcp/services/mcp_tool_registry.dart';
+import '../mcp/tools/repair_tool.dart';
 import '../utils/secure_storage_helper.dart';
 import 'ai_service.dart';
 
@@ -16,12 +22,14 @@ enum AiAssistantStatus {
 class AiDisplayMessage {
   final String role; // 'user' | 'assistant'
   final String text;
+  final String? imagePath;
   final String? toolUsed;
   final DateTime timestamp;
 
   AiDisplayMessage({
     required this.role,
     required this.text,
+    this.imagePath,
     this.toolUsed,
     DateTime? timestamp,
   }) : timestamp = timestamp ?? DateTime.now();
@@ -38,16 +46,23 @@ class AiAssistantState {
   final String apiUrl;
   final String model;
 
-  const AiAssistantState({
+  AiAssistantState({
     this.status = AiAssistantStatus.idle,
     this.conversationHistory = const [],
     this.displayMessages = const [],
     this.currentToolStatus,
     this.errorMessage,
     this.apiKey,
-    this.apiUrl = AiAssistantService.defaultApiUrl,
-    this.model = AiAssistantService.defaultModel,
+    this.apiUrl = '',
+    this.model = '',
   });
+
+  /// 空字符串代表“跟随当前默认”（默认走 Worker 中转）。
+  String get resolvedApiUrl =>
+      apiUrl.trim().isNotEmpty ? apiUrl.trim() : AiAssistantService.defaultApiUrl;
+
+  String get resolvedModel =>
+      model.trim().isNotEmpty ? model.trim() : AiAssistantService.defaultModel;
 
   bool get isLoading =>
       status == AiAssistantStatus.thinking || status == AiAssistantStatus.callingTool;
@@ -72,6 +87,7 @@ class AiAssistantState {
     String? currentToolStatus,
     String? errorMessage,
     String? apiKey,
+    bool clearApiKey = false,
     String? apiUrl,
     String? model,
   }) {
@@ -81,7 +97,7 @@ class AiAssistantState {
       displayMessages: displayMessages ?? this.displayMessages,
       currentToolStatus: currentToolStatus,
       errorMessage: errorMessage,
-      apiKey: apiKey ?? this.apiKey,
+      apiKey: clearApiKey ? null : (apiKey ?? this.apiKey),
       apiUrl: apiUrl ?? this.apiUrl,
       model: model ?? this.model,
     );
@@ -94,16 +110,24 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   final AiAssistantService _service = AiAssistantService();
   final SecureStorageHelper _storage = SecureStorageHelper();
 
-  AiAssistantNotifier(this.ref) : super(const AiAssistantState()) {
+  AiAssistantNotifier(this.ref) : super(AiAssistantState()) {
     loadSettings();
   }
 
-  /// 加载配置
+  /// 加载配置：存量旧直连（硅基流动）配置自动迁移到 Worker 中转
   Future<void> loadSettings() async {
     try {
       final apiKey = await _storage.getAiApiKey();
-      final apiUrl = await _storage.getAiApiUrl() ?? AiAssistantService.defaultApiUrl;
-      final model = await _storage.getAiModel() ?? AiAssistantService.defaultModel;
+      var apiUrl = await _storage.getAiApiUrl();
+      if (AiAssistantService.isLegacyDefaultApiUrl(apiUrl)) {
+        await _storage.clearAiApiUrl();
+        apiUrl = null;
+      }
+      var model = await _storage.getAiModel();
+      if (AiAssistantService.isLegacyDefaultModel(model)) {
+        await _storage.clearAiModel();
+        model = null;
+      }
       state = state.copyWith(
         apiKey: apiKey,
         apiUrl: apiUrl,
@@ -118,35 +142,53 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     state = state.copyWith(apiKey: apiKey.trim());
   }
 
-  /// 更新并保存 API URL
+  /// 更新并保存 API URL（空字符串表示跟随默认）
   Future<void> setApiUrl(String url) async {
-    await _storage.saveAiApiUrl(url);
+    if (url.trim().isNotEmpty) {
+      await _storage.saveAiApiUrl(url);
+    } else {
+      await _storage.clearAiApiUrl();
+    }
     state = state.copyWith(apiUrl: url.trim());
   }
 
-  /// 更新并保存模型
+  /// 更新并保存模型（空字符串表示跟随默认）
   Future<void> setModel(String model) async {
-    await _storage.saveAiModel(model);
+    if (model.trim().isNotEmpty) {
+      await _storage.saveAiModel(model);
+    } else {
+      await _storage.clearAiModel();
+    }
     state = state.copyWith(model: model.trim());
   }
 
-  /// 保存完整设置 (URL + Model + Key)
+  /// 保存完整设置 (URL + Model + Key)，留空表示跟随默认（Worker 中转）
   Future<void> saveFullSettings({
     required String apiUrl,
     required String model,
     required String apiKey,
   }) async {
-    await _storage.saveAiApiUrl(apiUrl);
-    await _storage.saveAiModel(model);
+    if (apiUrl.trim().isNotEmpty) {
+      await _storage.saveAiApiUrl(apiUrl);
+    } else {
+      await _storage.clearAiApiUrl();
+    }
+    if (model.trim().isNotEmpty) {
+      await _storage.saveAiModel(model);
+    } else {
+      await _storage.clearAiModel();
+    }
     if (apiKey.trim().isNotEmpty) {
       await _storage.saveAiApiKey(apiKey);
     } else {
       await _storage.clearAiApiKey();
     }
+    final trimmedKey = apiKey.trim();
     state = state.copyWith(
-      apiUrl: apiUrl.trim().isNotEmpty ? apiUrl.trim() : AiAssistantService.defaultApiUrl,
-      model: model.trim().isNotEmpty ? model.trim() : AiAssistantService.defaultModel,
-      apiKey: apiKey.trim().isNotEmpty ? apiKey.trim() : null,
+      apiUrl: apiUrl.trim(),
+      model: model.trim(),
+      apiKey: trimmedKey.isNotEmpty ? trimmedKey : null,
+      clearApiKey: trimmedKey.isEmpty,
     );
   }
 
@@ -156,9 +198,9 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     await _storage.clearAiModel();
     await _storage.clearAiApiKey();
     state = state.copyWith(
-      apiUrl: AiAssistantService.defaultApiUrl,
-      model: AiAssistantService.defaultModel,
-      apiKey: null,
+      apiUrl: '',
+      model: '',
+      clearApiKey: true,
     );
   }
 
@@ -173,30 +215,88 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     );
   }
 
-  /// 发送消息给 AI
-  Future<void> sendMessage(String text) async {
+  AppLocalizations _getL10n() {
+    final locale = ref.read(localeProvider);
+    return lookupAppLocalizations(
+      locale ?? WidgetsBinding.instance.platformDispatcher.locale,
+    );
+  }
+
+  String _getMimeType(String path) {
+    final lower = path.toLowerCase();
+    if (lower.endsWith('.png')) return 'image/png';
+    if (lower.endsWith('.webp')) return 'image/webp';
+    if (lower.endsWith('.gif')) return 'image/gif';
+    if (lower.endsWith('.bmp')) return 'image/bmp';
+    return 'image/jpeg';
+  }
+
+  /// 发送消息给 AI（支持附带本地图片并按 MiMo/OpenAI 多模态规范转为 Base64 Data URI）
+  Future<void> sendMessage(String text, {String? imagePath}) async {
     final query = text.trim();
-    if (query.isEmpty) return;
+    if (query.isEmpty && (imagePath == null || imagePath.isEmpty)) return;
+
+    final l10n = _getL10n();
 
     if (!state.hasApiKey) {
       state = state.copyWith(
         status: AiAssistantStatus.error,
-        errorMessage: '未配置 API Key，请先在「AI 助理设置」中填入 API Key',
+        errorMessage: l10n.aiApiKeyNotConfigured,
       );
       return;
     }
 
-    final newHistory = List<AiChatMessage>.from(state.conversationHistory);
-    newHistory.add(AiChatMessage(role: 'user', content: query));
+    final effectiveDisplayText = query.isNotEmpty
+        ? query
+        : (imagePath != null ? l10n.describeImagePrompt : '');
 
+    final newHistory = List<AiChatMessage>.from(state.conversationHistory);
     final newDisplay = List<AiDisplayMessage>.from(state.displayMessages);
-    newDisplay.add(AiDisplayMessage(role: 'user', text: query));
+
+    if (imagePath != null && imagePath.isNotEmpty) {
+      RepairSubmitTool.lastChatImagePath = imagePath;
+      final file = File(imagePath);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        final base64String = base64Encode(bytes);
+        final mimeType = _getMimeType(imagePath);
+        final dataUri = 'data:$mimeType;base64,$base64String';
+
+        final basePrompt = query.isNotEmpty ? query : l10n.describeImagePrompt;
+
+        newHistory.add(AiChatMessage(
+          role: 'user',
+          content: [
+            {
+              'type': 'image_url',
+              'image_url': {
+                'url': dataUri,
+              },
+            },
+            {
+              'type': 'text',
+              'text': basePrompt,
+            },
+          ],
+        ));
+      } else {
+        newHistory.add(AiChatMessage(role: 'user', content: effectiveDisplayText));
+      }
+    } else {
+      newHistory.add(AiChatMessage(role: 'user', content: query));
+    }
+
+    newDisplay.add(AiDisplayMessage(
+      role: 'user',
+      text: effectiveDisplayText,
+      imagePath: imagePath,
+    ));
 
     state = state.copyWith(
       status: AiAssistantStatus.thinking,
       conversationHistory: newHistory,
       displayMessages: newDisplay,
-      currentToolStatus: '正在思考中...',
+      currentToolStatus: l10n.aiThinking,
       errorMessage: null,
     );
 
@@ -206,8 +306,8 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
 
       final reply = await _service.chat(
         apiKey: state.effectiveApiKey,
-        apiUrl: state.apiUrl,
-        model: state.model,
+        apiUrl: state.resolvedApiUrl,
+        model: state.resolvedModel,
         conversationHistory: newHistory,
         toolRegistry: toolRegistry,
         onToolExecuting: (toolName, statusMessage) {

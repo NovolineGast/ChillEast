@@ -4,11 +4,13 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/constants/app_constants.dart';
+import '../../../core/utils/l10n_extension.dart';
 import '../services/campus_card_service.dart';
 import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/route_utils.dart';
 import 'payment_result_screen.dart';
 import 'campus_card_recharge_screen.dart';
+import 'transaction_history_screen.dart';
 
 class PaymentCodeScreen extends ConsumerStatefulWidget {
   const PaymentCodeScreen({super.key});
@@ -133,7 +135,7 @@ class _PaymentCodeScreenState extends ConsumerState<PaymentCodeScreen> with Widg
         if (status == "1") {
           _handlePaymentSuccess(res['resultData']);
         } else if (["2", "4", "6", "7"].contains(status)) {
-           _handlePaymentError(res['resultData']['message'] ?? '支付失败');
+           _handlePaymentError(res['resultData']['message'] ?? context.l10n.paymentFailed);
         }
       }
     } catch (e) {
@@ -239,9 +241,9 @@ class _PaymentCodeScreenState extends ConsumerState<PaymentCodeScreen> with Widg
                               child: const Icon(Icons.credit_card, size: 16, color: Color(0xFF1677FF)),
                             ),
                             const SizedBox(width: 12),
-                            const Text(
-                              '校园卡',
-                              style: TextStyle(
+                            Text(
+                              context.l10n.campusCard,
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,
                                 fontWeight: FontWeight.w500,
@@ -314,7 +316,7 @@ class _PaymentCodeScreenState extends ConsumerState<PaymentCodeScreen> with Widg
                       ), // 镂空银行卡图标
                       const SizedBox(width: 12),
                       Text(
-                        '余额 ￥${_getBalance()}', // 格式改为：余额 ￥x
+                        context.l10n.balanceAmount(_getBalance()),
                         style: TextStyle(
                           color: isDark ? Colors.white70 : Colors.black.withOpacity(0.6), // 稍微灰一点的文字
                           fontSize: 15,
@@ -329,19 +331,70 @@ class _PaymentCodeScreenState extends ConsumerState<PaymentCodeScreen> with Widg
                           minimumSize: Size.zero,
                           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
-                        child: const Text('充值', style: TextStyle(color: Color(0xFF1677FF), fontWeight: FontWeight.bold)),
+                        child: Text(context.l10n.transactionRecharge, style: const TextStyle(color: Color(0xFF1677FF), fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
                 ),
-                
+
+                const SizedBox(height: 24),
+
+                // 独立账单入口 (阳光「填写诉求」条目样式)
+                InkWell(
+                  onTap: () => Navigator.push(context, createSlideUpRoute(const TransactionHistoryScreen())),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? const Color(0xFF1E1E1E)
+                          : Colors.white,
+                      border: Border.all(
+                        color: isDark
+                            ? Colors.white.withOpacity(0.12)
+                            : Colors.grey.withOpacity(0.3),
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.receipt_long_outlined,
+                          size: 20,
+                          color: Color(0xFF1677FF),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          context.l10n.bill,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: isDark
+                                ? Colors.white
+                                : const Color(0xFF202124),
+                          ),
+                        ),
+                        const Spacer(),
+                        Icon(
+                          Icons.chevron_right,
+                          size: 20,
+                          color:
+                              isDark ? Colors.white38 : Colors.grey,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+
                 const SizedBox(height: 24),
                 
                 // 提示语 (左对齐)
                 Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
-                    '点击二维码以刷新',
+                    context.l10n.tapQrToRefresh,
                     style: TextStyle(
                       color: isDark ? Colors.white38 : Colors.black54,
                       fontSize: 14,

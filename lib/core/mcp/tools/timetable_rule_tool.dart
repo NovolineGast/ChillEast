@@ -1,7 +1,6 @@
 import '../../../features/timetable/models/course_model.dart';
 import '../../../features/timetable/models/timetable_rule_model.dart';
 import '../../../features/timetable/services/timetable_rule_service.dart';
-import '../../../features/timetable/utils/week_parser.dart';
 import '../models/mcp_tool.dart';
 
 /// MCP Tool: 课表规则管理 (manage_timetable_rules)
@@ -75,6 +74,11 @@ class TimetableRuleTool {
             'type': 'boolean',
             'description': '调休时是否为双向互换。默认为 false (移动/单向补课模式)。',
           },
+          'mode': {
+            'type': 'string',
+            'description': '调课方式：copy (复制), move (平移，默认), swap (对调)。',
+            'enum': ['copy', 'move', 'swap'],
+          },
           'sourceStartPeriod': {
             'type': 'integer',
             'description': '调课源节次起始 (1-12，可选；单门调课时建议提供以精确定位)。',
@@ -113,7 +117,19 @@ class TimetableRuleTool {
           },
           'dayOfWeek': {
             'type': 'integer',
-            'description': '停课星期几 (1-7，可选)。',
+            'description': '停课星期几 (1-7，可选，兼容旧格式)。',
+            'minimum': 1,
+            'maximum': 7,
+          },
+          'startDayOfWeek': {
+            'type': 'integer',
+            'description': '停课起始星期几 (1-7，可选；默认1周一)。',
+            'minimum': 1,
+            'maximum': 7,
+          },
+          'endDayOfWeek': {
+            'type': 'integer',
+            'description': '停课结束星期几 (1-7，可选；默认7周日)。',
             'minimum': 1,
             'maximum': 7,
           },
@@ -206,6 +222,8 @@ class TimetableRuleTool {
             final targetEndPeriod = asInt(arguments['targetEndPeriod']);
             final courseName = arguments['courseName'] as String?;
             final isSwap = arguments['isSwap'] as bool? ?? false;
+            final mode = (arguments['mode'] as String?) ??
+                (arguments['rescheduleMode'] as String?);
 
             if (sourceWeek == null ||
                 sourceDayOfWeek == null ||
@@ -226,6 +244,7 @@ class TimetableRuleTool {
               targetStartPeriod: targetStartPeriod,
               targetEndPeriod: targetEndPeriod,
               isSwap: isSwap,
+              action: mode,
             );
 
             await ruleService.addRule(rule);
@@ -239,6 +258,8 @@ class TimetableRuleTool {
             final startWeek = asInt(arguments['startWeek']);
             final endWeek = asInt(arguments['endWeek']) ?? startWeek;
             final dayOfWeek = asInt(arguments['dayOfWeek']);
+            final startDayOfWeek = asInt(arguments['startDayOfWeek']);
+            final endDayOfWeek = asInt(arguments['endDayOfWeek']);
             final courseName = arguments['courseName'] as String?;
             final startPeriod = asInt(arguments['startPeriod']);
             final endPeriod = asInt(arguments['endPeriod']);
@@ -251,6 +272,8 @@ class TimetableRuleTool {
               startWeek: startWeek,
               endWeek: endWeek!,
               dayOfWeek: dayOfWeek,
+              startDayOfWeek: startDayOfWeek,
+              endDayOfWeek: endDayOfWeek,
               courseName: courseName,
               startPeriod: startPeriod,
               endPeriod: endPeriod,

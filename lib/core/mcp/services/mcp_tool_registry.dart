@@ -11,10 +11,18 @@ import '../tools/electricity_tool.dart';
 import '../tools/notice_tool.dart';
 import '../tools/library_tool.dart';
 import '../tools/sunshine_tool.dart';
+import '../tools/questionnaire_tool.dart';
+import '../tools/leave_tool.dart';
+import '../tools/transaction_tool.dart';
+import '../tools/repair_tool.dart';
 import '../../../features/workspace/services/electricity_service.dart';
 import '../../../features/workspace/services/campus_card_service.dart';
+import '../../../features/workspace/services/transaction_service.dart';
 import '../../../features/library/providers/library_provider.dart';
 import '../../../features/sunshine/services/sunshine_service.dart';
+import '../../../features/questionnaire/services/questionnaire_service.dart';
+import '../../../features/leave/services/leave_service.dart';
+import '../../../features/repairs/services/repair_service.dart';
 
 /// MCP Tool Registry Provider
 final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
@@ -22,6 +30,10 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
   final campusCardService = ref.watch(campusCardServiceProvider);
   final libraryService = ref.watch(libraryServiceProvider);
   final sunshineService = ref.watch(sunshineServiceProvider);
+  final questionnaireService = ref.watch(questionnaireServiceProvider);
+  final leaveService = ref.watch(leaveServiceProvider);
+  final transactionService = ref.watch(transactionServiceProvider);
+  final repairService = ref.watch(repairServiceProvider);
 
   final registry = McpToolRegistry();
 
@@ -50,8 +62,9 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
   // 7. 校园卡余额查询
   registry.register(CampusCardTool.create(service: campusCardService));
 
-  // 8. 电费充值与查询
+  // 8. 电费充值与查询 (同时注册 recharge_electricity 与 query_electricity 别名以提高模型兼容度)
   registry.register(ElectricityTool.create(service: electricityService));
+  registry.register(ElectricityTool.create(service: electricityService, toolName: 'query_electricity'));
 
   // 9. 通知查询
   registry.register(NoticeTool.create());
@@ -67,6 +80,41 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
 
   // 13. 阳光服务诉求快速提交
   registry.register(SunshineSubmitTool.create(service: sunshineService));
+
+  // 14. 学工问卷列表查询
+  registry.register(QuestionnaireListTool.create(service: questionnaireService));
+
+  // 15. 学工问卷题目查询
+  registry.register(QuestionnaireDetailTool.create(service: questionnaireService));
+
+  // 16. 学工问卷代填提交（需用户确认）
+  registry.register(QuestionnaireSubmitTool.create(service: questionnaireService));
+
+  // 17. 请假记录查询
+  registry.register(LeaveListTool.create(service: leaveService));
+
+  // 18. 请假单详情查询
+  registry.register(LeaveDetailTool.create(service: leaveService));
+
+  // 19. 请假代提交（需用户确认）
+  registry.register(LeaveSubmitTool.create(service: leaveService));
+
+  // 20. 校园卡账单查询 (同时注册 query_card_transactions 与 query_bill 别名)
+  registry.register(TransactionTool.create(service: transactionService));
+  registry.register(TransactionTool.create(service: transactionService, toolName: 'query_bill'));
+
+  // 21. 报修工单查询 (同时注册 query_repairs 与 query_repair_orders 别名)
+  registry.register(RepairOrdersQueryTool.create(service: repairService));
+  registry.register(RepairOrdersQueryTool.create(service: repairService, toolName: 'query_repair_orders'));
+
+  // 22. 报修工单详情查询
+  registry.register(RepairDetailTool.create(service: repairService));
+
+  // 23. 报修工单提交（后勤报修必带图，需用户确认）
+  registry.register(RepairSubmitTool.create(service: repairService));
+
+  // 24. 报修工单取消（需用户确认）
+  registry.register(RepairCancelTool.create(service: repairService));
 
   return registry;
 });

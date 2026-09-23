@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../sunshine/screens/sunshine_screen.dart';
+import '../../repairs/screens/repair_screen.dart';
+import '../../questionnaire/screens/questionnaire_list_screen.dart';
+import '../../leave/screens/leave_list_screen.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/state/auth_state.dart';
 import '../../../core/utils/route_utils.dart';
@@ -16,9 +19,12 @@ import 'campus_card_recharge_screen.dart';
 import 'electricity_recharge_screen.dart';
 import '../services/campus_card_service.dart';
 import '../../profile/providers/appearance_provider.dart';
+import '../../profile/models/appearance_state.dart';
+import '../../../core/utils/l10n_extension.dart';
 import '../../../core/utils/location_helper.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../../library/screens/library_home_screen.dart';
+import '../../campus_bus/screens/campus_bus_map_screen.dart';
 
 /// 功能页 - 展示各种功能入口
 class FunctionsScreen extends ConsumerStatefulWidget {
@@ -49,8 +55,8 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
   void _showLoginDialog() {
     if (ref.read(authStateProvider).status == AuthStatus.authenticating) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('正在登录，请稍候...'),
+        SnackBar(
+          content: Text(context.l10n.loggingInWait),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -90,7 +96,7 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
                   final item = visibleItems[index];
                   return _buildFunctionListItem(
                     context,
-                    title: item.label,
+                    title: item.getLocalizedTitle(context),
                     icon: item.icon,
                     color: item.color ?? Colors.blue,
                     onTap: () => _handleFunctionTap(context, item.id, isLoggedIn),
@@ -136,24 +142,28 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
             ? _safeNavigate(const SunshineScreen())
             : _showLoginDialog();
         break;
+      case 'questionnaire':
+        isLoggedIn
+            ? _safeNavigate(const QuestionnaireListScreen())
+            : _showLoginDialog();
+        break;
+      case 'leave':
+        isLoggedIn
+            ? _safeNavigate(const LeaveListScreen())
+            : _showLoginDialog();
+        break;
       case 'repairs':
         isLoggedIn 
             ? _safeNavigate(
-                const WebViewDetailScreen(
-                  title: '报修平台',
-                  url: AppConstants.repairsSsoUrl,
-                  userAgent: 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Mobile Safari/537.36',
-                  showWebBack: true,
-                  targetUrl: '/relax/mobile/index.html',
-                ),
+                const RepairScreen(),
               )
             : _showLoginDialog();
         break;
       case 'gym':
         isLoggedIn 
             ? _safeNavigate(
-                const WebViewDetailScreen(
-                  title: '场馆预约',
+                WebViewDetailScreen(
+                  title: context.l10n.funcGym,
                   url: AppConstants.gymReservationUrl,
                   showWebBack: true,
                 ),
@@ -163,8 +173,8 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
       case 'xgxt':
         isLoggedIn 
             ? _safeNavigate(
-                const WebViewDetailScreen(
-                  title: '学工系统',
+                WebViewDetailScreen(
+                  title: context.l10n.funcXgxt,
                   url: AppConstants.xgxtWapUrl,
                   showAppBar: false,
                   showWebBack: false,
@@ -176,8 +186,8 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
       case 'teaching_eval':
         isLoggedIn 
             ? _safeNavigate(
-                const WebViewDetailScreen(
-                  title: '教评系统',
+                WebViewDetailScreen(
+                  title: context.l10n.funcEvaluation,
                   url: AppConstants.teachingEvalUrl,
                   showAppBar: false,
                   showWebBack: false,
@@ -200,9 +210,10 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
           final service = ref.read(campusCardServiceProvider);
           final url = service.getCampusCardHomeUrl();
           
+          if (!mounted) return;
           _safeNavigate(
             WebViewDetailScreen(
-              title: '校园卡',
+              title: context.l10n.funcCampusCard,
               url: url,
               userAgent: AppConstants.campusCardUA,
               showWebBack: false,
@@ -217,12 +228,16 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
       case 'bus':
         _safeNavigate(const BusTrackingScreen());
         break;
+      case 'campus_bus_route':
+        _safeNavigate(const CampusBusMapScreen());
+        break;
       case 'cs_bus':
         final hasPermission = await LocationHelper.requestPermission();
+        if (!mounted) return;
         if (hasPermission) {
           _safeNavigate(
-            const WebViewDetailScreen(
-              title: '长沙实时公交',
+            WebViewDetailScreen(
+              title: context.l10n.funcCsBus,
               url: AppConstants.changshaBusUrl,
               showWebBack: true,
               showAppBar: true,
@@ -232,8 +247,8 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('需要定位权限以显示附近的实时公交'),
+              SnackBar(
+                content: Text(context.l10n.needLocationForBus),
                 behavior: SnackBarBehavior.floating,
               ),
             );

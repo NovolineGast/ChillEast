@@ -1,6 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker_android/image_picker_android.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'core/network/dio_client.dart';
 import 'features/home/screens/main_scaffold.dart';
@@ -9,6 +12,10 @@ import 'core/state/auth_state.dart';
 import 'core/services/notification_service.dart';
 import 'core/services/background_worker.dart';
 import 'core/services/live_scheduler.dart';
+import 'core/state/locale_provider.dart';
+import 'core/utils/l10n_extension.dart';
+import 'core/utils/fallback_localizations_delegate.dart';
+import 'l10n/app_localizations.dart';
 
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 
@@ -16,8 +23,23 @@ void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
+  if (Platform.isAndroid) {
+    final ImagePickerPlatform picker = ImagePickerPlatform.instance;
+    if (picker is ImagePickerAndroid) {
+      picker.useAndroidPhotoPicker = true;
+    }
+  }
+
   // Only keep the lightweight dependencies needed before the first frame.
-  await initializeDateFormatting('zh_CN', null);
+  await Future.wait([
+    initializeDateFormatting('zh_CN', null),
+    initializeDateFormatting('en', null),
+    initializeDateFormatting('ja', null),
+    initializeDateFormatting('es', null),
+    initializeDateFormatting('fr', null),
+    initializeDateFormatting('pt', null),
+    initializeDateFormatting('ru', null),
+  ]);
   try {
     await DioClient().initialize().timeout(const Duration(seconds: 5));
   } catch (e) {
@@ -72,10 +94,15 @@ class LiveHunauApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
+    final locale = ref.watch(localeProvider);
 
     return MaterialApp(
-      title: '自在东湖',
+      title: 'ChillEast',
+      onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,
+      locale: locale,
+      localizationsDelegates: appLocalizationsDelegates,
+      supportedLocales: AppLocalizations.supportedLocales,
       theme: ThemeData(
         useMaterial3: true,
         primaryColor: const Color(0xFF09C489),
