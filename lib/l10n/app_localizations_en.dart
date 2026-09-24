@@ -184,6 +184,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get funcRepairs => 'Campus Repairs';
 
   @override
+  String get repairWorkOrders => 'Repair work orders';
+
+  @override
+  String get quickActions => 'Quick actions';
+
+  @override
   String get funcGym => 'Gym Booking';
 
   @override
@@ -220,10 +226,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get homeButtonsTitle => 'Home Buttons';
 
   @override
-  String get functionsButtonsSetting => 'Service Button Layout & Visibility';
+  String get functionsButtonsSetting => 'Function Order & Visibility';
 
   @override
-  String get functionsButtonsTitle => 'Service Buttons';
+  String get functionsButtonsTitle => 'Function Order';
+
+  @override
+  String get groupPayment => 'Payment';
+
+  @override
+  String get groupStudy => 'Study';
+
+  @override
+  String get groupLife => 'Life';
+
+  @override
+  String get groupTravel => 'Travel';
+
+  @override
+  String get groupTools => 'Tools';
+
+  @override
+  String get groupMiniApps => 'Mini apps';
+
+  @override
+  String get feedButtonsSetting => 'Feed Layout & Visibility';
+
+  @override
+  String get feedButtonsTitle => 'Home Feed';
 
   @override
   String get visibleFunctions => 'Visible Services';
@@ -536,6 +566,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayTimetable => 'Today\'s Schedule';
 
   @override
+  String get tomorrowAgenda => 'Tomorrow\'s agenda';
+
+  @override
+  String get todayAgenda => 'Today\'s agenda';
+
+  @override
   String get timetableLoginRequiredTitle => 'Login Required for Schedule';
 
   @override
@@ -679,6 +715,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get refreshTimetable => 'Refresh Timetable';
+
+  @override
+  String get timetableSettings => 'Timetable settings';
+
+  @override
+  String get notSet => 'Not set';
+
+  @override
+  String get timetableAutoSync => 'Auto-sync timetable';
+
+  @override
+  String get disableAutoSyncTitle => 'Turn off auto-sync?';
+
+  @override
+  String get disableAutoSyncMessage =>
+      'Turning off will delete the local timetable (reschedule and suspension rules will be kept). To view your timetable, tap the refresh button on the timetable page to sync manually.';
+
+  @override
+  String get localTimetableDeleted => 'Local timetable deleted';
+
+  @override
+  String get noLocalTimetable => 'No local timetable';
+
+  @override
+  String get tapRefreshButtonToSync =>
+      'Tap the refresh button above to sync manually';
 
   @override
   String get shareTimetable => 'Share Timetable';
@@ -1675,6 +1737,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentWorkQuestionnaire => 'Student Questionnaire';
+
+  @override
+  String get pendingQuestionnaires => 'Pending questionnaires';
 
   @override
   String get statusSubmitted => 'Submitted';

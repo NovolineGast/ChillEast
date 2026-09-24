@@ -183,6 +183,12 @@ class AppLocalizationsYue extends AppLocalizations {
   String get funcRepairs => '报修平台';
 
   @override
+  String get repairWorkOrders => '报修工单';
+
+  @override
+  String get quickActions => '快捷功能';
+
+  @override
   String get funcGym => '场馆预约';
 
   @override
@@ -219,10 +225,34 @@ class AppLocalizationsYue extends AppLocalizations {
   String get homeButtonsTitle => '首页按钮设定';
 
   @override
-  String get functionsButtonsSetting => '功能页按钮排序与隐藏';
+  String get functionsButtonsSetting => '功能排序与隐藏';
 
   @override
-  String get functionsButtonsTitle => '功能页按钮设定';
+  String get functionsButtonsTitle => '功能排序';
+
+  @override
+  String get groupPayment => '支付';
+
+  @override
+  String get groupStudy => '学习';
+
+  @override
+  String get groupLife => '生活';
+
+  @override
+  String get groupTravel => '出行';
+
+  @override
+  String get groupTools => '工具';
+
+  @override
+  String get groupMiniApps => '小程序';
+
+  @override
+  String get feedButtonsSetting => '信息流排序与隐藏';
+
+  @override
+  String get feedButtonsTitle => '信息流设定';
 
   @override
   String get visibleFunctions => '显示中的功能';
@@ -524,6 +554,12 @@ class AppLocalizationsYue extends AppLocalizations {
   String get todayTimetable => '今日课表';
 
   @override
+  String get tomorrowAgenda => '听日日程';
+
+  @override
+  String get todayAgenda => '今日日程';
+
+  @override
   String get timetableLoginRequiredTitle => '要登入先可以查看课表';
 
   @override
@@ -665,6 +701,31 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get refreshTimetable => '重新整理课表';
+
+  @override
+  String get timetableSettings => '课表设置';
+
+  @override
+  String get notSet => '未设置';
+
+  @override
+  String get timetableAutoSync => '自动同步课表';
+
+  @override
+  String get disableAutoSyncTitle => '关闭自动同步？';
+
+  @override
+  String get disableAutoSyncMessage =>
+      '关闭后将删除本地课表（调课、停课等规则会保留），如需查看课表，可点击课表页右上角刷新按钮手动同步。';
+
+  @override
+  String get localTimetableDeleted => '本地课表已删除';
+
+  @override
+  String get noLocalTimetable => '暂无本地课表';
+
+  @override
+  String get tapRefreshButtonToSync => '点击右上角刷新按钮手动同步';
 
   @override
   String get shareTimetable => '分享课表';
@@ -1631,6 +1692,9 @@ class AppLocalizationsYue extends AppLocalizations {
 
   @override
   String get studentWorkQuestionnaire => '学工问卷';
+
+  @override
+  String get pendingQuestionnaires => '待完成嘅问卷';
 
   @override
   String get statusSubmitted => '已提交';

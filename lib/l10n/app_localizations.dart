@@ -467,6 +467,18 @@ abstract class AppLocalizations {
   /// **'报修平台'**
   String get funcRepairs;
 
+  /// No description provided for @repairWorkOrders.
+  ///
+  /// In zh, this message translates to:
+  /// **'报修工单'**
+  String get repairWorkOrders;
+
+  /// No description provided for @quickActions.
+  ///
+  /// In zh, this message translates to:
+  /// **'快捷功能'**
+  String get quickActions;
+
   /// No description provided for @funcGym.
   ///
   /// In zh, this message translates to:
@@ -542,14 +554,62 @@ abstract class AppLocalizations {
   /// No description provided for @functionsButtonsSetting.
   ///
   /// In zh, this message translates to:
-  /// **'功能页按钮排序与隐藏'**
+  /// **'功能排序与隐藏'**
   String get functionsButtonsSetting;
 
   /// No description provided for @functionsButtonsTitle.
   ///
   /// In zh, this message translates to:
-  /// **'功能页按钮设置'**
+  /// **'功能排序'**
   String get functionsButtonsTitle;
+
+  /// No description provided for @groupPayment.
+  ///
+  /// In zh, this message translates to:
+  /// **'支付'**
+  String get groupPayment;
+
+  /// No description provided for @groupStudy.
+  ///
+  /// In zh, this message translates to:
+  /// **'学习'**
+  String get groupStudy;
+
+  /// No description provided for @groupLife.
+  ///
+  /// In zh, this message translates to:
+  /// **'生活'**
+  String get groupLife;
+
+  /// No description provided for @groupTravel.
+  ///
+  /// In zh, this message translates to:
+  /// **'出行'**
+  String get groupTravel;
+
+  /// No description provided for @groupTools.
+  ///
+  /// In zh, this message translates to:
+  /// **'工具'**
+  String get groupTools;
+
+  /// No description provided for @groupMiniApps.
+  ///
+  /// In zh, this message translates to:
+  /// **'小程序'**
+  String get groupMiniApps;
+
+  /// No description provided for @feedButtonsSetting.
+  ///
+  /// In zh, this message translates to:
+  /// **'信息流排序与隐藏'**
+  String get feedButtonsSetting;
+
+  /// No description provided for @feedButtonsTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'信息流设置'**
+  String get feedButtonsTitle;
 
   /// No description provided for @visibleFunctions.
   ///
@@ -1103,6 +1163,18 @@ abstract class AppLocalizations {
   /// **'今日课表'**
   String get todayTimetable;
 
+  /// No description provided for @tomorrowAgenda.
+  ///
+  /// In zh, this message translates to:
+  /// **'明日日程'**
+  String get tomorrowAgenda;
+
+  /// No description provided for @todayAgenda.
+  ///
+  /// In zh, this message translates to:
+  /// **'今日日程'**
+  String get todayAgenda;
+
   /// No description provided for @timetableLoginRequiredTitle.
   ///
   /// In zh, this message translates to:
@@ -1372,6 +1444,54 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'刷新课表'**
   String get refreshTimetable;
+
+  /// No description provided for @timetableSettings.
+  ///
+  /// In zh, this message translates to:
+  /// **'课表设置'**
+  String get timetableSettings;
+
+  /// No description provided for @notSet.
+  ///
+  /// In zh, this message translates to:
+  /// **'未设置'**
+  String get notSet;
+
+  /// No description provided for @timetableAutoSync.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动同步课表'**
+  String get timetableAutoSync;
+
+  /// No description provided for @disableAutoSyncTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭自动同步？'**
+  String get disableAutoSyncTitle;
+
+  /// No description provided for @disableAutoSyncMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'关闭后将删除本地课表（调课、停课等规则会保留），如需查看课表，可点击课表页右上角刷新按钮手动同步。'**
+  String get disableAutoSyncMessage;
+
+  /// No description provided for @localTimetableDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'本地课表已删除'**
+  String get localTimetableDeleted;
+
+  /// No description provided for @noLocalTimetable.
+  ///
+  /// In zh, this message translates to:
+  /// **'暂无本地课表'**
+  String get noLocalTimetable;
+
+  /// No description provided for @tapRefreshButtonToSync.
+  ///
+  /// In zh, this message translates to:
+  /// **'点击右上角刷新按钮手动同步'**
+  String get tapRefreshButtonToSync;
 
   /// No description provided for @shareTimetable.
   ///
@@ -3188,6 +3308,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'学工问卷'**
   String get studentWorkQuestionnaire;
+
+  /// No description provided for @pendingQuestionnaires.
+  ///
+  /// In zh, this message translates to:
+  /// **'待完成的问卷'**
+  String get pendingQuestionnaires;
 
   /// No description provided for @statusSubmitted.
   ///

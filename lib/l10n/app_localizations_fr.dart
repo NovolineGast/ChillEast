@@ -185,6 +185,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get funcRepairs => 'Demandes de réparation';
 
   @override
+  String get repairWorkOrders => '报修工单';
+
+  @override
+  String get quickActions => '快捷功能';
+
+  @override
   String get funcGym => 'Réservation de salles de sport';
 
   @override
@@ -227,6 +233,30 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get functionsButtonsTitle => 'Boutons de services';
+
+  @override
+  String get groupPayment => '支付';
+
+  @override
+  String get groupStudy => '学习';
+
+  @override
+  String get groupLife => '生活';
+
+  @override
+  String get groupTravel => '出行';
+
+  @override
+  String get groupTools => '工具';
+
+  @override
+  String get groupMiniApps => '小程序';
+
+  @override
+  String get feedButtonsSetting => '信息流排序与隐藏';
+
+  @override
+  String get feedButtonsTitle => '信息流设置';
 
   @override
   String get visibleFunctions => 'Services affichés';
@@ -542,6 +572,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get todayTimetable => 'Emploi du temps d\'aujourd\'hui';
 
   @override
+  String get tomorrowAgenda => '明日日程';
+
+  @override
+  String get todayAgenda => '今日日程';
+
+  @override
   String get timetableLoginRequiredTitle =>
       'Connexion requise pour l\'emploi du temps';
 
@@ -691,6 +727,31 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get refreshTimetable => 'Actualiser l\'emploi du temps';
+
+  @override
+  String get timetableSettings => '课表设置';
+
+  @override
+  String get notSet => '未设置';
+
+  @override
+  String get timetableAutoSync => '自动同步课表';
+
+  @override
+  String get disableAutoSyncTitle => '关闭自动同步？';
+
+  @override
+  String get disableAutoSyncMessage =>
+      '关闭后将删除本地课表（调课、停课等规则会保留），如需查看课表，可点击课表页右上角刷新按钮手动同步。';
+
+  @override
+  String get localTimetableDeleted => '本地课表已删除';
+
+  @override
+  String get noLocalTimetable => '暂无本地课表';
+
+  @override
+  String get tapRefreshButtonToSync => '点击右上角刷新按钮手动同步';
 
   @override
   String get shareTimetable => 'Partager l\'emploi du temps';
@@ -1708,6 +1769,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get studentWorkQuestionnaire => 'Questionnaires étudiants';
+
+  @override
+  String get pendingQuestionnaires => '待完成的问卷';
 
   @override
   String get statusSubmitted => 'Soumis';
