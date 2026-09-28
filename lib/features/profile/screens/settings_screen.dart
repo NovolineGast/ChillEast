@@ -5,7 +5,9 @@ import '../../../core/utils/l10n_extension.dart';
 import '../../../core/utils/route_utils.dart';
 import 'notification_settings_screen.dart';
 import 'appearance_settings_screen.dart';
+import 'button_reorder_screen.dart';
 import 'ai_settings_screen.dart';
+import 'data_sync_settings_screen.dart';
 import 'language_settings_screen.dart';
 import 'timetable_settings_screen.dart';
 
@@ -85,6 +87,20 @@ class SettingsScreen extends ConsumerWidget {
           ),
           _buildSettingItem(
             context,
+            icon: Icons.widgets_outlined,
+            title: l10n.widgetSettings,
+            onTap: () {
+              Navigator.push(
+                context,
+                createSlideUpRoute(ButtonReorderScreen(
+                  title: l10n.widgetSettings,
+                  listType: 'widget',
+                )),
+              );
+            },
+          ),
+          _buildSettingItem(
+            context,
             icon: Icons.notifications_none_rounded,
             title: l10n.notificationSettings,
             onTap: () {
@@ -105,6 +121,17 @@ class SettingsScreen extends ConsumerWidget {
               );
             },
           ),
+          _buildSettingItem(
+            context,
+            icon: Icons.sync_rounded,
+            title: l10n.dataSyncSettings,
+            onTap: () {
+              Navigator.push(
+                context,
+                createSlideUpRoute(const DataSyncSettingsScreen()),
+              );
+            },
+          ),
         ],
       ),
     );
@@ -114,7 +141,9 @@ class SettingsScreen extends ConsumerWidget {
     BuildContext context, {
     required IconData icon,
     required String title,
+    String? subtitle,
     Widget? trailing,
+    bool showChevron = true,
     required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -128,24 +157,40 @@ class SettingsScreen extends ConsumerWidget {
             Icon(icon, size: 24, color: const Color(0xFF5F6368)),
             const SizedBox(width: 16),
             Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w400,
-                  color: isDark ? Colors.white : const Color(0xFF202124),
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w400,
+                      color: isDark ? Colors.white : const Color(0xFF202124),
+                    ),
+                  ),
+                  if (subtitle != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: isDark ? Colors.white54 : const Color(0xFF9E9E9E),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
             if (trailing != null) ...[
               trailing,
               const SizedBox(width: 4),
             ],
-            const Icon(
-              Icons.chevron_right_rounded,
-              size: 20,
-              color: Color(0xFF9E9E9E),
-            ),
+            if (showChevron)
+              const Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: Color(0xFF9E9E9E),
+              ),
           ],
         ),
       ),

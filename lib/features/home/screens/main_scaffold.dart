@@ -4,9 +4,12 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../cloudisk/screens/cloud_sync_prompt_screen.dart';
 import '../../../core/utils/route_utils.dart';
 import '../../../core/services/update_service.dart';
+import '../../../core/services/home_widget_service.dart';
 import '../../../core/state/auth_state.dart';
+import '../../../core/state/widget_action_provider.dart';
 import '../../auth/screens/login_screen.dart';
 import 'home_screen.dart';
 import '../../timetable/screens/timetable_screen.dart';
@@ -23,6 +26,7 @@ import '../widgets/ai_response_card.dart';
 import '../../../core/ai/ai_provider.dart';
 import '../../profile/providers/settings_provider.dart';
 import '../../../core/utils/l10n_extension.dart';
+import '../widgets/quick_action_router.dart';
 
 
 /// 自定义顶部滑动指示器，圆角朝下
@@ -88,6 +92,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
 
   // AI 助理交互状态
   bool _isAiMode = false;
+  bool _promptPushed = false;
   String? _selectedImagePath;
   final TextEditingController _aiInputController = TextEditingController();
   final FocusNode _aiInputFocusNode = FocusNode();
@@ -116,12 +121,69 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
 
     _initHitokoto();
     _loadReminderState();
+
+    // 桌面小组件点进来时，取原生暂存的动作并路由
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _consumeWidgetAction();
+    });
     
     // 延迟检查更新，避免干扰启动
     Future.delayed(const Duration(seconds: 3), () {
       if (mounted) {
         UpdateService().checkUpdate(context);
       }
+    });
+  }
+
+  /// 消费小组件点击动作：agenda/homework 切 tab，功能 id 打开对应页面
+  Future<void> _consumeWidgetAction() async {
+    try {
+      final action = await HomeWidgetService().consumeInitialWidgetAction();
+      if (action != null && action.isNotEmpty && mounted) {
+        ref.read(widgetActionProvider.notifier).state = action;
+      }
+    } catch (_) {}
+  }
+
+  /// 消费小组件点击动作：agenda/homework 切 tab，功能 id 打开对应页面。
+  /// 未登录时功能动作不清零，先弹登录，登录成功后由 auth 监听接力跳转。
+  Future<void> _handleWidgetAction(String action) async {
+    if (action == 'agenda') {
+      if (mounted) switchToTab(1);
+      ref.read(widgetActionProvider.notifier).state = null;
+    } else if (action == 'homework') {
+      if (mounted) switchToTab(2);
+      ref.read(widgetActionProvider.notifier).state = null;
+    } else if (HomeWidgetService.allFunctionIds.contains(action)) {
+      final authed =
+          ref.read(authStateProvider).status == AuthStatus.authenticated;
+      if (!authed) {
+        // 未登录（含游客）：先走登录流程，动作保留，登录成功后继续
+        if (mounted) await openFunctionById(context, ref, action);
+        return;
+      }
+      if (mounted) switchToTab(0);
+      // 等 tab 切回主页后再打开功能页，避免动画冲突
+      await Future.delayed(const Duration(milliseconds: 350));
+      if (!mounted) return;
+      await openFunctionById(context, ref, action);
+      ref.read(widgetActionProvider.notifier).state = null;
+    } else {
+      ref.read(widgetActionProvider.notifier).state = null;
+    }
+  }
+
+  /// 把同步推荐页推到顶层（全屏弹窗），避免被主页/登录残留路由盖住。
+  void _pushCloudSyncPrompt() {
+    if (_promptPushed) return;
+    _promptPushed = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!ref.read(cloudSyncPromptPendingProvider)) {
+        _promptPushed = false;
+        return;
+      }
+      Navigator.of(context).push(CloudSyncPromptScreen.route());
     });
   }
 
@@ -255,6 +317,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _maybeRescheduleOnResume();
+      // 从桌面小组件点进来时（App 活着走 onNewIntent），这里取走暂存动作并路由；
+      // 冷启动路径仍由 initState 的 postFrame 消费。
+      _consumeWidgetAction();
     }
   }
 
@@ -335,12 +400,43 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       }
     });
 
+    // 桌面小组件点击动作（原生侧透出一次，消费后清空）
+    ref.listen<String?>(widgetActionProvider, (previous, next) {
+      if (next != null && next.isNotEmpty) {
+        _handleWidgetAction(next);
+      }
+    });
+
+    // 登录成功接力：小组件点的是需登录功能且当时未登录时，
+    // 动作会保留到这里，登录一完成立刻跳转进去
+    ref.listen<AuthState>(authStateProvider, (previous, next) {
+      if (previous?.status != AuthStatus.authenticated &&
+          next.status == AuthStatus.authenticated) {
+        final pending = ref.read(widgetActionProvider);
+        if (pending != null && pending.isNotEmpty && mounted) {
+          _handleWidgetAction(pending);
+        }
+      }
+    });
+
     // 监听课表状态变化（针对删除等操作）
     ref.listen(timetableStatusProvider, (previous, next) {
       if (next == true) {
         _loadReminderState();
       }
     });
+
+    // 登录后同步推荐：以顶层弹窗盖在主页之上，同一会话只推一次
+    ref.listen<bool>(cloudSyncPromptPendingProvider, (previous, next) {
+      if (next == true) {
+        _pushCloudSyncPrompt();
+      } else {
+        _promptPushed = false;
+      }
+    });
+    if (ref.watch(cloudSyncPromptPendingProvider) && !_promptPushed) {
+      _pushCloudSyncPrompt();
+    }
 
     return PopScope(
       canPop: !_isAiMode,

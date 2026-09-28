@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:async';
 import '../../sunshine/screens/sunshine_screen.dart';
 import '../../repairs/screens/repair_screen.dart';
 import '../../repairs/screens/repair_detail_screen.dart';
@@ -36,6 +37,7 @@ import '../../../core/utils/route_utils.dart';
 import '../../profile/providers/appearance_provider.dart';
 import '../../profile/models/appearance_state.dart';
 import '../../../core/utils/l10n_extension.dart';
+import '../../../core/services/home_widget_service.dart';
 import '../../workspace/screens/campus_card_recharge_screen.dart';
 import '../../workspace/screens/electricity_recharge_screen.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -63,11 +65,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   DateTime _previewDate = DateTime.now();
   final PageController _quickPageController = PageController();
   int _quickPageIndex = 0;
+  // 小组件同步节流
+  DateTime _lastWidgetSync = DateTime.fromMillisecondsSinceEpoch(0);
 
   @override
   void initState() {
     super.initState();
     _loadPreviewCourses();
+    // 预热付款码：进 App 即后台拉一次 openVirtualcard，
+    // 点进付款码页直接秒开（服务层 55s 缓存去重，未登录则静默跳过）。
+    if (ref.read(authStateProvider).status == AuthStatus.authenticated) {
+      final svc = ref.read(campusCardServiceProvider);
+      Future(() async {
+        try {
+          await svc.fetchPaymentCode();
+        } catch (_) {}
+      });
+    }
   }
 
   @override
@@ -160,12 +174,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       setState(() {
         _isLoadingTimetable = false;
       });
+      _syncWidgetsDebounced();
     }
+  }
+
+  /// 课表/作业就绪后同步桌面小组件（30 秒节流，失败静默）
+  void _syncWidgetsDebounced() {
+    final now = DateTime.now();
+    if (now.difference(_lastWidgetSync).inSeconds < 30) return;
+    _lastWidgetSync = now;
+    unawaited(HomeWidgetService().syncWidgets());
   }
 
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
+
+    // 作业后到时也同步一次小组件（与课表加载时的同步共用 30 秒节流）
+    ref.listen(homeworkProvider, (previous, next) {
+      next.whenData((list) {
+        if (list.isNotEmpty && !_isLoadingTimetable && mounted) {
+          _syncWidgetsDebounced();
+        }
+      });
+    });
 
     return Scaffold(
       body: SingleChildScrollView(
@@ -248,33 +280,60 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            height: gridHeight,
-            child: PageView.builder(
-              controller: _quickPageController,
-              itemCount: pageCount,
-              onPageChanged: (i) => setState(() => _quickPageIndex = i),
-              itemBuilder: (context, page) {
-                if (page == 0) {
-                  return _buildQuickGrid(
-                    context,
-                    items: firstPageItems,
-                    showMore: true,
-                    isDark: isDark,
-                    isLoggedIn: isLoggedIn,
-                  );
-                }
-                final start = (page - 1) * perPage;
-                final end = (start + perPage).clamp(0, remaining.length);
-                return _buildQuickGrid(
-                  context,
-                  items: remaining.sublist(start, end),
-                  showMore: false,
-                  isDark: isDark,
-                  isLoggedIn: isLoggedIn,
-                );
-              },
-            ),
+          // 页间隙 10px（与格内 crossAxisSpacing 一致），同时保证静止时
+          // 卡片外沿与单页布局对齐：PageView 本体比父宽 10px（两侧各外溢 5px），
+          // 每页内对称 Padding 5px 抵消。用 OverflowBox 实现外溢，避免负边距。
+          LayoutBuilder(
+            builder: (context, constraints) {
+              const pageGap = 10.0;
+              const halfGap = pageGap / 2;
+              final viewWidth = constraints.maxWidth + pageGap;
+              return SizedBox(
+                height: gridHeight,
+                child: OverflowBox(
+                  maxWidth: viewWidth,
+                  alignment: Alignment.center,
+                  child: SizedBox(
+                    width: viewWidth,
+                    height: gridHeight,
+                    child: PageView.builder(
+                      controller: _quickPageController,
+                      itemCount: pageCount,
+                      onPageChanged: (i) =>
+                          setState(() => _quickPageIndex = i),
+                      itemBuilder: (context, page) {
+                        Widget grid;
+                        if (page == 0) {
+                          grid = _buildQuickGrid(
+                            context,
+                            items: firstPageItems,
+                            showMore: true,
+                            isDark: isDark,
+                            isLoggedIn: isLoggedIn,
+                          );
+                        } else {
+                          final start = (page - 1) * perPage;
+                          final end =
+                              (start + perPage).clamp(0, remaining.length);
+                          grid = _buildQuickGrid(
+                            context,
+                            items: remaining.sublist(start, end),
+                            showMore: false,
+                            isDark: isDark,
+                            isLoggedIn: isLoggedIn,
+                          );
+                        }
+                        return Padding(
+                          padding:
+                              const EdgeInsets.symmetric(horizontal: halfGap),
+                          child: grid,
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 8),
           Row(
