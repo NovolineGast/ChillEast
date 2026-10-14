@@ -77,27 +77,35 @@ jobs:
           flutter pub get --enforce-lockfile
           git diff --exit-code -- pubspec.lock
 
+      - name: Build Universal Release APK (Fat)
+        run: |
+          mkdir -p dist
+          flutter build apk --release --no-pub \
+            --dart-define=DEFAULT_AI_API_KEY="${{ secrets.DEFAULT_AI_API_KEY }}" \
+            --dart-define=DEFAULT_AI_API_URL="${{ secrets.DEFAULT_AI_API_URL }}" \
+            --dart-define=DEFAULT_AI_MODEL="${{ secrets.DEFAULT_AI_MODEL }}"
+          cp build/app/outputs/flutter-apk/app-release.apk dist/app-universal-release.apk
+          echo "Successfully built true Universal APK (app-universal-release.apk)"
+
       - name: Build Split Release APKs
         run: |
           flutter build apk --release --no-pub --split-per-abi \
             --dart-define=DEFAULT_AI_API_KEY="${{ secrets.DEFAULT_AI_API_KEY }}" \
             --dart-define=DEFAULT_AI_API_URL="${{ secrets.DEFAULT_AI_API_URL }}" \
             --dart-define=DEFAULT_AI_MODEL="${{ secrets.DEFAULT_AI_MODEL }}"
-
-      # 将默认 arm64-v8a 产物复制为 app-release.apk，保持分发和 CDN 链接名称不变
-      - name: Prepare Default Release APK (arm64-v8a)
-        run: |
-          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk build/app/outputs/flutter-apk/app-release.apk
-          echo "Successfully copied app-arm64-v8a-release.apk to app-release.apk"
+          cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk dist/
+          cp build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk dist/
+          cp build/app/outputs/flutter-apk/app-x86_64-release.apk dist/
+          echo "Successfully built Split ABI APKs (arm64, armv7, x86_64)"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            build/app/outputs/flutter-apk/app-release.apk
-            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-            build/app/outputs/flutter-apk/app-x86_64-release.apk
+            dist/app-universal-release.apk
+            dist/app-arm64-v8a-release.apk
+            dist/app-armeabi-v7a-release.apk
+            dist/app-x86_64-release.apk
           generate_release_notes: true
           draft: false
           prerelease: false
@@ -105,6 +113,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       # R2 是正式发布的必要目标；凭据缺失或上传失败时应让发布失败，不能静默跳过。
+      # 上传至 R2 时，将体积更小的 arm64-v8a 命名为 app-release.apk，供 CDN 快速分发与应用内更新
       - name: Upload to Cloudflare R2
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
@@ -113,11 +122,11 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
         run: |
-          aws s3 cp build/app/outputs/flutter-apk/app-release.apk \
+          aws s3 cp dist/app-arm64-v8a-release.apk \
             s3://${R2_BUCKET_NAME}/latest/app-release.apk \
             --endpoint-url https://${CLOUDFLARE_ACCOUNT_ID}.r2.cloudflarestorage.com \
             --cache-control "public, max-age=300, s-maxage=300"
-          echo "Successfully uploaded latest/app-release.apk (arm64-v8a default) to Cloudflare R2"
+          echo "Successfully uploaded app-arm64-v8a-release.apk as latest/app-release.apk to Cloudflare R2"
 
       # CDN 清缓存是可选步骤。使用前置步骤检查 Secrets，避免在步骤自己的 if 中
       # 判断尚未映射的 env，导致 Secrets 已配置却仍被静默跳过。

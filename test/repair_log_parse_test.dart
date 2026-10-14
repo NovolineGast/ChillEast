@@ -46,7 +46,7 @@ void main() {
     for (final raw in [
       '张三在“报修人确认”节点，评价了该工单!',
       '付阿妮在“管理员处理”节点，完成了该工单!',
-      '张三发表了评论，评论内容：已收到',
+      '李四发表了评论，评论内容：已收到',
     ]) {
       final segs = parseRepairLogDescription(raw);
       expect(segs.length, 1, reason: raw);
