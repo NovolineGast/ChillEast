@@ -18,7 +18,6 @@ import '../../notice/screens/notice_list_screen.dart';
 import '../../workspace/screens/functions_screen.dart';
 import '../../profile/screens/profile_screen.dart';
 import '../../../core/services/hitokoto_service.dart';
-import '../../timetable/services/timetable_storage.dart';
 import '../../timetable/providers/timetable_status_provider.dart';
 import '../../timetable/providers/reminder_trigger_provider.dart';
 import '../../../core/widgets/triangle_painter.dart';
@@ -817,7 +816,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   /// AI 模式悬浮底栏（原顶栏）
   Widget _buildAiBottomBar(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final canSend = _aiInputController.text.trim().isNotEmpty || _selectedImagePath != null;
+    final aiState = ref.watch(aiAssistantProvider);
+    final isLimitReached = aiState.isRoundLimitReached;
+    final canSend = !isLimitReached &&
+        (_aiInputController.text.trim().isNotEmpty || _selectedImagePath != null);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -856,8 +858,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                     controller: _aiInputController,
                     focusNode: _aiInputFocusNode,
                     autofocus: true,
+                    enabled: !isLimitReached,
                     textInputAction: TextInputAction.send,
-                    onSubmitted: _submitAiQuery,
+                    onSubmitted: isLimitReached ? null : _submitAiQuery,
                     cursorColor: const Color(0xFF09C489),
                     style: TextStyle(
                       fontSize: 16,
@@ -865,9 +868,11 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                       color: isDark ? Colors.white : const Color(0xFF202124),
                     ),
                     decoration: InputDecoration(
-                      hintText: context.l10n.whatsNewHint,
+                      hintText: isLimitReached
+                          ? '本轮对话已达上限（20次），请开启新对话'
+                          : context.l10n.whatsNewHint,
                       hintStyle: TextStyle(
-                        fontSize: 16,
+                        fontSize: isLimitReached ? 14 : 16,
                         height: 1.2,
                         color: isDark ? Colors.white38 : Colors.grey[400],
                       ),
@@ -941,7 +946,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                   ),
                 const Spacer(),
                 GestureDetector(
-                  onTap: _pickImage,
+                  onTap: isLimitReached ? null : _pickImage,
                   behavior: HitTestBehavior.opaque,
                   child: SizedBox(
                     width: 40,
@@ -951,9 +956,11 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                         _selectedImagePath != null
                             ? Icons.image_rounded
                             : Icons.image_outlined,
-                        color: _selectedImagePath != null
-                            ? const Color(0xFF09C489)
-                            : (isDark ? Colors.white70 : Colors.grey[600]),
+                        color: isLimitReached
+                            ? (isDark ? Colors.white24 : Colors.grey[400])
+                            : (_selectedImagePath != null
+                                ? const Color(0xFF09C489)
+                                : (isDark ? Colors.white70 : Colors.grey[600])),
                         size: 22,
                       ),
                     ),

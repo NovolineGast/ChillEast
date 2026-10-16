@@ -9,6 +9,7 @@ import '../mcp/tools/repair_tool.dart';
 import '../../features/cloudisk/services/cloud_backup_manager.dart';
 import '../utils/secure_storage_helper.dart';
 import 'ai_service.dart';
+import 'providers/ai_memory_provider.dart';
 
 /// 交互状态
 enum AiAssistantStatus {
@@ -80,6 +81,15 @@ class AiAssistantState {
   bool get hasApiKey =>
       (apiKey != null && apiKey!.trim().isNotEmpty) ||
       AiAssistantService.defaultApiKey.isNotEmpty;
+
+  /// 单轮对话最大来回数（20个来回）
+  static const int maxConversationRounds = 20;
+
+  /// 当前会话中的来回数（以 user 消息数量计算）
+  int get roundCount => displayMessages.where((m) => m.role == 'user').length;
+
+  /// 是否已达到 20 个来回上限
+  bool get isRoundLimitReached => roundCount >= maxConversationRounds;
 
   AiAssistantState copyWith({
     AiAssistantStatus? status,
@@ -209,6 +219,37 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     );
   }
 
+  /// 从服务器拉取可用模型列表
+  Future<List<String>> fetchModels({String? apiUrl, String? apiKey}) async {
+    return _service.fetchModels(
+      apiKey: (apiKey != null && apiKey.trim().isNotEmpty)
+          ? apiKey.trim()
+          : state.effectiveApiKey,
+      apiUrl: (apiUrl != null && apiUrl.trim().isNotEmpty)
+          ? apiUrl.trim()
+          : state.resolvedApiUrl,
+    );
+  }
+
+  /// 测试与大模型服务的联通性
+  Future<Duration> testConnection({
+    String? apiUrl,
+    String? model,
+    String? apiKey,
+  }) async {
+    return _service.testConnection(
+      apiKey: (apiKey != null && apiKey.trim().isNotEmpty)
+          ? apiKey.trim()
+          : state.effectiveApiKey,
+      apiUrl: (apiUrl != null && apiUrl.trim().isNotEmpty)
+          ? apiUrl.trim()
+          : state.resolvedApiUrl,
+      model: (model != null && model.trim().isNotEmpty)
+          ? model.trim()
+          : state.resolvedModel,
+    );
+  }
+
   /// 清空当前对话上下文（点击返回或退出时调用）
   void clearSession() {
     state = state.copyWith(
@@ -240,6 +281,14 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
   Future<void> sendMessage(String text, {String? imagePath}) async {
     final query = text.trim();
     if (query.isEmpty && (imagePath == null || imagePath.isEmpty)) return;
+
+    if (state.isRoundLimitReached) {
+      state = state.copyWith(
+        status: AiAssistantStatus.error,
+        errorMessage: '本轮对话已达到上限（20个来回）。请开启新对话继续交流。',
+      );
+      return;
+    }
 
     final l10n = _getL10n();
 
@@ -331,6 +380,14 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
         text: reply,
         toolUsed: lastUsedTool,
       ));
+
+      if (lastUsedTool == 'add_memory' ||
+          lastUsedTool == 'save_memory' ||
+          lastUsedTool == 'delete_memory') {
+        try {
+          await ref.read(aiMemoryProvider.notifier).reloadFromStorage();
+        } catch (_) {}
+      }
 
       state = state.copyWith(
         status: AiAssistantStatus.success,

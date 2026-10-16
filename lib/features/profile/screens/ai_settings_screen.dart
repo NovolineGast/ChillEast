@@ -3,7 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ai/ai_provider.dart';
 import '../../../core/ai/ai_service.dart';
+import '../../../core/ai/providers/ai_memory_provider.dart';
 import '../../../core/utils/l10n_extension.dart';
+import '../../../core/utils/route_utils.dart';
+import 'ai_memory_screen.dart';
 
 class AiSettingsScreen extends ConsumerStatefulWidget {
   const AiSettingsScreen({super.key});
@@ -18,6 +21,9 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
   late TextEditingController _apiKeyController;
   bool _obscureApiKey = true;
   bool _isSaving = false;
+  bool _isFetchingModels = false;
+  bool _isTestingConnection = false;
+  List<String> _availableModels = [];
 
   @override
   void initState() {
@@ -73,6 +79,7 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
       _apiUrlController.text = AiAssistantService.defaultApiUrl;
       _modelController.text = AiAssistantService.defaultModel;
       _apiKeyController.clear();
+      _availableModels.clear();
     });
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -82,6 +89,149 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
         ),
       );
     }
+  }
+
+  Future<void> _testConnection() async {
+    final apiKey = _apiKeyController.text.trim();
+    final aiState = ref.read(aiAssistantProvider);
+    if (apiKey.isEmpty && !aiState.hasApiKey) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.aiApiKeyRequired),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isTestingConnection = true;
+    });
+
+    try {
+      final apiUrl = _apiUrlController.text.trim();
+      final model = _modelController.text.trim();
+      final latency =
+          await ref.read(aiAssistantProvider.notifier).testConnection(
+                apiUrl: apiUrl,
+                model: model,
+                apiKey: apiKey,
+              );
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content:
+                Text('✅ ${context.l10n.aiTestSuccess(latency.inMilliseconds)}'),
+            backgroundColor: const Color(0xFF09C489),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMsg = e.toString().replaceFirst('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('❌ ${context.l10n.aiTestFailed(errorMsg)}'),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isTestingConnection = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _fetchAndSelectModel({bool forceRefresh = false}) async {
+    if (!forceRefresh && _availableModels.isNotEmpty) {
+      _showModelSelectionSheet();
+      return;
+    }
+
+    final apiKey = _apiKeyController.text.trim();
+    final aiState = ref.read(aiAssistantProvider);
+    if (apiKey.isEmpty && !aiState.hasApiKey) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(context.l10n.aiApiKeyRequired),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    setState(() {
+      _isFetchingModels = true;
+    });
+
+    try {
+      final apiUrl = _apiUrlController.text.trim();
+      final models = await ref.read(aiAssistantProvider.notifier).fetchModels(
+            apiUrl: apiUrl,
+            apiKey: apiKey,
+          );
+
+      setState(() {
+        _availableModels = models;
+      });
+
+      if (mounted) {
+        _showModelSelectionSheet();
+      }
+    } catch (e) {
+      if (mounted) {
+        final errorMsg = e.toString().replaceFirst('Exception: ', '');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isFetchingModels = false;
+        });
+      }
+    }
+  }
+
+  void _showModelSelectionSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (sheetContext) {
+        return _ModelSelectionModal(
+          initialModels: _availableModels,
+          selectedModel: _modelController.text.trim(),
+          onModelSelected: (model) {
+            setState(() {
+              _modelController.text = model;
+            });
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(context.l10n.aiModelSelected(model)),
+                behavior: SnackBarBehavior.floating,
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          },
+          onRefresh: () async {
+            Navigator.pop(sheetContext);
+            await _fetchAndSelectModel(forceRefresh: true);
+          },
+        );
+      },
+    );
   }
 
   Future<void> _pasteFromClipboard() async {
@@ -221,6 +371,53 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
                   size: 20,
                   color: isDark ? Colors.white60 : Colors.grey[600],
                 ),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_isFetchingModels)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      )
+                    else
+                      IconButton(
+                        icon: const Icon(Icons.format_list_bulleted_rounded, size: 20),
+                        tooltip: context.l10n.aiFetchModels,
+                        onPressed: _isFetchingModels ? null : () => _fetchAndSelectModel(),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: ActionChip(
+                avatar: _isFetchingModels
+                    ? const SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(strokeWidth: 1.5),
+                      )
+                    : const Icon(Icons.download_rounded, size: 16),
+                label: Text(
+                  _availableModels.isNotEmpty
+                      ? '${context.l10n.aiSelectModel} (${_availableModels.length})'
+                      : context.l10n.aiFetchModels,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                onPressed: _isFetchingModels ? null : () => _fetchAndSelectModel(),
+                backgroundColor: isDark
+                    ? Colors.white.withOpacity(0.08)
+                    : Colors.grey.withOpacity(0.1),
+                side: BorderSide.none,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
               ),
             ),
             const SizedBox(height: 18),
@@ -303,7 +500,69 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
                 ),
               ),
             ),
+            const SizedBox(height: 20),
+
+            // Agent 长期记忆管理入口
+            Material(
+              color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(6),
+                side: BorderSide(
+                  color: isDark
+                      ? Colors.white.withOpacity(0.1)
+                      : Colors.grey.withOpacity(0.3),
+                ),
+              ),
+              child: ListTile(
+                leading: const Icon(Icons.psychology_outlined, color: primaryColor),
+                title: const Text('Agent 记忆管理', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                subtitle: Text(
+                  '已沉淀 ${ref.watch(aiMemoryProvider).length} 条长期记忆（支持删除与管理）',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white60 : Colors.grey[600],
+                  ),
+                ),
+                trailing: const Icon(Icons.chevron_right_rounded),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    createSlideUpRoute(const AiMemoryScreen()),
+                  );
+                },
+              ),
+            ),
             const SizedBox(height: 32),
+
+            // 测试联通按钮
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton.icon(
+                onPressed: _isTestingConnection ? null : _testConnection,
+                icon: _isTestingConnection
+                    ? const SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.wifi_tethering_rounded, size: 20),
+                label: Text(
+                  _isTestingConnection
+                      ? context.l10n.aiTestingConnection
+                      : context.l10n.aiTestConnection,
+                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                ),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primaryColor,
+                  side: const BorderSide(color: primaryColor, width: 1.2),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
 
             // 保存按钮
             SizedBox(
@@ -358,6 +617,200 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ModelSelectionModal extends StatefulWidget {
+  final List<String> initialModels;
+  final String selectedModel;
+  final ValueChanged<String> onModelSelected;
+  final Future<void> Function() onRefresh;
+
+  const _ModelSelectionModal({
+    required this.initialModels,
+    required this.selectedModel,
+    required this.onModelSelected,
+    required this.onRefresh,
+  });
+
+  @override
+  State<_ModelSelectionModal> createState() => _ModelSelectionModalState();
+}
+
+class _ModelSelectionModalState extends State<_ModelSelectionModal> {
+  final TextEditingController _searchController = TextEditingController();
+  late List<String> _filteredModels;
+
+  @override
+  void initState() {
+    super.initState();
+    _filteredModels = List.from(widget.initialModels);
+    _searchController.addListener(_filter);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _filter() {
+    final query = _searchController.text.trim().toLowerCase();
+    setState(() {
+      if (query.isEmpty) {
+        _filteredModels = List.from(widget.initialModels);
+      } else {
+        _filteredModels = widget.initialModels
+            .where((m) => m.toLowerCase().contains(query))
+            .toList();
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    const primaryColor = Color(0xFF09C489);
+
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.72,
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: Column(
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 6),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isDark ? Colors.white24 : Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        context.l10n.aiSelectModel,
+                        style: const TextStyle(
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '共 ${widget.initialModels.length} 个模型',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? Colors.white54 : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.refresh_rounded, size: 20),
+                  tooltip: context.l10n.aiFetchModels,
+                  onPressed: widget.onRefresh,
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+          ),
+          // Search box
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: context.l10n.aiSearchModelHint,
+                prefixIcon: const Icon(Icons.search_rounded, size: 20),
+                suffixIcon: _searchController.text.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear_rounded, size: 18),
+                        onPressed: () => _searchController.clear(),
+                      )
+                    : null,
+                contentPadding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                filled: isDark,
+                fillColor:
+                    isDark ? Colors.white.withOpacity(0.06) : Colors.grey[100],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ),
+          const Divider(height: 1),
+          // Models list
+          Expanded(
+            child: _filteredModels.isEmpty
+                ? Center(
+                    child: Text(
+                      context.l10n.aiNoModelsFound,
+                      style: TextStyle(
+                        color: isDark ? Colors.white54 : Colors.grey[600],
+                        fontSize: 14,
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: _filteredModels.length,
+                    itemBuilder: (context, index) {
+                      final model = _filteredModels[index];
+                      final isSelected = model == widget.selectedModel;
+                      return ListTile(
+                        leading: Icon(
+                          Icons.memory_outlined,
+                          size: 20,
+                          color: isSelected
+                              ? primaryColor
+                              : (isDark ? Colors.white60 : Colors.grey[600]),
+                        ),
+                        title: Text(
+                          model,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight:
+                                isSelected ? FontWeight.w600 : FontWeight.normal,
+                            color: isSelected
+                                ? primaryColor
+                                : (isDark
+                                    ? Colors.white
+                                    : const Color(0xFF202124)),
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? const Icon(Icons.check_rounded,
+                                color: primaryColor, size: 20)
+                            : null,
+                        onTap: () {
+                          widget.onModelSelected(model);
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  ),
+          ),
+        ],
       ),
     );
   }

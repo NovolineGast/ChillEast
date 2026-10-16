@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ai/ai_provider.dart';
 import '../../../core/utils/l10n_extension.dart';
 import '../../../core/utils/route_utils.dart';
+import '../../profile/screens/ai_memory_screen.dart';
 import '../../profile/screens/ai_settings_screen.dart';
 
 /// 贴合 MD2 规范的 AI 响应卡片组件
@@ -115,7 +116,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
   );
 }
 
-  /// 卡片头部（纯净无多余文字与分割线）
+  /// 卡片头部（显示轮次统计、记忆入口、新对话与配置）
   Widget _buildCardHeader(
       BuildContext context, AiAssistantState aiState, bool isDark) {
     if (aiState.displayMessages.isEmpty) {
@@ -127,49 +128,112 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
         color: Colors.transparent,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: () {
-              ref.read(aiAssistantProvider.notifier).clearSession();
-            },
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.refresh_rounded,
-                    size: 14,
+          // 左侧：轮次展示与记忆快捷入口
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: aiState.isRoundLimitReached
+                      ? Colors.orangeAccent.withOpacity(0.15)
+                      : (isDark
+                          ? Colors.white.withOpacity(0.08)
+                          : Colors.black.withOpacity(0.05)),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  '${aiState.roundCount}/${AiAssistantState.maxConversationRounds} 轮',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: aiState.isRoundLimitReached
+                        ? Colors.orangeAccent
+                        : (isDark ? Colors.white60 : Colors.grey[600]),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    createSlideUpRoute(const AiMemoryScreen()),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.psychology_outlined,
+                        size: 14,
+                        color: isDark ? Colors.white60 : Colors.grey[600],
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        '记忆',
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? Colors.white60 : Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          // 右侧：开启新对话与配置
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  ref.read(aiAssistantProvider.notifier).clearSession();
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.refresh_rounded,
+                        size: 14,
+                        color: isDark ? Colors.white60 : Colors.grey[500],
+                      ),
+                      const SizedBox(width: 3),
+                      Text(
+                        context.l10n.newChat,
+                        style: TextStyle(
+                          fontSize: 11.5,
+                          color: isDark ? Colors.white60 : Colors.grey[500],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    createSlideUpRoute(const AiSettingsScreen()),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Icon(
+                    Icons.code_rounded,
+                    size: 16,
                     color: isDark ? Colors.white60 : Colors.grey[500],
                   ),
-                  const SizedBox(width: 3),
-                  Text(
-                    context.l10n.newChat,
-                    style: TextStyle(
-                      fontSize: 11.5,
-                      color: isDark ? Colors.white60 : Colors.grey[500],
-                    ),
-                  ),
-                ],
+                ),
               ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                createSlideUpRoute(const AiSettingsScreen()),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(2),
-              child: Icon(
-                Icons.code_rounded,
-                size: 16,
-                color: isDark ? Colors.white60 : Colors.grey[500],
-              ),
-            ),
+            ],
           ),
         ],
       ),
@@ -187,10 +251,12 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
       return _buildInitialQuickActions(context, isDark);
     }
 
-    final hasError = aiState.errorMessage != null && !aiState.isLoading;
+    final isLimitReached = aiState.isRoundLimitReached;
+    final hasError = aiState.errorMessage != null && !aiState.isLoading && !isLimitReached;
     final itemCount = aiState.displayMessages.length +
         (aiState.isLoading ? 1 : 0) +
-        (hasError ? 1 : 0);
+        (hasError ? 1 : 0) +
+        (isLimitReached ? 1 : 0);
 
     return ListView.builder(
       controller: _scrollController,
@@ -202,14 +268,97 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
           final msg = aiState.displayMessages[index];
           return _buildMessageItem(msg, isDark);
         }
-        if (aiState.isLoading && index == aiState.displayMessages.length) {
-          return _buildLoadingBubble(aiState, isDark);
+        var nextIdx = index - aiState.displayMessages.length;
+        if (aiState.isLoading) {
+          if (nextIdx == 0) return _buildLoadingBubble(aiState, isDark);
+          nextIdx--;
         }
         if (hasError) {
-          return _buildErrorMessageBubble(aiState.errorMessage!, isDark);
+          if (nextIdx == 0) return _buildErrorMessageBubble(aiState.errorMessage!, isDark);
+          nextIdx--;
+        }
+        if (isLimitReached && nextIdx == 0) {
+          return _buildRoundLimitBanner(context, isDark);
         }
         return const SizedBox.shrink();
       },
+    );
+  }
+
+  /// 对话轮次达到上限提示横幅
+  Widget _buildRoundLimitBanner(BuildContext context, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.orangeAccent.withOpacity(0.12)
+            : const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark
+              ? Colors.orangeAccent.withOpacity(0.3)
+              : Colors.orangeAccent.withOpacity(0.4),
+          width: 0.8,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.info_outline_rounded,
+                size: 15,
+                color: Colors.orangeAccent,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '已达本轮对话上限（20 轮）',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.orangeAccent : const Color(0xFFE65100),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '为了保证回答质量，每次对话最多支持 20 个来回。关键信息与偏好已沉淀至长期记忆，开启新对话即可继续交流。',
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.4,
+              color: isDark ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+              onTap: () {
+                ref.read(aiAssistantProvider.notifier).clearSession();
+              },
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF09C489),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  '开启新对话',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
