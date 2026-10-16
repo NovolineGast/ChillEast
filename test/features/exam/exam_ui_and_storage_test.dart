@@ -62,6 +62,28 @@ void main() {
       expect(afterDelete, isEmpty);
     });
 
+    test('ExamScheduleModel supports manual exams, location and remarks', () async {
+      final storage = ExamStorage(baseDirectory: tempDir);
+      final exam = ExamScheduleModel(
+        id: 'manual_123456',
+        title: '大学英语期末口语考试',
+        courseName: '大学英语',
+        time: DateTime(2026, 11, 20, 14, 30),
+        status: '待考',
+        isManual: true,
+        location: '文科楼402',
+        remarks: '自带准考证和学生证',
+      );
+
+      await storage.saveExamList([exam]);
+      final loaded = await storage.readExamList();
+      expect(loaded.length, equals(1));
+      expect(loaded.first.isManual, isTrue);
+      expect(loaded.first.location, equals('文科楼402'));
+      expect(loaded.first.remarks, equals('自带准考证和学生证'));
+      expect(loaded.first.courseName, equals('大学英语'));
+    });
+
     testWidgets('Renders upcoming exam card with first occurrence time', (tester) async {
       final mockExam = ExamScheduleModel(
         id: '9473825',

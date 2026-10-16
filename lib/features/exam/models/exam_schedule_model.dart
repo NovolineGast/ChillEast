@@ -15,6 +15,12 @@ class ExamScheduleModel {
   final String detailUrl;
   /// 考试状态（如 "未交", "已完成", "未开始", "进行中"）
   final String status;
+  /// 是否为手动添加
+  final bool isManual;
+  /// 考场 / 教室地点
+  final String? location;
+  /// 备注信息
+  final String? remarks;
   /// 学生姓名
   final String? studentName;
   /// 学生学号
@@ -31,6 +37,9 @@ class ExamScheduleModel {
     this.rawTimeStrs = const [],
     this.detailUrl = '',
     this.status = '',
+    this.isManual = false,
+    this.location,
+    this.remarks,
     this.studentName,
     this.studentId,
     this.createdAt,
@@ -45,6 +54,9 @@ class ExamScheduleModel {
         'rawTimeStrs': rawTimeStrs,
         'detailUrl': detailUrl,
         'status': status,
+        'isManual': isManual,
+        'location': location,
+        'remarks': remarks,
         'studentName': studentName,
         'studentId': studentId,
         'createdAt': createdAt?.toIso8601String(),
@@ -66,6 +78,9 @@ class ExamScheduleModel {
           [],
       detailUrl: json['detailUrl'] as String? ?? '',
       status: json['status'] as String? ?? '',
+      isManual: json['isManual'] as bool? ?? false,
+      location: json['location'] as String?,
+      remarks: json['remarks'] as String?,
       studentName: json['studentName'] as String?,
       studentId: json['studentId'] as String?,
       createdAt: json['createdAt'] != null
@@ -83,6 +98,9 @@ class ExamScheduleModel {
     List<String>? rawTimeStrs,
     String? detailUrl,
     String? status,
+    bool? isManual,
+    String? location,
+    String? remarks,
     String? studentName,
     String? studentId,
     DateTime? createdAt,
@@ -96,6 +114,9 @@ class ExamScheduleModel {
       rawTimeStrs: rawTimeStrs ?? this.rawTimeStrs,
       detailUrl: detailUrl ?? this.detailUrl,
       status: status ?? this.status,
+      isManual: isManual ?? this.isManual,
+      location: location ?? this.location,
+      remarks: remarks ?? this.remarks,
       studentName: studentName ?? this.studentName,
       studentId: studentId ?? this.studentId,
       createdAt: createdAt ?? this.createdAt,
