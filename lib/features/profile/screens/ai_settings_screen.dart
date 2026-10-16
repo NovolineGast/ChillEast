@@ -313,7 +313,7 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6),
-                  borderSide: BorderSide(color: primaryColor, width: 1.5),
+                  borderSide: const BorderSide(color: primaryColor, width: 1.5),
                 ),
                 prefixIcon: Icon(
                   Icons.link_rounded,
@@ -364,7 +364,7 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6),
-                  borderSide: BorderSide(color: primaryColor, width: 1.5),
+                  borderSide: const BorderSide(color: primaryColor, width: 1.5),
                 ),
                 prefixIcon: Icon(
                   Icons.memory_outlined,
@@ -463,7 +463,7 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(6),
-                  borderSide: BorderSide(color: primaryColor, width: 1.5),
+                  borderSide: const BorderSide(color: primaryColor, width: 1.5),
                 ),
                 prefixIcon: Icon(
                   Icons.vpn_key_outlined,
