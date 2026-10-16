@@ -528,14 +528,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       height: 52,
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.black.withOpacity(0.05),
-            width: 1,
-          ),
-        ),
       ),
       child: Row(
         children: [
