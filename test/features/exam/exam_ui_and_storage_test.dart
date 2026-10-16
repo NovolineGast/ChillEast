@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ChillEast/features/exam/models/exam_schedule_model.dart';
 import 'package:ChillEast/features/exam/providers/exam_provider.dart';
 import 'package:ChillEast/features/exam/services/exam_storage.dart';
+import 'package:ChillEast/features/exam/screens/exam_screen.dart';
 import 'package:ChillEast/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
@@ -128,6 +129,53 @@ void main() {
       expect(find.text('26年春形策期末考试'), findsOneWidget);
       expect(find.text('考试时间: 17:00'), findsOneWidget);
       expect(find.text('未交'), findsOneWidget);
+    });
+
+    testWidgets('ExamScreen renders AppBar with plus button and shows exam cards', (tester) async {
+      final mockExam = ExamScheduleModel(
+        id: 'manual_999',
+        title: '编译原理期末考',
+        courseName: '编译原理',
+        time: DateTime.now().add(const Duration(days: 3)),
+        status: '待考',
+        isManual: true,
+        location: '计算机楼B201',
+      );
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            examProvider.overrideWith((ref) => _MockExamNotifier(ref, [mockExam])),
+          ],
+          child: const MaterialApp(
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            locale: Locale('zh'),
+            home: ExamScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // 验证标题与加号按钮
+      expect(find.text('考试安排'), findsOneWidget);
+      expect(find.byIcon(Icons.add_rounded), findsOneWidget);
+
+      // 验证考试卡片内容
+      expect(find.text('编译原理'), findsOneWidget);
+      expect(find.text('编译原理期末考'), findsOneWidget);
+      expect(find.text('计算机楼B201'), findsOneWidget);
+      expect(find.text('手动添加'), findsOneWidget);
+      expect(find.text('待考'), findsOneWidget);
+
+      // 点击加号打开添加考试弹窗
+      await tester.tap(find.byIcon(Icons.add_rounded));
+      await tester.pumpAndSettle();
+
+      expect(find.text('添加考试'), findsOneWidget);
+      expect(find.text('考试名称'), findsOneWidget);
+      expect(find.text('所属课程'), findsOneWidget);
     });
   });
 }

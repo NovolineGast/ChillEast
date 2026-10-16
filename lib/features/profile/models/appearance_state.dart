@@ -98,7 +98,7 @@ const List<FunctionGroup> functionGroups = [
       ids: ['payment_code', 'recharge', 'ele_recharge']),
   FunctionGroup(
       titleKey: 'groupStudy',
-      ids: ['library', 'empty_classroom', 'score']),
+      ids: ['library', 'empty_classroom', 'score', 'exam']),
   FunctionGroup(
       titleKey: 'groupLife',
       ids: ['repairs', 'leave', 'questionnaire', 'sunshine', 'dormitory']),
@@ -163,6 +163,8 @@ extension FunctionItemLocalization on FunctionItem {
         return l10n.funcTeachingEval;
       case 'score':
         return l10n.funcScore;
+      case 'exam':
+        return l10n.examSchedule;
       case 'vpn':
         return l10n.funcVpn;
       case 'campus_card':

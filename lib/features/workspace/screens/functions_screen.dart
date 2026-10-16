@@ -25,6 +25,7 @@ import 'package:permission_handler/permission_handler.dart';
 import '../../library/screens/library_home_screen.dart';
 import '../../campus_bus/screens/campus_bus_map_screen.dart';
 import '../../dormitory/screens/dormitory_screen.dart';
+import '../../exam/screens/exam_screen.dart';
 
 /// 功能页 - 展示各种功能入口
 class FunctionsScreen extends ConsumerStatefulWidget {
@@ -297,6 +298,9 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
         isLoggedIn 
             ? _safeNavigate(const ScoreScreen())
             : _showLoginDialog();
+        break;
+      case 'exam':
+        _safeNavigate(const ExamScreen());
         break;
       case 'vpn':
         _safeNavigate(const VpnConverterScreen());

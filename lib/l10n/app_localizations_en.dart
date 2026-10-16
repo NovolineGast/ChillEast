@@ -286,6 +286,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get manualExamTag => 'Manual';
 
   @override
+  String get delete => 'Delete';
+
+  @override
   String get deleteExamConfirm => 'Are you sure you want to delete this exam?';
 
   @override
@@ -2972,4 +2975,40 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get clearWebViewCacheConfirmMessage =>
       'This will clear local offline cache and temporary data for in-app web pages. Your login session will not be affected.';
+
+  @override
+  String get aiFetchModels => 'Fetch Models';
+
+  @override
+  String get aiSelectModel => 'Select Model';
+
+  @override
+  String get aiSearchModelHint => 'Search model name...';
+
+  @override
+  String get aiNoModelsFound => 'No models found';
+
+  @override
+  String get aiTestConnection => 'Test Connection';
+
+  @override
+  String get aiTestingConnection => 'Testing connection...';
+
+  @override
+  String aiTestSuccess(int ms) {
+    return 'Connection successful (${ms}ms)';
+  }
+
+  @override
+  String aiTestFailed(String error) {
+    return 'Connection failed: $error';
+  }
+
+  @override
+  String get aiApiKeyRequired => 'Please enter an API Key first';
+
+  @override
+  String aiModelSelected(String model) {
+    return 'Selected model: $model';
+  }
 }

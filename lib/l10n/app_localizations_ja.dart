@@ -243,7 +243,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get funcExamSchedule => '考试安排';
 
   @override
-  String get examSchedule => '考试日程';
+  String get examSchedule => '考试安排';
 
   @override
   String get addExam => '添加考试';
@@ -283,6 +283,9 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get manualExamTag => '手动添加';
+
+  @override
+  String get delete => '删除';
 
   @override
   String get deleteExamConfirm => '确定要删除此考试吗？';
@@ -2904,4 +2907,40 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String get clearWebViewCacheConfirmMessage =>
       '将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。';
+
+  @override
+  String get aiFetchModels => '获取模型列表';
+
+  @override
+  String get aiSelectModel => '选择模型';
+
+  @override
+  String get aiSearchModelHint => '搜索模型名称…';
+
+  @override
+  String get aiNoModelsFound => '未找到匹配的模型';
+
+  @override
+  String get aiTestConnection => '测试联通';
+
+  @override
+  String get aiTestingConnection => '正在测试联通…';
+
+  @override
+  String aiTestSuccess(int ms) {
+    return '联通成功 (耗时 ${ms}ms)';
+  }
+
+  @override
+  String aiTestFailed(String error) {
+    return '联通失败: $error';
+  }
+
+  @override
+  String get aiApiKeyRequired => '请先配置 API Key';
+
+  @override
+  String aiModelSelected(String model) {
+    return '已选择模型: $model';
+  }
 }

@@ -179,6 +179,7 @@
   "inputExamRemarksHint": "输入备注或准备事项（可选）",
   "noCurrentSemesterExams": "本学期暂无考试安排",
   "manualExamTag": "手动添加",
+  "delete": "删除",
   "deleteExamConfirm": "确定要删除此考试吗？",
   "examDeleted": "已删除考试",
   "examAdded": "已成功添加考试",
@@ -1694,11 +1695,65 @@
   "ehallSessionExpired": "办事大厅登录态已过期，请重新登录",
   "ehallExternalJumpPrompt": "即将跳转至外部服务",
   "ehallOpenNativeLeave": "在请假小程序中办理",
-  "examSchedule": "考试日程",
   "examTimePrefix": "考试时间",
   "clearWebViewCache": "清理缓存",
   "clearWebViewCacheSubtitle": "清理 InAppWebView 磁盘缓存与网页离线数据",
   "clearWebViewCacheSuccess": "已清理缓存",
   "clearWebViewCacheConfirmTitle": "确认清理缓存？",
-  "clearWebViewCacheConfirmMessage": "将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。"
+  "clearWebViewCacheConfirmMessage": "将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。",
+  "aiFetchModels": "获取模型列表",
+  "@aiFetchModels": {
+    "description": "Agent设置获取模型列表按钮"
+  },
+  "aiSelectModel": "选择模型",
+  "@aiSelectModel": {
+    "description": "Agent设置选择模型标题"
+  },
+  "aiSearchModelHint": "搜索模型名称…",
+  "@aiSearchModelHint": {
+    "description": "搜索模型提示词"
+  },
+  "aiNoModelsFound": "未找到匹配的模型",
+  "@aiNoModelsFound": {
+    "description": "未找到模型提示"
+  },
+  "aiTestConnection": "测试联通",
+  "@aiTestConnection": {
+    "description": "Agent设置测试联通按钮"
+  },
+  "aiTestingConnection": "正在测试联通…",
+  "@aiTestingConnection": {
+    "description": "测试联通中状态"
+  },
+  "aiTestSuccess": "联通成功 (耗时 {ms}ms)",
+  "@aiTestSuccess": {
+    "description": "联通成功提示",
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "aiTestFailed": "联通失败: {error}",
+  "@aiTestFailed": {
+    "description": "联通失败提示",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aiApiKeyRequired": "请先配置 API Key",
+  "@aiApiKeyRequired": {
+    "description": "缺少API Key提示"
+  },
+  "aiModelSelected": "已选择模型: {model}",
+  "@aiModelSelected": {
+    "description": "模型选择成功提示",
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  }
 }

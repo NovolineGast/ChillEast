@@ -590,7 +590,7 @@ abstract class AppLocalizations {
   /// No description provided for @examSchedule.
   ///
   /// In zh, this message translates to:
-  /// **'考试日程'**
+  /// **'考试安排'**
   String get examSchedule;
 
   /// No description provided for @addExam.
@@ -670,6 +670,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'手动添加'**
   String get manualExamTag;
+
+  /// No description provided for @delete.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除'**
+  String get delete;
 
   /// No description provided for @deleteExamConfirm.
   ///
@@ -5528,6 +5534,66 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。'**
   String get clearWebViewCacheConfirmMessage;
+
+  /// Agent设置获取模型列表按钮
+  ///
+  /// In zh, this message translates to:
+  /// **'获取模型列表'**
+  String get aiFetchModels;
+
+  /// Agent设置选择模型标题
+  ///
+  /// In zh, this message translates to:
+  /// **'选择模型'**
+  String get aiSelectModel;
+
+  /// 搜索模型提示词
+  ///
+  /// In zh, this message translates to:
+  /// **'搜索模型名称…'**
+  String get aiSearchModelHint;
+
+  /// 未找到模型提示
+  ///
+  /// In zh, this message translates to:
+  /// **'未找到匹配的模型'**
+  String get aiNoModelsFound;
+
+  /// Agent设置测试联通按钮
+  ///
+  /// In zh, this message translates to:
+  /// **'测试联通'**
+  String get aiTestConnection;
+
+  /// 测试联通中状态
+  ///
+  /// In zh, this message translates to:
+  /// **'正在测试联通…'**
+  String get aiTestingConnection;
+
+  /// 联通成功提示
+  ///
+  /// In zh, this message translates to:
+  /// **'联通成功 (耗时 {ms}ms)'**
+  String aiTestSuccess(int ms);
+
+  /// 联通失败提示
+  ///
+  /// In zh, this message translates to:
+  /// **'联通失败: {error}'**
+  String aiTestFailed(String error);
+
+  /// 缺少API Key提示
+  ///
+  /// In zh, this message translates to:
+  /// **'请先配置 API Key'**
+  String get aiApiKeyRequired;
+
+  /// 模型选择成功提示
+  ///
+  /// In zh, this message translates to:
+  /// **'已选择模型: {model}'**
+  String aiModelSelected(String model);
 }
 
 class _AppLocalizationsDelegate
