@@ -1807,7 +1807,50 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final List<Widget> cards = [];
 
-    // 1. 校园卡卡片
+    // 1. 宿舍电费卡片（电费放在校园卡上面；若无保存的房间则不显示，保存两个则显示两个）
+    for (int i = 0; i < eleState.rooms.length; i++) {
+      final room = eleState.rooms[i];
+      if (room == null) continue;
+
+      final roomDisplayName =
+          room.roomName.isNotEmpty ? room.roomName : room.roomId;
+      final eleTitle =
+          room.areaName.isNotEmpty ? room.areaName : context.l10n.dormitoryElectricity;
+      final String eleSubtitle;
+      if (room.buildingName.isNotEmpty) {
+        eleSubtitle = room.buildingName.endsWith(roomDisplayName)
+            ? room.buildingName
+            : '${room.buildingName} $roomDisplayName';
+      } else {
+        eleSubtitle = roomDisplayName;
+      }
+
+      final balanceInfo = (i < eleState.balances.length) ? eleState.balances[i] : null;
+      final balanceText = balanceInfo != null
+          ? '¥${balanceInfo.balance}'
+          : (eleState.isLoading ? '...' : '¥--');
+
+      final double? eleBal = balanceInfo != null ? double.tryParse(balanceInfo.balance) : null;
+      final bool isLowBalance = eleBal != null && eleBal <= 10.0;
+      final Color eleBalanceColor = isLowBalance
+          ? const Color(0xFFE53935)
+          : (isDark ? Colors.white : const Color(0xFF202124));
+
+      cards.add(
+        _buildBalanceCardItem(
+          icon: Icons.bolt_outlined,
+          iconColor: const Color(0xFFFF9800),
+          title: eleTitle,
+          subtitle: eleSubtitle,
+          balanceText: balanceText,
+          balanceColor: eleBalanceColor,
+          onTap: () => _openElectricity(context, initialSlot: i),
+          isDark: isDark,
+        ),
+      );
+    }
+
+    // 2. 校园卡卡片
     if (cardInfo != null || isAuthenticated) {
       final String cardSubtitle;
       final String balanceText;
@@ -1832,45 +1875,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           title: context.l10n.funcCampusCard,
           subtitle: cardSubtitle,
           balanceText: balanceText,
-          balanceColor: isDark ? Colors.white : const Color(0xFF1677FF),
+          balanceColor: isDark ? Colors.white : const Color(0xFF202124),
           onTap: () => _openCampusCard(context),
-          isDark: isDark,
-        ),
-      );
-    }
-
-    // 2. 宿舍电费卡片（若无保存的房间则不显示，保存两个则显示两个）
-    for (int i = 0; i < eleState.rooms.length; i++) {
-      final room = eleState.rooms[i];
-      if (room == null) continue;
-
-      final roomDisplayName =
-          room.roomName.isNotEmpty ? room.roomName : room.roomId;
-      final eleTitle =
-          room.areaName.isNotEmpty ? room.areaName : context.l10n.dormitoryElectricity;
-      final String eleSubtitle;
-      if (room.buildingName.isNotEmpty) {
-        eleSubtitle = room.buildingName.endsWith(roomDisplayName)
-            ? room.buildingName
-            : '${room.buildingName} $roomDisplayName';
-      } else {
-        eleSubtitle = roomDisplayName;
-      }
-
-      final balanceInfo = (i < eleState.balances.length) ? eleState.balances[i] : null;
-      final balanceText = balanceInfo != null
-          ? '¥${balanceInfo.balance}'
-          : (eleState.isLoading ? '...' : '¥--');
-
-      cards.add(
-        _buildBalanceCardItem(
-          icon: Icons.bolt_outlined,
-          iconColor: const Color(0xFFFF9800),
-          title: eleTitle,
-          subtitle: eleSubtitle,
-          balanceText: balanceText,
-          balanceColor: isDark ? Colors.white : const Color(0xFFFF9800),
-          onTap: () => _openElectricity(context, initialSlot: i),
           isDark: isDark,
         ),
       );
