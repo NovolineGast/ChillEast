@@ -832,7 +832,17 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           Text(
             course.name,
             style: const TextStyle(
-                color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              shadows: [
+                Shadow(
+                  color: Colors.black45,
+                  offset: Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -841,7 +851,17 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
             [timeRange, course.classroom.trim(), course.teacher.trim()]
                 .where((s) => s.isNotEmpty)
                 .join(', '),
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+              shadows: [
+                Shadow(
+                  color: Colors.black45,
+                  offset: Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ],
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

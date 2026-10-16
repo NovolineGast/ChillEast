@@ -1320,6 +1320,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               fontSize: 15,
               fontWeight: FontWeight.bold,
               height: 1.2,
+              shadows: [
+                Shadow(
+                  color: Colors.black45,
+                  offset: Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ],
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -1334,6 +1341,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               color: Colors.white,
               fontSize: 12,
               height: 1.2,
+              shadows: [
+                Shadow(
+                  color: Colors.black45,
+                  offset: Offset(0, 1),
+                  blurRadius: 2,
+                ),
+              ],
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,

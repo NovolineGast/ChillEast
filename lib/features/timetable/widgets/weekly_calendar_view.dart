@@ -333,6 +333,13 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     height: 1.1,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black45,
+                        offset: Offset(0, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
@@ -345,6 +352,13 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
                       color: Colors.white,
                       fontSize: 9,
                       height: 1.1,
+                      shadows: [
+                        Shadow(
+                          color: Colors.black45,
+                          offset: Offset(0, 1),
+                          blurRadius: 2,
+                        ),
+                      ],
                     ),
                     maxLines: 3, // 支持 3 行显示
                     overflow: TextOverflow.ellipsis,
@@ -752,6 +766,13 @@ Widget _buildColorRow({
                     color: Colors.white,
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black45,
+                        offset: Offset(0, 1),
+                        blurRadius: 2,
+                      ),
+                    ],
                   ),
                 ),
               ],
@@ -776,12 +797,6 @@ class _MaterialColorPickerDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentColor = CourseColorUtils.getColorForCourse(courseName);
-
-    // 按色系分组
-    final grouped = <String, List<MaterialColorItem>>{};
-    for (final item in CourseColorUtils.materialColorItems) {
-      grouped.putIfAbsent(item.family, () => []).add(item);
-    }
 
     return AlertDialog(
       title: Row(
@@ -814,112 +829,114 @@ class _MaterialColorPickerDialog extends StatelessWidget {
                     color: Theme.of(context).hintColor,
                   ),
                 ),
-                const SizedBox(height: 12),
-                ...grouped.entries.map((group) {
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          group.key,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).textTheme.bodySmall?.color,
-                          ),
-                        ),
-                        const SizedBox(height: 6),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: group.value.map((item) {
-                            final isCurrent =
-                                item.color.toARGB32() == currentColor.toARGB32();
-                            final occupyingCourse =
-                                CourseColorUtils.getCourseUsingColor(
-                              item.color,
-                              excludeCourse: courseName,
-                            );
+                const SizedBox(height: 16),
+                Center(
+                  child: Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.center,
+                    children: CourseColorUtils.materialColorItems.map((item) {
+                      final isCurrent =
+                          item.color.toARGB32() == currentColor.toARGB32();
+                      final occupyingCourse =
+                          CourseColorUtils.getCourseUsingColor(
+                        item.color,
+                        excludeCourse: courseName,
+                      );
 
-                            return InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: () async {
-                                final conflict = occupyingCourse;
-                                await CourseColorUtils.setCourseColor(
-                                  courseName,
-                                  item.color,
-                                );
-                                if (context.mounted) {
-                                  Navigator.pop(context);
-                                }
-                                onColorChanged();
-                                if (conflict != null && context.mounted) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        context.l10n.colorSwappedNotice(conflict),
-                                      ),
-                                      duration: const Duration(seconds: 2),
-                                      behavior: SnackBarBehavior.floating,
-                                    ),
-                                  );
-                                }
-                              },
-                              child: Tooltip(
-                                message: occupyingCourse != null
-                                    ? '${item.family} ${item.shade} ($occupyingCourse)'
-                                    : '${item.family} ${item.shade}',
-                                child: Container(
-                                  width: 36,
-                                  height: 36,
-                                  decoration: BoxDecoration(
-                                    color: item.color,
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: isCurrent
-                                          ? Colors.white
-                                          : Colors.black.withValues(alpha: 0.15),
-                                      width: isCurrent ? 2.5 : 1,
-                                    ),
-                                    boxShadow: isCurrent
-                                        ? [
-                                            BoxShadow(
-                                              color: item.color
-                                                  .withValues(alpha: 0.5),
-                                              blurRadius: 6,
-                                              spreadRadius: 1,
-                                            ),
-                                          ]
-                                        : null,
-                                  ),
-                                  child: isCurrent
-                                      ? const Icon(
-                                          Icons.check,
-                                          size: 20,
-                                          color: Colors.white,
-                                        )
-                                      : (occupyingCourse != null
-                                          ? Center(
-                                              child: Container(
-                                                width: 6,
-                                                height: 6,
-                                                decoration: const BoxDecoration(
-                                                  color: Colors.white70,
-                                                  shape: BoxShape.circle,
-                                                ),
-                                              ),
-                                            )
-                                          : null),
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(22),
+                        onTap: () async {
+                          final conflict = occupyingCourse;
+                          await CourseColorUtils.setCourseColor(
+                            courseName,
+                            item.color,
+                          );
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                          onColorChanged();
+                          if (conflict != null && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  context.l10n.colorSwappedNotice(conflict),
                                 ),
+                                duration: const Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
                               ),
                             );
-                          }).toList(),
+                          }
+                        },
+                        child: Tooltip(
+                          message: occupyingCourse != null
+                              ? '${item.family} ${item.shade} ($occupyingCourse)'
+                              : '${item.family} ${item.shade}',
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: item.color,
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isCurrent
+                                    ? Colors.white
+                                    : Colors.black.withValues(alpha: 0.15),
+                                width: isCurrent ? 3 : 1,
+                              ),
+                              boxShadow: [
+                                if (isCurrent)
+                                  BoxShadow(
+                                    color: item.color.withValues(alpha: 0.6),
+                                    blurRadius: 8,
+                                    spreadRadius: 2,
+                                  )
+                                else
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.12),
+                                    blurRadius: 3,
+                                    offset: const Offset(0, 1),
+                                  ),
+                              ],
+                            ),
+                            child: isCurrent
+                                ? const Icon(
+                                    Icons.check,
+                                    size: 24,
+                                    color: Colors.white,
+                                    shadows: [
+                                      Shadow(
+                                        color: Colors.black45,
+                                        offset: Offset(0, 1),
+                                        blurRadius: 2,
+                                      ),
+                                    ],
+                                  )
+                                : (occupyingCourse != null
+                                    ? Center(
+                                        child: Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withValues(alpha: 0.85),
+                                            shape: BoxShape.circle,
+                                            boxShadow: const [
+                                              BoxShadow(
+                                                color: Colors.black38,
+                                                blurRadius: 2,
+                                                offset: Offset(0, 1),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : null),
+                          ),
                         ),
-                      ],
-                    ),
-                  );
-                }),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ],
             ),
           ),

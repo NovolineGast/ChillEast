@@ -1,24 +1,7 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ChillEast/features/timetable/utils/course_color_utils.dart';
-
-double _relativeLuminance(Color color) {
-  double transform(double c) {
-    return c <= 0.03928 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4).toDouble();
-  }
-
-  final r = transform(color.r);
-  final g = transform(color.g);
-  final b = transform(color.b);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
-}
-
-double _contrastRatioWithWhite(Color color) {
-  final l = _relativeLuminance(color);
-  return (1.0 + 0.05) / (l + 0.05);
-}
 
 void main() {
   setUp(() {
@@ -26,35 +9,60 @@ void main() {
     CourseColorUtils.resetForTesting();
   });
 
-  group('CourseColorUtils Palette & Contrast', () {
-    test('All palette colors must have contrast ratio >= 3.0 with white text', () {
+  group('CourseColorUtils 700 Palette Specification', () {
+    test('Contains exactly 19 colors and all are shade 700', () {
+      expect(CourseColorUtils.materialColorItems.length, equals(19));
+      expect(CourseColorUtils.selectablePalette.length, equals(19));
+      expect(CourseColorUtils.defaultPaletteOrder.length, equals(19));
+
       for (final item in CourseColorUtils.materialColorItems) {
-        final cr = _contrastRatioWithWhite(item.color);
-        expect(
-          cr,
-          greaterThanOrEqualTo(3.0),
-          reason:
-              '${item.family} ${item.shade} (${item.color}) contrast ratio is $cr, which is too low for white text',
-        );
+        expect(item.shade, equals('700'));
       }
     });
 
-    test('Palette items have non-empty family, shade, and distinct colors', () {
-      expect(CourseColorUtils.materialColorItems.isNotEmpty, isTrue);
-      for (final item in CourseColorUtils.materialColorItems) {
-        expect(item.family.isNotEmpty, isTrue);
-        expect(item.shade.isNotEmpty, isTrue);
-      }
+    test('Contains the exact 19 Material UI color families', () {
+      const expectedFamilies = {
+        'Red',
+        'Pink',
+        'Purple',
+        'Deep Purple',
+        'Indigo',
+        'Blue',
+        'Light Blue',
+        'Cyan',
+        'Teal',
+        'Green',
+        'Light Green',
+        'Lime',
+        'Yellow',
+        'Amber',
+        'Orange',
+        'Deep Orange',
+        'Brown',
+        'Grey',
+        'Blue Grey',
+      };
+
+      final actualFamilies =
+          CourseColorUtils.materialColorItems.map((item) => item.family).toSet();
+      expect(actualFamilies, equals(expectedFamilies));
+    });
+
+    test('All 19 palette colors are distinct', () {
+      final colorValues = CourseColorUtils.selectablePalette
+          .map((c) => c.toARGB32())
+          .toSet();
+      expect(colorValues.length, equals(19));
     });
   });
 
   group('CourseColorUtils Uniqueness Guarantee', () {
-    test('Sequential calls to getColorForCourse guarantee all unique colors', () {
-      final courseNames = List.generate(20, (i) => '课程$i');
+    test('Sequential calls to getColorForCourse guarantee all unique colors for 19 courses', () {
+      final courseNames = List.generate(19, (i) => '课程$i');
       final colors =
           courseNames.map((name) => CourseColorUtils.getColorForCourse(name)).toList();
       final colorValues = colors.map((c) => c.toARGB32()).toSet();
-      expect(colorValues.length, equals(courseNames.length));
+      expect(colorValues.length, equals(19));
     });
 
     test('syncCourses assigns pairwise distinct colors to all courses', () {
@@ -109,7 +117,7 @@ void main() {
       expect(allValues.length, equals(courses.length));
     });
 
-    test('setCourseColor throws when color is outside allowed palette', () async {
+    test('setCourseColor throws when color is outside 19 700-shade palette', () async {
       expect(
         () => CourseColorUtils.setCourseColor('课程A', const Color(0xFFFFFFFF)),
         throwsArgumentError,

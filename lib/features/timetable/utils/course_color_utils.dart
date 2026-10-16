@@ -17,184 +17,66 @@ class MaterialColorItem {
 
 /// 课程配色工具类
 /// 
-/// 遵循 https://materialui.co/colors 规范，精选高对比度颜色（在白色文字下清晰可见），
-/// 并始终保证同一个课表中各门课程的颜色互不相同。
+/// 遵循 https://materialui.co/colors 规范，严格限定在 Material UI 19 种色彩的 700 色阶：
+/// Red, Pink, Purple, Deep Purple, Indigo, Blue, Light Blue, Cyan, Teal, Green,
+/// Light Green, Lime, Yellow, Amber, Orange, Deep Orange, Brown, Grey, Blue Grey.
+/// 
+/// 并始终保证同一个课表中各门课程的颜色互不相同（唯一分配 + 换色对调机制）。
 class CourseColorUtils {
   static const String _prefsKey = 'custom_course_colors';
   static final Map<String, Color> _assignedColors = {};
   static bool _initialized = false;
   static Future<void>? _initFuture;
 
-  /// 来自 https://materialui.co/colors 中在白色文字下对比度清晰（CR >= 3.5）的颜色项
+  /// 来自 https://materialui.co/colors 的 19 种颜色的 700 色阶
   static const List<MaterialColorItem> materialColorItems = [
-    // --- Red ---
-    MaterialColorItem(family: 'Red', shade: '500', color: Color(0xFFF44336)),
-    MaterialColorItem(family: 'Red', shade: '600', color: Color(0xFFE53935)),
     MaterialColorItem(family: 'Red', shade: '700', color: Color(0xFFD32F2F)),
-    MaterialColorItem(family: 'Red', shade: '800', color: Color(0xFFC62828)),
-    MaterialColorItem(family: 'Red', shade: '900', color: Color(0xFFB71C1C)),
-    MaterialColorItem(family: 'Red', shade: 'A400', color: Color(0xFFFF1744)),
-    MaterialColorItem(family: 'Red', shade: 'A700', color: Color(0xFFD50000)),
-
-    // --- Pink ---
-    MaterialColorItem(family: 'Pink', shade: '500', color: Color(0xFFE91E63)),
-    MaterialColorItem(family: 'Pink', shade: '600', color: Color(0xFFD81B60)),
     MaterialColorItem(family: 'Pink', shade: '700', color: Color(0xFFC2185B)),
-    MaterialColorItem(family: 'Pink', shade: '800', color: Color(0xFFAD1457)),
-    MaterialColorItem(family: 'Pink', shade: '900', color: Color(0xFF880E4F)),
-    MaterialColorItem(family: 'Pink', shade: 'A400', color: Color(0xFFF50057)),
-    MaterialColorItem(family: 'Pink', shade: 'A700', color: Color(0xFFC51162)),
-
-    // --- Purple ---
-    MaterialColorItem(family: 'Purple', shade: '500', color: Color(0xFF9C27B0)),
-    MaterialColorItem(family: 'Purple', shade: '600', color: Color(0xFF8E24AA)),
     MaterialColorItem(family: 'Purple', shade: '700', color: Color(0xFF7B1FA2)),
-    MaterialColorItem(family: 'Purple', shade: '800', color: Color(0xFF6A1B9A)),
-    MaterialColorItem(family: 'Purple', shade: '900', color: Color(0xFF4A148C)),
-    MaterialColorItem(family: 'Purple', shade: 'A400', color: Color(0xFFD500F9)),
-    MaterialColorItem(family: 'Purple', shade: 'A700', color: Color(0xFFAA00FF)),
-
-    // --- Deep Purple ---
-    MaterialColorItem(family: 'Deep Purple', shade: '500', color: Color(0xFF673AB7)),
-    MaterialColorItem(family: 'Deep Purple', shade: '600', color: Color(0xFF5E35B1)),
     MaterialColorItem(family: 'Deep Purple', shade: '700', color: Color(0xFF512DA8)),
-    MaterialColorItem(family: 'Deep Purple', shade: '800', color: Color(0xFF4527A0)),
-    MaterialColorItem(family: 'Deep Purple', shade: '900', color: Color(0xFF311B92)),
-    MaterialColorItem(family: 'Deep Purple', shade: 'A200', color: Color(0xFF7C4DFF)),
-    MaterialColorItem(family: 'Deep Purple', shade: 'A400', color: Color(0xFF651FFF)),
-    MaterialColorItem(family: 'Deep Purple', shade: 'A700', color: Color(0xFF6200EA)),
-
-    // --- Indigo ---
-    MaterialColorItem(family: 'Indigo', shade: '500', color: Color(0xFF3F51B5)),
-    MaterialColorItem(family: 'Indigo', shade: '600', color: Color(0xFF3949AB)),
     MaterialColorItem(family: 'Indigo', shade: '700', color: Color(0xFF303F9F)),
-    MaterialColorItem(family: 'Indigo', shade: '800', color: Color(0xFF283593)),
-    MaterialColorItem(family: 'Indigo', shade: '900', color: Color(0xFF1A237E)),
-    MaterialColorItem(family: 'Indigo', shade: 'A400', color: Color(0xFF3D5AFE)),
-    MaterialColorItem(family: 'Indigo', shade: 'A700', color: Color(0xFF304FFE)),
-
-    // --- Blue ---
-    MaterialColorItem(family: 'Blue', shade: '600', color: Color(0xFF1E88E5)),
     MaterialColorItem(family: 'Blue', shade: '700', color: Color(0xFF1976D2)),
-    MaterialColorItem(family: 'Blue', shade: '800', color: Color(0xFF1565C0)),
-    MaterialColorItem(family: 'Blue', shade: '900', color: Color(0xFF0D47A1)),
-    MaterialColorItem(family: 'Blue', shade: 'A400', color: Color(0xFF2979FF)),
-    MaterialColorItem(family: 'Blue', shade: 'A700', color: Color(0xFF2962FF)),
-
-    // --- Light Blue ---
     MaterialColorItem(family: 'Light Blue', shade: '700', color: Color(0xFF0288D1)),
-    MaterialColorItem(family: 'Light Blue', shade: '800', color: Color(0xFF0277BD)),
-    MaterialColorItem(family: 'Light Blue', shade: '900', color: Color(0xFF01579B)),
-    MaterialColorItem(family: 'Light Blue', shade: 'A700', color: Color(0xFF0091EA)),
-
-    // --- Cyan ---
     MaterialColorItem(family: 'Cyan', shade: '700', color: Color(0xFF0097A7)),
-    MaterialColorItem(family: 'Cyan', shade: '800', color: Color(0xFF00838F)),
-    MaterialColorItem(family: 'Cyan', shade: '900', color: Color(0xFF006064)),
-
-    // --- Teal ---
-    MaterialColorItem(family: 'Teal', shade: '500', color: Color(0xFF009688)),
-    MaterialColorItem(family: 'Teal', shade: '600', color: Color(0xFF00897B)),
     MaterialColorItem(family: 'Teal', shade: '700', color: Color(0xFF00796B)),
-    MaterialColorItem(family: 'Teal', shade: '800', color: Color(0xFF00695C)),
-    MaterialColorItem(family: 'Teal', shade: '900', color: Color(0xFF004D40)),
-
-    // --- Green ---
     MaterialColorItem(family: 'Green', shade: '700', color: Color(0xFF388E3C)),
-    MaterialColorItem(family: 'Green', shade: '800', color: Color(0xFF2E7D32)),
-    MaterialColorItem(family: 'Green', shade: '900', color: Color(0xFF1B5E20)),
-
-    // --- Light Green ---
-    MaterialColorItem(family: 'Light Green', shade: '800', color: Color(0xFF558B2F)),
-    MaterialColorItem(family: 'Light Green', shade: '900', color: Color(0xFF33691E)),
-
-    // --- Lime ---
-    MaterialColorItem(family: 'Lime', shade: '900', color: Color(0xFF827717)),
-
-    // --- Orange ---
-    MaterialColorItem(family: 'Orange', shade: '900', color: Color(0xFFE65100)),
-
-    // --- Deep Orange ---
-    MaterialColorItem(family: 'Deep Orange', shade: '600', color: Color(0xFFF4511E)),
+    MaterialColorItem(family: 'Light Green', shade: '700', color: Color(0xFF689F38)),
+    MaterialColorItem(family: 'Lime', shade: '700', color: Color(0xFFAFB42B)),
+    MaterialColorItem(family: 'Yellow', shade: '700', color: Color(0xFFFBC02D)),
+    MaterialColorItem(family: 'Amber', shade: '700', color: Color(0xFFFFA000)),
+    MaterialColorItem(family: 'Orange', shade: '700', color: Color(0xFFF57C00)),
     MaterialColorItem(family: 'Deep Orange', shade: '700', color: Color(0xFFE64A19)),
-    MaterialColorItem(family: 'Deep Orange', shade: '800', color: Color(0xFFD84315)),
-    MaterialColorItem(family: 'Deep Orange', shade: '900', color: Color(0xFFBF360C)),
-    MaterialColorItem(family: 'Deep Orange', shade: 'A700', color: Color(0xFFDD2C00)),
-
-    // --- Brown ---
-    MaterialColorItem(family: 'Brown', shade: '500', color: Color(0xFF795548)),
-    MaterialColorItem(family: 'Brown', shade: '600', color: Color(0xFF6D4C41)),
     MaterialColorItem(family: 'Brown', shade: '700', color: Color(0xFF5D4037)),
-    MaterialColorItem(family: 'Brown', shade: '800', color: Color(0xFF4E342E)),
-    MaterialColorItem(family: 'Brown', shade: '900', color: Color(0xFF3E2723)),
-
-    // --- Grey ---
-    MaterialColorItem(family: 'Grey', shade: '600', color: Color(0xFF757575)),
     MaterialColorItem(family: 'Grey', shade: '700', color: Color(0xFF616161)),
-    MaterialColorItem(family: 'Grey', shade: '800', color: Color(0xFF424242)),
-    MaterialColorItem(family: 'Grey', shade: '900', color: Color(0xFF212121)),
-
-    // --- Blue Grey ---
-    MaterialColorItem(family: 'Blue Grey', shade: '500', color: Color(0xFF607D8B)),
-    MaterialColorItem(family: 'Blue Grey', shade: '600', color: Color(0xFF546E7A)),
     MaterialColorItem(family: 'Blue Grey', shade: '700', color: Color(0xFF455A64)),
-    MaterialColorItem(family: 'Blue Grey', shade: '800', color: Color(0xFF37474F)),
-    MaterialColorItem(family: 'Blue Grey', shade: '900', color: Color(0xFF263238)),
   ];
 
-  /// 供选取的全部颜色列表
+  /// 供选取的全部颜色列表（严格限定为 19 个 700 色阶）
   static List<Color> get selectablePalette =>
       materialColorItems.map((item) => item.color).toList();
 
-  /// 默认按不同色系交替轮换的推荐排序（确保相邻课程视觉反差鲜明）
-  static final List<Color> defaultPaletteOrder = _buildDefaultOrder();
-
-  static List<Color> _buildDefaultOrder() {
-    // 优先从不同色系中各选出 1~2 个最经典的大节高饱和度色
-    const priorityColors = [
-      Color(0xFF3949AB), // Indigo 600
-      Color(0xFF00897B), // Teal 600
-      Color(0xFFF4511E), // Deep Orange 600
-      Color(0xFF8E24AA), // Purple 600
-      Color(0xFF1976D2), // Blue 700
-      Color(0xFF388E3C), // Green 700
-      Color(0xFFD81B60), // Pink 600
-      Color(0xFF5E35B1), // Deep Purple 600
-      Color(0xFF0097A7), // Cyan 700
-      Color(0xFFE53935), // Red 600
-      Color(0xFF0288D1), // Light Blue 700
-      Color(0xFF546E7A), // Blue Grey 600
-      Color(0xFF6D4C41), // Brown 600
-      Color(0xFF558B2F), // Light Green 800
-      Color(0xFFE65100), // Orange 900
-      Color(0xFF827717), // Lime 900
-      Color(0xFF616161), // Grey 700
-      Color(0xFF283593), // Indigo 800
-      Color(0xFF00695C), // Teal 800
-      Color(0xFFD84315), // Deep Orange 800
-      Color(0xFF6A1B9A), // Purple 800
-      Color(0xFF1565C0), // Blue 800
-      Color(0xFF2E7D32), // Green 800
-      Color(0xFFC2185B), // Pink 700
-      Color(0xFF512DA8), // Deep Purple 700
-      Color(0xFF00838F), // Cyan 800
-      Color(0xFFD32F2F), // Red 700
-      Color(0xFF0277BD), // Light Blue 800
-      Color(0xFF455A64), // Blue Grey 700
-      Color(0xFF5D4037), // Brown 700
-    ];
-
-    final result = <Color>[...priorityColors];
-    final addedValues = priorityColors.map((c) => c.toARGB32()).toSet();
-
-    for (final item in materialColorItems) {
-      if (!addedValues.contains(item.color.toARGB32())) {
-        result.add(item.color);
-        addedValues.add(item.color.toARGB32());
-      }
-    }
-    return result;
-  }
+  /// 默认推荐分配顺序：冷暖与明暗交替轮换，确保相邻课程视觉反差鲜明
+  static const List<Color> defaultPaletteOrder = [
+    Color(0xFF303F9F), // Indigo 700
+    Color(0xFFE64A19), // Deep Orange 700
+    Color(0xFF00796B), // Teal 700
+    Color(0xFFC2185B), // Pink 700
+    Color(0xFF1976D2), // Blue 700
+    Color(0xFFFFA000), // Amber 700
+    Color(0xFF7B1FA2), // Purple 700
+    Color(0xFF388E3C), // Green 700
+    Color(0xFFD32F2F), // Red 700
+    Color(0xFF0097A7), // Cyan 700
+    Color(0xFFF57C00), // Orange 700
+    Color(0xFF512DA8), // Deep Purple 700
+    Color(0xFF689F38), // Light Green 700
+    Color(0xFF0288D1), // Light Blue 700
+    Color(0xFF5D4037), // Brown 700
+    Color(0xFFAFB42B), // Lime 700
+    Color(0xFF455A64), // Blue Grey 700
+    Color(0xFFFBC02D), // Yellow 700
+    Color(0xFF616161), // Grey 700
+  ];
 
   /// 初始化从 SharedPreferences 读取已保存的课程颜色配置
   static Future<void> init() async {
@@ -210,9 +92,14 @@ class CourseColorUtils {
       final jsonStr = prefs.getString(_prefsKey);
       if (jsonStr != null && jsonStr.isNotEmpty) {
         final Map<String, dynamic> decoded = jsonDecode(jsonStr);
+        final validARGBs = selectablePalette.map((c) => c.toARGB32()).toSet();
         for (final entry in decoded.entries) {
           if (entry.value is int) {
-            _assignedColors[entry.key] = Color(entry.value as int);
+            final val = entry.value as int;
+            // 仅载入属于 19 种 700 颜色的配置，历史非 700 配置将在 syncCourses 时统一重分配
+            if (validARGBs.contains(val)) {
+              _assignedColors[entry.key] = Color(val);
+            }
           }
         }
       }
@@ -243,13 +130,15 @@ class CourseColorUtils {
         .toList();
     if (validNames.isEmpty) return;
 
+    final validARGBs = selectablePalette.map((c) => c.toARGB32()).toSet();
     final usedColors = <int>{};
     final coursesNeedingAssignment = <String>[];
 
-    // 1. 保留已有且互不重复的颜色
+    // 1. 保留已有且属于 700 色板且互不重复的颜色
     for (final name in validNames) {
       final existingColor = _assignedColors[name];
       if (existingColor != null &&
+          validARGBs.contains(existingColor.toARGB32()) &&
           !usedColors.contains(existingColor.toARGB32())) {
         usedColors.add(existingColor.toARGB32());
       } else {
@@ -270,7 +159,7 @@ class CourseColorUtils {
         picked = defaultPaletteOrder[searchIndex];
         searchIndex++;
       } else {
-        // 极端兜底（课程数超过 70 门）
+        // 极端兜底（课程数超过 19 门）
         final hash = name.hashCode.abs();
         picked = defaultPaletteOrder[hash % defaultPaletteOrder.length];
       }
@@ -288,7 +177,10 @@ class CourseColorUtils {
     if (trimmed.isEmpty) return defaultPaletteOrder[0];
 
     final existing = _assignedColors[trimmed];
-    if (existing != null) return existing;
+    if (existing != null &&
+        selectablePalette.any((c) => c.toARGB32() == existing.toARGB32())) {
+      return existing;
+    }
 
     // 查找当前未被占用的颜色
     final usedColors = _assignedColors.values.map((c) => c.toARGB32()).toSet();
@@ -307,7 +199,7 @@ class CourseColorUtils {
     return fallback;
   }
 
-  /// 为指定课程手动设置新颜色（严格限定在 Material UI 允许的色板中）
+  /// 为指定课程手动设置新颜色（严格限定在 Material UI 19 种颜色的 700 色阶）
   /// 
   /// 如果新颜色已被其他课程占用，两者自动对调（swap），始终保证无课程颜色重复。
   static Future<void> setCourseColor(String courseName, Color newColor) async {
@@ -316,10 +208,10 @@ class CourseColorUtils {
 
     final targetARGB = newColor.toARGB32();
 
-    // 校验新颜色是否属于允许的色板
+    // 校验新颜色是否属于允许的 700 色阶色板
     final isValidColor = selectablePalette.any((c) => c.toARGB32() == targetARGB);
     if (!isValidColor) {
-      throw ArgumentError('所选颜色不在 Material UI 规定候选色板中');
+      throw ArgumentError('所选颜色不在 Material UI 700 候选色板中');
     }
 
     // 检测是否有其他课程占用了目标颜色
