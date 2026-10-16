@@ -6,6 +6,7 @@ import 'notification_service.dart';
 import '../../features/timetable/services/timetable_storage.dart';
 import '../../features/homework/services/homework_storage.dart';
 import '../../features/library/services/library_storage.dart';
+import '../../features/exam/services/exam_storage.dart';
 
 /// 后台周期重调度任务名称
 const String kRescheduleTaskUnique = 'chilleast_reschedule_periodic';
@@ -61,6 +62,19 @@ void callbackDispatcher() {
           } catch (e) {
             allSucceeded = false;
             debugPrint('⚠️ BG course reschedule failed: $e');
+          }
+
+          // 考试（跟上课通知一起走，按 reminderMinutes 提醒）
+          try {
+            final examStorage = ExamStorage();
+            final exams = await examStorage.readExamList();
+            if (exams.isNotEmpty) {
+              await NotificationService()
+                  .scheduleExamReminders(exams, reminderMinutes);
+            }
+          } catch (e) {
+            allSucceeded = false;
+            debugPrint('⚠️ BG exam reschedule failed: $e');
           }
         }
 

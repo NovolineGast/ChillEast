@@ -11,6 +11,7 @@ import '../../features/timetable/utils/date_calculator.dart';
 import '../../features/timetable/utils/week_parser.dart';
 import '../../features/homework/models/homework_model.dart';
 import '../../features/library/models/library_models.dart';
+import '../../features/exam/models/exam_schedule_model.dart';
 import 'package:logger/logger.dart';
 
 class NotificationService {
@@ -537,5 +538,103 @@ class NotificationService {
 
     _logger.i(
         '🚀 Scheduled $scheduledCount library reminders (Pre-notify: $reminderMinutes min)');
+  }
+
+  /// 为考试日程安排提醒（跟上课通知一起走，复用课程提醒 Channel 与提前分钟数）
+  /// [exams]: 考试列表
+  /// [reminderMinutes]: 提前多少分钟提醒（与上课提醒保持一致）
+  Future<void> scheduleExamReminders(
+    List<ExamScheduleModel> exams,
+    int reminderMinutes,
+  ) async {
+    if (reminderMinutes <= 0 || exams.isEmpty) return;
+
+    final l10n = await _getL10n();
+    final now = DateTime.now();
+    int scheduledCount = 0;
+
+    for (var exam in exams) {
+      final startTime = exam.time;
+      final reminderTime =
+          startTime.subtract(Duration(minutes: reminderMinutes));
+
+      final timeStr =
+          '${startTime.hour.toString().padLeft(2, '0')}:${startTime.minute.toString().padLeft(2, '0')}';
+      final title = '$timeStr 考试: ${exam.title}';
+      final details = [
+        if (exam.courseName.isNotEmpty) exam.courseName,
+        if (exam.location != null && exam.location!.isNotEmpty) exam.location!,
+        if (exam.remarks != null && exam.remarks!.isNotEmpty) exam.remarks!,
+      ];
+      final body = details.isNotEmpty ? details.join(' · ') : exam.title;
+
+      // 如果提醒时间已经过了，检查是否需要补发
+      if (!reminderTime.isAfter(now)) {
+        // 如果现在还没到考试开始时间，在提醒窗口期内补发
+        if (now.isBefore(startTime)) {
+          final prefs = await SharedPreferences.getInstance();
+          final String makeupKey =
+              'makeup_exam_${exam.id}_${startTime.millisecondsSinceEpoch}';
+
+          if (prefs.getBool(makeupKey) != true) {
+            final int makeupId = 450000000 +
+                ((exam.id.hashCode ^ startTime.millisecondsSinceEpoch).abs() %
+                    10000000);
+
+            await _notificationsPlugin.show(
+              makeupId,
+              title,
+              body,
+              NotificationDetails(
+                android: AndroidNotificationDetails(
+                  'course_reminder_channel',
+                  l10n.classReminderChannelName,
+                  channelDescription: l10n.classReminderChannelDesc,
+                  importance: Importance.max,
+                  priority: Priority.high,
+                ),
+              ),
+              payload: 'exam_${exam.id}',
+            );
+            await prefs.setBool(makeupKey, true);
+            _logger.i('📨 Makeup exam notification sent for ${exam.title}');
+          }
+        }
+        continue;
+      }
+
+      // 仅安排未来 30 天以内的考试，防止超出系统通知限制
+      if (reminderTime.isAfter(now.add(const Duration(days: 30)))) continue;
+
+      // 生成考试通知 ID (4开头)
+      final int notificationId = 400000000 +
+          (exam.id.hashCode.abs() +
+                      reminderTime.millisecondsSinceEpoch ~/ 60000)
+                  .toInt() %
+              100000000;
+
+      await _zonedScheduleWithFallback(
+        id: notificationId,
+        title: title,
+        body: body,
+        scheduledDate: tz.TZDateTime.from(reminderTime, tz.local),
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            'course_reminder_channel',
+            l10n.classReminderChannelName,
+            channelDescription: l10n.classReminderChannelDesc,
+            importance: Importance.max,
+            priority: Priority.high,
+            showWhen: true,
+          ),
+        ),
+        payload: 'exam_${exam.id}',
+      );
+
+      scheduledCount++;
+    }
+
+    _logger.i(
+        '🚀 Scheduled $scheduledCount exam reminders (Pre-notify: $reminderMinutes min)');
   }
 }

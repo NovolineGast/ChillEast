@@ -7,6 +7,7 @@ import '../../cloudisk/services/cloud_backup_manager.dart';
 import '../../timetable/services/timetable_storage.dart';
 import '../../homework/services/homework_storage.dart';
 import '../../library/services/library_storage.dart';
+import '../../exam/services/exam_storage.dart';
 
 class SettingsState {
   final int reminderMinutes; // 0: 不通知, 5, 10, 20, 30, 40, 50, 60
@@ -286,6 +287,20 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
           state.reminderMinutes,
         );
       }
+    }
+
+    // 1.1 安排考试通知（跟上课通知一起走，按 reminderMinutes 提醒）
+    if (state.reminderMinutes > 0) {
+      try {
+        final examStorage = ExamStorage();
+        final exams = await examStorage.readExamList();
+        if (exams.isNotEmpty) {
+          await NotificationService().scheduleExamReminders(
+            exams,
+            state.reminderMinutes,
+          );
+        }
+      } catch (_) {}
     }
 
     // 2. 安排作业通知
