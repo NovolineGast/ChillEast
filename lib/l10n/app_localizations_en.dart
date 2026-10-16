@@ -241,6 +241,72 @@ class AppLocalizationsEn extends AppLocalizations {
   String get funcDormitory => 'My Dormitory';
 
   @override
+  String get funcExamSchedule => 'Exam Schedule';
+
+  @override
+  String get examSchedule => 'Exam Schedule';
+
+  @override
+  String get addExam => 'Add Exam';
+
+  @override
+  String get examTitle => 'Exam Title';
+
+  @override
+  String get inputExamTitleHint => 'e.g. Final Exam';
+
+  @override
+  String get examCourse => 'Course';
+
+  @override
+  String get inputExamCourseHint => 'Course name (Optional)';
+
+  @override
+  String get examTime => 'Exam Time';
+
+  @override
+  String get selectExamTimeHint => 'Select date & time';
+
+  @override
+  String get examLocation => 'Location';
+
+  @override
+  String get inputExamLocationHint => 'Room or building (Optional)';
+
+  @override
+  String get examRemarks => 'Remarks';
+
+  @override
+  String get inputExamRemarksHint => 'Notes or materials needed (Optional)';
+
+  @override
+  String get noCurrentSemesterExams => 'No exam arrangements this semester';
+
+  @override
+  String get manualExamTag => 'Manual';
+
+  @override
+  String get deleteExamConfirm => 'Are you sure you want to delete this exam?';
+
+  @override
+  String get examDeleted => 'Exam deleted';
+
+  @override
+  String get examAdded => 'Exam added successfully';
+
+  @override
+  String get examStatusPending => 'Upcoming';
+
+  @override
+  String get examStatusEnded => 'Ended';
+
+  @override
+  String get examDetails => 'Exam Details';
+
+  @override
+  String get openInChaoXing => 'Open in XueXiTong';
+
+  @override
   String get dormitoryBuilding => 'Building';
 
   @override
@@ -978,6 +1044,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timeLabel => 'Time';
+
+  @override
+  String get courseColor => 'Course Color';
+
+  @override
+  String get changeColor => 'Change Color';
+
+  @override
+  String get selectCourseColor => 'Select Course Color';
+
+  @override
+  String colorSwappedNotice(String course) {
+    return 'Swapped course color with \"$course\"';
+  }
+
+  @override
+  String get materialColorNotice =>
+      'Only selectable from high-contrast Material UI colors';
 
   @override
   String get close => 'Close';
@@ -2868,9 +2952,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ehallOpenNativeLeave => 'Open in Native Leave App';
-
-  @override
-  String get examSchedule => 'Exam Schedule';
 
   @override
   String get examTimePrefix => 'Exam Time';

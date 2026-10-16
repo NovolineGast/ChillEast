@@ -240,6 +240,72 @@ class AppLocalizationsJa extends AppLocalizations {
   String get funcDormitory => '学生寮';
 
   @override
+  String get funcExamSchedule => '考试安排';
+
+  @override
+  String get examSchedule => '考试日程';
+
+  @override
+  String get addExam => '添加考试';
+
+  @override
+  String get examTitle => '考试名称';
+
+  @override
+  String get inputExamTitleHint => '输入考试名称（如期末考试）';
+
+  @override
+  String get examCourse => '所属课程';
+
+  @override
+  String get inputExamCourseHint => '输入课程名称（可选）';
+
+  @override
+  String get examTime => '考试时间';
+
+  @override
+  String get selectExamTimeHint => '选择考试日期和时间';
+
+  @override
+  String get examLocation => '考场地点';
+
+  @override
+  String get inputExamLocationHint => '输入考场或教室（可选）';
+
+  @override
+  String get examRemarks => '备注';
+
+  @override
+  String get inputExamRemarksHint => '输入备注或准备事项（可选）';
+
+  @override
+  String get noCurrentSemesterExams => '本学期暂无考试安排';
+
+  @override
+  String get manualExamTag => '手动添加';
+
+  @override
+  String get deleteExamConfirm => '确定要删除此考试吗？';
+
+  @override
+  String get examDeleted => '已删除考试';
+
+  @override
+  String get examAdded => '已成功添加考试';
+
+  @override
+  String get examStatusPending => '待考';
+
+  @override
+  String get examStatusEnded => '已结束';
+
+  @override
+  String get examDetails => '考试详情';
+
+  @override
+  String get openInChaoXing => '在学习通中查看';
+
+  @override
   String get dormitoryBuilding => '寮棟';
 
   @override
@@ -961,6 +1027,23 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get timeLabel => '時間';
+
+  @override
+  String get courseColor => '课程颜色';
+
+  @override
+  String get changeColor => '修改颜色';
+
+  @override
+  String get selectCourseColor => '选择课程颜色';
+
+  @override
+  String colorSwappedNotice(String course) {
+    return '已与「$course」互换课程颜色';
+  }
+
+  @override
+  String get materialColorNotice => '仅支持从高对比度 Material UI 色板中选取';
 
   @override
   String get close => '閉じる';
@@ -2802,9 +2885,6 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get ehallOpenNativeLeave => '在请假小程序中办理';
-
-  @override
-  String get examSchedule => '考试日程';
 
   @override
   String get examTimePrefix => '考试时间';

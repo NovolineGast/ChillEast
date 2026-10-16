@@ -326,6 +326,18 @@
   "weeksLabel": "Weeks",
   "periodsLabel": "Periods",
   "timeLabel": "Time",
+  "courseColor": "Course Color",
+  "changeColor": "Change Color",
+  "selectCourseColor": "Select Course Color",
+  "colorSwappedNotice": "Swapped course color with \"{course}\"",
+  "@colorSwappedNotice": {
+    "placeholders": {
+      "course": {
+        "type": "String"
+      }
+    }
+  },
+  "materialColorNotice": "Only selectable from high-contrast Material UI colors",
   "close": "Close",
   "unknown": "Unknown",
   "reschedule": "Reschedule",

@@ -581,6 +581,138 @@ abstract class AppLocalizations {
   /// **'我的宿舍'**
   String get funcDormitory;
 
+  /// No description provided for @funcExamSchedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试安排'**
+  String get funcExamSchedule;
+
+  /// No description provided for @examSchedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试日程'**
+  String get examSchedule;
+
+  /// No description provided for @addExam.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加考试'**
+  String get addExam;
+
+  /// No description provided for @examTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试名称'**
+  String get examTitle;
+
+  /// No description provided for @inputExamTitleHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入考试名称（如期末考试）'**
+  String get inputExamTitleHint;
+
+  /// No description provided for @examCourse.
+  ///
+  /// In zh, this message translates to:
+  /// **'所属课程'**
+  String get examCourse;
+
+  /// No description provided for @inputExamCourseHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入课程名称（可选）'**
+  String get inputExamCourseHint;
+
+  /// No description provided for @examTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试时间'**
+  String get examTime;
+
+  /// No description provided for @selectExamTimeHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择考试日期和时间'**
+  String get selectExamTimeHint;
+
+  /// No description provided for @examLocation.
+  ///
+  /// In zh, this message translates to:
+  /// **'考场地点'**
+  String get examLocation;
+
+  /// No description provided for @inputExamLocationHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入考场或教室（可选）'**
+  String get inputExamLocationHint;
+
+  /// No description provided for @examRemarks.
+  ///
+  /// In zh, this message translates to:
+  /// **'备注'**
+  String get examRemarks;
+
+  /// No description provided for @inputExamRemarksHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入备注或准备事项（可选）'**
+  String get inputExamRemarksHint;
+
+  /// No description provided for @noCurrentSemesterExams.
+  ///
+  /// In zh, this message translates to:
+  /// **'本学期暂无考试安排'**
+  String get noCurrentSemesterExams;
+
+  /// No description provided for @manualExamTag.
+  ///
+  /// In zh, this message translates to:
+  /// **'手动添加'**
+  String get manualExamTag;
+
+  /// No description provided for @deleteExamConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要删除此考试吗？'**
+  String get deleteExamConfirm;
+
+  /// No description provided for @examDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'已删除考试'**
+  String get examDeleted;
+
+  /// No description provided for @examAdded.
+  ///
+  /// In zh, this message translates to:
+  /// **'已成功添加考试'**
+  String get examAdded;
+
+  /// No description provided for @examStatusPending.
+  ///
+  /// In zh, this message translates to:
+  /// **'待考'**
+  String get examStatusPending;
+
+  /// No description provided for @examStatusEnded.
+  ///
+  /// In zh, this message translates to:
+  /// **'已结束'**
+  String get examStatusEnded;
+
+  /// No description provided for @examDetails.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试详情'**
+  String get examDetails;
+
+  /// No description provided for @openInChaoXing.
+  ///
+  /// In zh, this message translates to:
+  /// **'在学习通中查看'**
+  String get openInChaoXing;
+
   /// No description provided for @dormitoryBuilding.
   ///
   /// In zh, this message translates to:
@@ -1942,6 +2074,36 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'时间'**
   String get timeLabel;
+
+  /// No description provided for @courseColor.
+  ///
+  /// In zh, this message translates to:
+  /// **'课程颜色'**
+  String get courseColor;
+
+  /// No description provided for @changeColor.
+  ///
+  /// In zh, this message translates to:
+  /// **'修改颜色'**
+  String get changeColor;
+
+  /// No description provided for @selectCourseColor.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择课程颜色'**
+  String get selectCourseColor;
+
+  /// No description provided for @colorSwappedNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'已与「{course}」互换课程颜色'**
+  String colorSwappedNotice(String course);
+
+  /// No description provided for @materialColorNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅支持从高对比度 Material UI 色板中选取'**
+  String get materialColorNotice;
 
   /// No description provided for @close.
   ///
@@ -5330,12 +5492,6 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'在请假小程序中办理'**
   String get ehallOpenNativeLeave;
-
-  /// No description provided for @examSchedule.
-  ///
-  /// In zh, this message translates to:
-  /// **'考试日程'**
-  String get examSchedule;
 
   /// No description provided for @examTimePrefix.
   ///
