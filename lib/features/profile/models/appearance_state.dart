@@ -179,6 +179,8 @@ extension FunctionItemLocalization on FunctionItem {
         return l10n.libraryReservation;
       case 'feed_agenda':
         return l10n.todayAgenda;
+      case 'feed_homework':
+        return l10n.tabHomework;
       case 'feed_questionnaire':
         return l10n.pendingQuestionnaires;
       case 'feed_leave':

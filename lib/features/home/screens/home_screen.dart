@@ -52,6 +52,8 @@ import '../../library/models/library_models.dart';
 import '../../library/providers/library_provider.dart';
 import '../../library/screens/library_home_screen.dart';
 import '../../campus_bus/screens/campus_bus_map_screen.dart';
+import '../../../core/utils/date_format_utils.dart';
+import '../../../core/network/cookie_manager.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final Function(int)? onNavigateToTab;
@@ -224,6 +226,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       'feed_quick' => _buildQuickActions(context, authState),
                       'feed_library' => _buildLibrarySeatCard(context),
                       'feed_agenda' => _buildTodayTimetablePreview(context),
+                      'feed_homework' => _buildHomeworkSection(context),
                       'feed_questionnaire' =>
                         _buildPendingQuestionnaires(context),
                       'feed_leave' => _buildOngoingLeaves(context),
@@ -1290,6 +1293,86 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildHomeworkSection(BuildContext context) {
+    final homeworkAsync = ref.watch(homeworkProvider);
+    final pending = homeworkAsync.maybeWhen(
+      data: (list) {
+        final items = list
+            .where((h) => h.status == HomeworkStatus.pending)
+            .toList();
+        items.sort((a, b) {
+          if (a.endTime == null && b.endTime == null) return 0;
+          if (a.endTime == null) return 1;
+          if (b.endTime == null) return -1;
+          return a.endTime!.compareTo(b.endTime!);
+        });
+        return items;
+      },
+      orElse: () => <HomeworkModel>[],
+    );
+
+    if (pending.isEmpty) return const SizedBox.shrink();
+
+    final display = pending.take(5).toList();
+    final locale = Localizations.localeOf(context).toString();
+
+    return _buildMergedSection(
+      title: context.l10n.tabHomework,
+      onMore: () => _navigateToTab(context, 2),
+      items: display.map((item) {
+        final String deadlineStr = item.endTime != null
+            ? '${context.l10n.deadlinePrefix} ${formatMMMdHm(item.endTime!, locale)}'
+            : context.l10n.noDeadline;
+        final String timeInfo = item.courseName.isNotEmpty
+            ? '${item.courseName} · $deadlineStr'
+            : deadlineStr;
+
+        return _buildSectionItem(
+          onTap: () => _openHomeworkItem(context, item),
+          child: _buildSectionRow(
+            icon: Icons.assignment_outlined,
+            iconColor: const Color(0xFFF39C12),
+            title: item.title,
+            time: timeInfo,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<void> _openHomeworkItem(
+      BuildContext context, HomeworkModel item) async {
+    if (item.isManual) {
+      _navigateToTab(context, 2);
+    } else if (item.dataUrl.isNotEmpty) {
+      final auth = ref.read(authStateProvider);
+      if (auth.status == AuthStatus.authenticating) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.homeworkLoggingInWait),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+        return;
+      }
+
+      await AppCookieManager().injectAllChaoxingCookies();
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          createSlideUpRoute(WebViewDetailScreen(
+            title: context.l10n.homeworkDetail,
+            url: item.dataUrl,
+          )),
+        );
+      }
+    } else {
+      _navigateToTab(context, 2);
+    }
   }
 
   /// 首页通用合并大卡片区块：标题 + > + 一张大卡（条目无分割线）

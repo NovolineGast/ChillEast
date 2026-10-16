@@ -97,15 +97,15 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
     return items;
   }
 
-  /// 首页信息流区块（默认全显示，顺序即展示顺序）
   static final List<FunctionItem> _feedPool = [
     const FunctionItem(id: 'feed_quick', label: '快捷功能', icon: Icons.apps_rounded, color: Color(0xFF09C489)),
     const FunctionItem(id: 'feed_library', label: '图书馆预约', icon: Icons.local_library_outlined, color: Color(0xFF795548)),
     const FunctionItem(id: 'feed_agenda', label: '今日日程', icon: Icons.calendar_today_outlined, color: Color(0xFF09C489)),
-    const FunctionItem(id: 'feed_balance', label: '余额', icon: Icons.account_balance_wallet_outlined, color: Color(0xFF1677FF)),
-    const FunctionItem(id: 'feed_questionnaire', label: '待完成的问卷', icon: Icons.assignment_outlined, color: Color(0xFF2E7D32)),
+    const FunctionItem(id: 'feed_homework', label: '作业', icon: Icons.assignment_outlined, color: Color(0xFFF39C12)),
     const FunctionItem(id: 'feed_leave', label: '请假申请', icon: Icons.event_note_outlined, color: Color(0xFF009688)),
     const FunctionItem(id: 'feed_repair', label: '报修工单', icon: Icons.handyman_outlined, color: Colors.blueGrey),
+    const FunctionItem(id: 'feed_questionnaire', label: '待完成的问卷', icon: Icons.assignment_outlined, color: Color(0xFF2E7D32)),
+    const FunctionItem(id: 'feed_balance', label: '余额', icon: Icons.account_balance_wallet_outlined, color: Color(0xFF1677FF)),
   ];
 
   static List<FunctionItem> get feedPool =>
@@ -317,6 +317,13 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
         // 快捷功能是后加入的，老用户存档里没有，默认插到最顶部
         if (masterItem.id == 'feed_quick') {
           items.insert(0, masterItem);
+        } else if (masterItem.id == 'feed_homework') {
+          final agendaIdx = items.indexWhere((e) => e.id == 'feed_agenda');
+          if (agendaIdx != -1) {
+            items.insert(agendaIdx + 1, masterItem);
+          } else {
+            items.add(masterItem);
+          }
         } else {
           items.add(masterItem);
         }
