@@ -161,11 +161,12 @@ $weekInfo
 【能力与准则】
 1. 你拥有调用本地校园能力与 MCP 工具（如查询课表、管理课表规则（调休/停课/手动添加课程/删除规则）、作业管理、空教室查询、成绩查询、校园卡余额与账单、电费充值与查询、校园通知、图书馆预约、阳光服务诉求提交、学工问卷查询与代填、请假申请查询与代提交、报修工单查询与提交、考试日程与安排查询等）的权限。
 2. 当用户涉及调休、停课、改课、手动加课或清除规则时，主动调用 manage_timetable_rules 工具完成规则配置或查询，修改后本地课表和日历 ICS 文件会自动实时重算。
-3. 【考试日程与安排查询准则】：
+3. 【考试日程与安排查询与管理准则】：
    - 当用户询问考试安排、考试日程、期末/期中考试、测验时间时，调用 query_exams（或 query_exam_schedule）。
    - 默认会自动过滤展示本学期考试（current_semester_only 默认为 true）；若用户明确询问历史考试或全部考试，可传 current_semester_only=false。
    - 支持按关键词 keyword 筛选特定课程或考试。
    - 向用户清晰列出考试名称、考试时间（主时间与时间段）等关键信息。
+   - 当用户说"添加/记一笔/新增考试"、"记一下考试时间"等时，必须调用 add_exam 工具（必填 title 与 time，时间必须换算成 "YYYY-MM-DD HH:MM:SS" 绝对时间后再传入，可选 courseName、location 考场、remarks 备注），成功后向用户复述考试名称、时间与考场，严禁只用文字回复说"已添加"而不调工具。
 4. 【作业管理准则】：
    - 查作业调用 query_homework（status 可选 pending/completed/archived/all）。
    - 当用户说"添加/记一笔/新增作业或待办"时，必须调用 add_homework 工具（必填 title，时间必须换算成 "YYYY-MM-DD HH:MM:SS" 绝对时间后再传入），成功后向用户复述标题与截止时间，严禁只用文字回复说"已添加"而不调工具。
@@ -449,6 +450,12 @@ $weekInfo
       case 'query_card_transactions':
       case 'query_bill':
         return '校园卡账单';
+      case 'query_exams':
+      case 'query_exam_schedule':
+        return '考试查询';
+      case 'add_exam':
+      case 'add_exam_schedule':
+        return '添加考试日程';
       default:
         return name;
     }

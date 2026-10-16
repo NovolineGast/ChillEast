@@ -50,6 +50,12 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
     } catch (_) {}
   }
 
+  Future<void> reloadExams() async {
+    try {
+      await ref.read(examProvider.notifier).reloadFromStorage();
+    } catch (_) {}
+  }
+
   // 注册标准 MCP 工具
   // 1. 课表查询
   registry.register(TimetableTool.create());
@@ -154,6 +160,10 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
   // 25. 考试日程与安排查询 (同时注册 query_exams 与 query_exam_schedule 别名)
   registry.register(ExamQueryTool.create(storage: examStorage, service: examService));
   registry.register(ExamQueryTool.create(storage: examStorage, service: examService, toolName: 'query_exam_schedule'));
+
+  // 26. 考试日程手动添加 (同时注册 add_exam 与 add_exam_schedule 别名)
+  registry.register(ExamAddTool.create(storage: examStorage, onChanged: reloadExams));
+  registry.register(ExamAddTool.create(storage: examStorage, onChanged: reloadExams, toolName: 'add_exam_schedule'));
 
   return registry;
 });
