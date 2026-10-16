@@ -43,6 +43,48 @@ void main() {
       expect(await service.getSavedRoom(), isNull);
     });
 
+    test('1b. ElectricityService supports two room slots independently', () async {
+      final container = ProviderContainer();
+      final service = container.read(electricityServiceProvider);
+
+      const room1 = SavedElectricityRoom(
+        areaName: '东湖校区',
+        buildingName: '东湖公寓1栋',
+        roomId: '302',
+        roomName: '302',
+        mertype: 'yk',
+      );
+      const room2 = SavedElectricityRoom(
+        areaName: '金岸公寓空调',
+        buildingName: '金岸1栋',
+        roomId: '629',
+        roomName: '629',
+        mertype: 'yk',
+      );
+
+      await service.saveSavedRoom(room1, slot: 0);
+      await service.saveSavedRoom(room2, slot: 1);
+
+      final rooms = await service.getSavedRooms();
+      expect(rooms.length, 2);
+      expect(rooms[0]?.roomId, '302');
+      expect(rooms[1]?.roomId, '629');
+
+      final r0 = await service.getSavedRoom(slot: 0);
+      final r1 = await service.getSavedRoom(slot: 1);
+      expect(r0?.roomId, '302');
+      expect(r1?.roomId, '629');
+
+      // Clear slot 0 only
+      await service.clearSavedRoom(slot: 0);
+      expect(await service.getSavedRoom(slot: 0), isNull);
+      expect((await service.getSavedRoom(slot: 1))?.roomId, '629');
+
+      // Clear slot 1
+      await service.clearSavedRoom(slot: 1);
+      expect(await service.getSavedRoom(slot: 1), isNull);
+    });
+
     test('2. ElectricityTool returns error when no parameters and no remembered dormitory', () async {
       final container = ProviderContainer();
       final service = container.read(electricityServiceProvider);

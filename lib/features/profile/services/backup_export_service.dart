@@ -86,6 +86,8 @@ class BackupExportService {
         },
         'electricityRoom':
             _decodeJson(prefs.getString('saved_electricity_room')),
+        'electricityRoom2':
+            _decodeJson(prefs.getString('saved_electricity_room_2')),
         'ai': {
           'apiUrl': aiApiUrl,
           'model': aiModel,
@@ -308,6 +310,12 @@ class BackupExportService {
       final v = settings['electricityRoom'];
       if (v != null) {
         await prefs.setString('saved_electricity_room', jsonEncode(v));
+      }
+    }
+    if (settings.containsKey('electricityRoom2')) {
+      final v = settings['electricityRoom2'];
+      if (v != null) {
+        await prefs.setString('saved_electricity_room_2', jsonEncode(v));
       }
     }
 
