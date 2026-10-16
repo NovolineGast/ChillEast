@@ -16,6 +16,8 @@ import '../tools/leave_tool.dart';
 import '../tools/transaction_tool.dart';
 import '../tools/repair_tool.dart';
 import '../tools/exam_tool.dart';
+import '../tools/memory_tool.dart';
+import '../../ai/providers/ai_memory_provider.dart';
 import '../../../features/workspace/services/electricity_service.dart';
 import '../../../features/workspace/services/campus_card_service.dart';
 import '../../../features/workspace/services/transaction_service.dart';
@@ -41,6 +43,7 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
   final homeworkStorage = ref.watch(homeworkStorageProvider);
   final examStorage = ref.watch(examStorageProvider);
   final examService = ref.watch(examServiceProvider);
+  final memoryStorage = ref.watch(aiMemoryStorageProvider);
 
   final registry = McpToolRegistry();
 
@@ -53,6 +56,12 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
   Future<void> reloadExams() async {
     try {
       await ref.read(examProvider.notifier).reloadFromStorage();
+    } catch (_) {}
+  }
+
+  Future<void> reloadMemories() async {
+    try {
+      await ref.read(aiMemoryProvider.notifier).reloadFromStorage();
     } catch (_) {}
   }
 
@@ -164,6 +173,16 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
   // 26. 考试日程手动添加 (同时注册 add_exam 与 add_exam_schedule 别名)
   registry.register(ExamAddTool.create(storage: examStorage, onChanged: reloadExams));
   registry.register(ExamAddTool.create(storage: examStorage, onChanged: reloadExams, toolName: 'add_exam_schedule'));
+
+  // 27. 记忆沉淀与管理 (同时注册 add_memory 与 save_memory 别名)
+  registry.register(MemoryAddTool.create(storage: memoryStorage, onChanged: reloadMemories));
+  registry.register(MemoryAddTool.create(storage: memoryStorage, onChanged: reloadMemories, toolName: 'save_memory'));
+
+  // 28. 记忆查询 (query_memories)
+  registry.register(MemoryQueryTool.create(storage: memoryStorage));
+
+  // 29. 记忆删除 (delete_memory)
+  registry.register(MemoryDeleteTool.create(storage: memoryStorage, onChanged: reloadMemories));
 
   return registry;
 });

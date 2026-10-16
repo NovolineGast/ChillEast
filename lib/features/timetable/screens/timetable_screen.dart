@@ -169,6 +169,9 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
             firstWeekMonday = await _storage.resolveFirstWeekMonday();
           } catch (_) {}
 
+          await CourseColorUtils.init();
+          CourseColorUtils.syncCourses(courses.map((c) => c.name));
+
           setState(() {
             _courses = courses;
             _hasLocalTimetable = true;
@@ -638,6 +641,9 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
             key: _weeklyKey,
             courses: _courses,
             firstWeekMonday: _firstWeekMonday!,
+            onCourseColorChanged: () {
+              setState(() {});
+            },
           ),
         ),
       ],
