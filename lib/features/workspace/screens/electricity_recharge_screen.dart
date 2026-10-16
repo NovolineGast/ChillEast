@@ -13,7 +13,9 @@ import '../../../core/utils/app_logger.dart';
 import '../../../core/utils/l10n_extension.dart';
 
 class ElectricityRechargeScreen extends ConsumerStatefulWidget {
-  const ElectricityRechargeScreen({super.key});
+  final int initialSlot;
+
+  const ElectricityRechargeScreen({super.key, this.initialSlot = 0});
 
   @override
   ConsumerState<ElectricityRechargeScreen> createState() => _ElectricityRechargeScreenState();

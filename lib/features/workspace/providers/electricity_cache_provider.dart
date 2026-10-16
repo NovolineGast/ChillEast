@@ -5,19 +5,24 @@ import '../models/electricity_model.dart';
 import '../services/electricity_service.dart';
 
 class DormitoryElectricityState {
-  final SavedElectricityRoom? room;
-  final ElectricityBalanceInfo? balanceInfo;
+  final List<SavedElectricityRoom?> rooms;
+  final List<ElectricityBalanceInfo?> balances;
   final bool isLoading;
   final String? error;
 
   const DormitoryElectricityState({
-    this.room,
-    this.balanceInfo,
+    this.rooms = const [null, null],
+    this.balances = const [null, null],
     this.isLoading = false,
     this.error,
   });
 
+  SavedElectricityRoom? get room => rooms.isNotEmpty ? rooms[0] : null;
+  ElectricityBalanceInfo? get balanceInfo => balances.isNotEmpty ? balances[0] : null;
+
   DormitoryElectricityState copyWith({
+    List<SavedElectricityRoom?>? rooms,
+    List<ElectricityBalanceInfo?>? balances,
     SavedElectricityRoom? room,
     bool clearRoom = false,
     ElectricityBalanceInfo? balanceInfo,
@@ -26,9 +31,27 @@ class DormitoryElectricityState {
     String? error,
     bool clearError = false,
   }) {
+    List<SavedElectricityRoom?> nextRooms = rooms ?? List.from(this.rooms);
+    if (room != null || clearRoom) {
+      nextRooms = List.from(nextRooms);
+      while (nextRooms.isEmpty) {
+        nextRooms.add(null);
+      }
+      nextRooms[0] = clearRoom ? null : room;
+    }
+
+    List<ElectricityBalanceInfo?> nextBalances = balances ?? List.from(this.balances);
+    if (balanceInfo != null || clearBalanceInfo) {
+      nextBalances = List.from(nextBalances);
+      while (nextBalances.isEmpty) {
+        nextBalances.add(null);
+      }
+      nextBalances[0] = clearBalanceInfo ? null : balanceInfo;
+    }
+
     return DormitoryElectricityState(
-      room: clearRoom ? null : (room ?? this.room),
-      balanceInfo: clearBalanceInfo ? null : (balanceInfo ?? this.balanceInfo),
+      rooms: nextRooms,
+      balances: nextBalances,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
     );
@@ -61,27 +84,32 @@ class ElectricityCacheNotifier
 
   Future<void> _init() async {
     final service = _ref.read(electricityServiceProvider);
-    final room = await service.getSavedRoom();
-    final balance = await service.getSavedBalance();
+    final rooms = await service.getSavedRooms();
+    final balances = await service.getSavedBalances();
 
     if (mounted) {
       state = DormitoryElectricityState(
-        room: room,
-        balanceInfo: balance,
+        rooms: rooms,
+        balances: balances,
         isLoading: false,
       );
     }
 
     final auth = _ref.read(authStateProvider);
-    if (auth.status == AuthStatus.authenticated && room != null) {
+    if (auth.status == AuthStatus.authenticated && rooms.any((r) => r != null)) {
       _silentRefresh();
     }
   }
 
   Future<void> _silentRefresh() async {
-    final room =
-        state.room ?? await _ref.read(electricityServiceProvider).getSavedRoom();
-    if (room == null) {
+    final service = _ref.read(electricityServiceProvider);
+    final savedRooms = await service.getSavedRooms();
+    final rooms = List<SavedElectricityRoom?>.generate(
+      2,
+      (i) => (i < state.rooms.length ? state.rooms[i] : null) ?? (i < savedRooms.length ? savedRooms[i] : null),
+    );
+
+    if (rooms.every((r) => r == null)) {
       if (mounted && state.isLoading) {
         state = state.copyWith(isLoading: false);
       }
@@ -89,61 +117,104 @@ class ElectricityCacheNotifier
     }
 
     if (mounted) {
-      state = state.copyWith(room: room, isLoading: true, clearError: true);
+      state = state.copyWith(rooms: rooms, isLoading: true, clearError: true);
     }
 
-    try {
-      final info = await _ref.read(electricityServiceProvider).getBalance(
-            areaName: room.areaName,
-            buildingName: room.buildingName,
-            roomId: room.roomId,
-            mertype: room.mertype,
-          );
-      if (mounted) {
-        state = state.copyWith(
-          room: room,
-          balanceInfo: info,
-          isLoading: false,
-          clearError: true,
+    final newBalances = List<ElectricityBalanceInfo?>.from(state.balances);
+    while (newBalances.length < 2) {
+      newBalances.add(null);
+    }
+
+    String? lastError;
+    for (int i = 0; i < rooms.length; i++) {
+      final room = rooms[i];
+      if (room == null) continue;
+      try {
+        final info = await service.getBalance(
+          areaName: room.areaName,
+          buildingName: room.buildingName,
+          roomId: room.roomId,
+          mertype: room.mertype,
         );
+        newBalances[i] = info;
+        await service.saveSavedBalance(info, slot: i);
+      } catch (e) {
+        _logger.w('⚠️ Silent refresh electricity balance failed for slot $i: $e');
+        lastError = e.toString();
       }
-    } catch (e) {
-      _logger.w('⚠️ Silent refresh electricity balance failed: $e');
-      if (mounted) {
-        state = state.copyWith(
-          room: room,
-          isLoading: false,
-          error: e.toString(),
-        );
-      }
+    }
+
+    if (mounted) {
+      state = state.copyWith(
+        rooms: rooms,
+        balances: newBalances,
+        isLoading: false,
+        error: lastError,
+        clearError: lastError == null,
+      );
     }
   }
 
   Future<void> refresh() async {
-    final room = await _ref.read(electricityServiceProvider).getSavedRoom();
-    if (mounted && room != state.room) {
-      state = state.copyWith(room: room);
+    final service = _ref.read(electricityServiceProvider);
+    final savedRooms = await service.getSavedRooms();
+    if (mounted) {
+      state = state.copyWith(rooms: savedRooms);
     }
     await _silentRefresh();
   }
 
   void updateRoomAndBalance(
-      SavedElectricityRoom room, ElectricityBalanceInfo? balanceInfo) {
+      SavedElectricityRoom room, ElectricityBalanceInfo? balanceInfo, {int slot = 0}) {
     if (mounted) {
+      final newRooms = List<SavedElectricityRoom?>.from(state.rooms);
+      while (newRooms.length <= slot) {
+        newRooms.add(null);
+      }
+      newRooms[slot] = room;
+
+      final newBalances = List<ElectricityBalanceInfo?>.from(state.balances);
+      while (newBalances.length <= slot) {
+        newBalances.add(null);
+      }
+      newBalances[slot] = balanceInfo;
+
       state = state.copyWith(
-        room: room,
-        balanceInfo: balanceInfo,
-        clearBalanceInfo: balanceInfo == null,
+        rooms: newRooms,
+        balances: newBalances,
         isLoading: false,
         clearError: true,
       );
     }
   }
 
-  void updateBalance(ElectricityBalanceInfo balanceInfo) {
+  void updateBalance(ElectricityBalanceInfo balanceInfo, {int slot = 0}) {
     if (mounted) {
+      final newBalances = List<ElectricityBalanceInfo?>.from(state.balances);
+      while (newBalances.length <= slot) {
+        newBalances.add(null);
+      }
+      newBalances[slot] = balanceInfo;
+
       state = state.copyWith(
-        balanceInfo: balanceInfo,
+        balances: newBalances,
+        isLoading: false,
+        clearError: true,
+      );
+    }
+  }
+
+  void clearRoom({int slot = 0}) {
+    if (mounted) {
+      final newRooms = List<SavedElectricityRoom?>.from(state.rooms);
+      if (slot < newRooms.length) newRooms[slot] = null;
+
+      final newBalances = List<ElectricityBalanceInfo?>.from(state.balances);
+      if (slot < newBalances.length) newBalances[slot] = null;
+
+      state = state.copyWith(
+        rooms: newRooms,
+        balances: newBalances,
         isLoading: false,
         clearError: true,
       );
