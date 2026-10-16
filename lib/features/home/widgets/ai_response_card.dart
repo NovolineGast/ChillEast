@@ -541,39 +541,34 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
     );
   }
 
-  /// 消息渲染（完美适配明暗模式与 Markdown）
+  /// 消息渲染（Agent 输出直接铺在卡片背景上，用户消息保持右侧对话气泡）
   Widget _buildMessageItem(AiDisplayMessage msg, bool isDark) {
     final isUser = msg.role == 'user';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        crossAxisAlignment:
-            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: isUser
-                  ? const Color(0xFF09C489).withOpacity(isDark ? 0.25 : 0.12)
-                  : (isDark ? const Color(0xFF282828) : const Color(0xFFF1F3F4)),
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(8),
-                topRight: const Radius.circular(8),
-                bottomLeft: Radius.circular(isUser ? 8 : 2),
-                bottomRight: Radius.circular(isUser ? 2 : 8),
+    if (isUser) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF09C489).withOpacity(isDark ? 0.25 : 0.12),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                  bottomRight: Radius.circular(2),
+                ),
+                border: Border.all(
+                  color: const Color(0xFF09C489).withOpacity(isDark ? 0.4 : 0.2),
+                  width: 0.8,
+                ),
               ),
-              border: Border.all(
-                color: isUser
-                    ? const Color(0xFF09C489).withOpacity(isDark ? 0.4 : 0.2)
-                    : (isDark ? Colors.white10 : Colors.transparent),
-                width: 0.8,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (isUser) ...[
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   if (msg.imagePath != null && File(msg.imagePath!).existsSync()) ...[
                     GestureDetector(
                       onTap: () {
@@ -625,168 +620,168 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                         color: isDark ? Colors.white : const Color(0xFF202124),
                       ),
                     ),
-                ] else
-                  MarkdownBody(
-                    data: msg.text,
-                    selectable: true,
-                    shrinkWrap: true,
-                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                      p: TextStyle(
-                        fontSize: 13.5,
-                        height: 1.45,
-                        color: isDark ? const Color(0xFFEEEEEE) : const Color(0xFF202124),
-                      ),
-                      strong: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                      em: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                      ),
-                      h1: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF202124),
-                      ),
-                      h2: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF202124),
-                      ),
-                      h3: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF202124),
-                      ),
-                      listBullet: TextStyle(
-                        fontSize: 13.5,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                      ),
-                      code: TextStyle(
-                        fontSize: 12,
-                        backgroundColor: isDark ? Colors.white10 : Colors.black.withOpacity(0.06),
-                        color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF09C489),
-                        fontFamily: 'monospace',
-                      ),
-                      codeblockDecoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFEAEAEA),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: isDark ? Colors.white12 : Colors.black12,
-                          width: 0.5,
-                        ),
-                      ),
-                      blockquoteDecoration: BoxDecoration(
-                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-                        borderRadius: BorderRadius.circular(2),
-                        border: const Border(
-                          left: BorderSide(
-                            color: Color(0xFF09C489),
-                            width: 3,
-                          ),
-                        ),
-                      ),
-                      tableBorder: TableBorder.all(
-                        color: isDark ? Colors.white24 : Colors.grey[300]!,
-                        width: 0.5,
-                      ),
-                      tableHead: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF202124),
-                      ),
-                      tableBody: TextStyle(
-                        color: isDark ? Colors.white70 : const Color(0xFF3C4043),
-                      ),
-                      pPadding: const EdgeInsets.only(bottom: 4),
-                      listIndent: 16,
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Agent 输出：不套在对话框里，直接在背景之上，距离卡片左右两侧间距相同
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            MarkdownBody(
+              data: msg.text,
+              selectable: true,
+              shrinkWrap: true,
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                p: TextStyle(
+                  fontSize: 13.5,
+                  height: 1.45,
+                  color: isDark ? const Color(0xFFEEEEEE) : const Color(0xFF202124),
+                ),
+                strong: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+                em: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+                h1: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+                h2: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+                h3: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+                listBullet: TextStyle(
+                  fontSize: 13.5,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+                code: TextStyle(
+                  fontSize: 12,
+                  backgroundColor: isDark ? Colors.white10 : Colors.black.withOpacity(0.06),
+                  color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF09C489),
+                  fontFamily: 'monospace',
+                ),
+                codeblockDecoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFEAEAEA),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                    width: 0.5,
+                  ),
+                ),
+                blockquoteDecoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(2),
+                  border: const Border(
+                    left: BorderSide(
+                      color: Color(0xFF09C489),
+                      width: 3,
                     ),
                   ),
-                if (!isUser) ...[
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: msg.text));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(context.l10n.copiedAnswer),
-                              duration: const Duration(seconds: 1),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.copy_rounded,
-                                size: 13,
-                                color: isDark ? Colors.white54 : Colors.grey[500],
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                context.l10n.copy,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: isDark ? Colors.white54 : Colors.grey[500],
-                                ),
-                              ),
-                            ],
+                ),
+                tableBorder: TableBorder.all(
+                  color: isDark ? Colors.white24 : Colors.grey[300]!,
+                  width: 0.5,
+                ),
+                tableHead: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+                tableBody: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF3C4043),
+                ),
+                pPadding: const EdgeInsets.only(bottom: 4),
+                listIndent: 16,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: msg.text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(context.l10n.copiedAnswer),
+                        duration: const Duration(seconds: 1),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.copy_rounded,
+                          size: 13,
+                          color: isDark ? Colors.white54 : Colors.grey[500],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          context.l10n.copy,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white54 : Colors.grey[500],
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  /// 加载等待指示
+  /// 加载等待指示（直接在背景之上展示）
   Widget _buildLoadingBubble(AiAssistantState aiState, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF282828) : const Color(0xFFF1F3F4),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isDark ? Colors.white10 : Colors.transparent,
-              width: 0.8,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation(Color(0xFF09C489)),
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Color(0xFF09C489)),
-                ),
+            const SizedBox(width: 8),
+            Text(
+              context.l10n.aiThinking,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.white70 : Colors.grey[600],
               ),
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.aiThinking,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? Colors.white70 : Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
