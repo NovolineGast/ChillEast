@@ -2,6 +2,7 @@ import 'dart:io' as io;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:ChillEast/l10n/app_localizations.dart';
 import 'package:ChillEast/features/timetable/models/course_model.dart';
 import 'package:ChillEast/features/timetable/widgets/timetable_rule_dialogs.dart';
 
@@ -49,6 +50,9 @@ void main() {
 
     await tester.pumpWidget(
       MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('zh'),
         home: Scaffold(
           body: Builder(
             builder: (ctx) => ElevatedButton(
@@ -184,6 +188,9 @@ void main() {
       // 4. 我的调整弹窗
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           home: Scaffold(
             body: Builder(
               builder: (ctx) => ElevatedButton(

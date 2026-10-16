@@ -2,6 +2,7 @@ import 'package:ChillEast/features/sunshine/models/sunshine_models.dart';
 import 'package:ChillEast/features/sunshine/screens/sunshine_form_screen.dart';
 import 'package:ChillEast/features/sunshine/screens/sunshine_screen.dart';
 import 'package:ChillEast/features/sunshine/services/sunshine_service.dart';
+import 'package:ChillEast/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -80,6 +81,9 @@ void main() {
     await tester.pumpWidget(ProviderScope(
       overrides: [sunshineServiceProvider.overrideWithValue(service)],
       child: MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('zh'),
           theme: ThemeData(
               useMaterial3: true,
               brightness: dark ? Brightness.dark : Brightness.light),
