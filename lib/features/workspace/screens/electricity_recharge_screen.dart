@@ -21,6 +21,17 @@ class ElectricityRechargeScreen extends ConsumerStatefulWidget {
   ConsumerState<ElectricityRechargeScreen> createState() => _ElectricityRechargeScreenState();
 }
 
+class _CardSlotState {
+  ElectricityArea? selectedArea;
+  ElectricityBuilding? selectedBuilding;
+  ElectricityRoom? selectedRoom;
+  List<ElectricityBuilding> buildings = [];
+  List<ElectricityRoom> rooms = [];
+  ElectricityBalanceInfo? balanceInfo;
+  bool isLoadingBalance = false;
+  String? balanceError;
+}
+
 class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeScreen> {
   final _logger = AppLogger.instance;
   final TextEditingController _amountController = TextEditingController();
@@ -29,24 +40,21 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
   String? _error;
 
   List<ElectricityArea> _areas = [];
-  List<ElectricityBuilding> _buildings = [];
-  List<ElectricityRoom> _rooms = [];
-
-  ElectricityArea? _selectedArea;
-  ElectricityBuilding? _selectedBuilding;
-  ElectricityRoom? _selectedRoom;
+  final List<_CardSlotState> _cardSlots = [
+    _CardSlotState(),
+    _CardSlotState(),
+  ];
+  late int _expandedIndex;
 
   double? _selectedAmount;
   final List<double> _presetAmounts = [10, 20, 50, 100];
   CampusCardInfo? _cardInfo;
   bool _isPaying = false;
-  bool _isLoadingBalance = false;
-  ElectricityBalanceInfo? _balanceInfo;
-  String? _balanceError;
 
   @override
   void initState() {
     super.initState();
+    _expandedIndex = widget.initialSlot.clamp(0, 1);
     _initData();
   }
 
@@ -64,44 +72,51 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
 
     try {
       final service = ref.read(electricityServiceProvider);
-      final savedRoom = await service.getSavedRoom();
       _areas = await service.getAreas();
-      
-      if (_areas.isNotEmpty) {
-        ElectricityArea? targetArea;
-        if (savedRoom != null && savedRoom.areaName.isNotEmpty) {
-          targetArea = _areas.where((e) => e.name == savedRoom.areaName).firstOrNull;
-        }
-        _selectedArea = targetArea ?? _areas.first;
 
-        final buildings = await service.getBuildings(_selectedArea!.name);
-        _buildings = buildings;
+      for (int slot = 0; slot < 2; slot++) {
+        final savedRoom = await service.getSavedRoom(slot: slot);
+        final card = _cardSlots[slot];
 
-        ElectricityBuilding? targetBuilding;
-        if (savedRoom != null && targetArea != null && savedRoom.buildingName.isNotEmpty) {
-          targetBuilding = _buildings.where((e) => e.name == savedRoom.buildingName).firstOrNull;
-        }
-        _selectedBuilding = targetBuilding ?? (_buildings.isNotEmpty ? _buildings.first : null);
-
-        if (_selectedBuilding != null) {
-          final rooms = await service.getRooms(_selectedArea!.name, _selectedBuilding!.name);
-          _rooms = rooms;
-
-          ElectricityRoom? targetRoom;
-          if (savedRoom != null && targetBuilding != null && savedRoom.roomId.isNotEmpty) {
-            targetRoom = _rooms.where((e) => e.id == savedRoom.roomId || e.name == savedRoom.roomName).firstOrNull;
+        if (_areas.isNotEmpty) {
+          ElectricityArea? targetArea;
+          if (savedRoom != null && savedRoom.areaName.isNotEmpty) {
+            targetArea = _areas.where((e) => e.name == savedRoom.areaName).firstOrNull;
+          } else if (slot == 0) {
+            targetArea = _areas.first;
           }
-          _selectedRoom = targetRoom ?? (_rooms.isNotEmpty ? _rooms.first : null);
-        }
+          card.selectedArea = targetArea;
 
-        if (_selectedRoom != null) {
-          final savedBalance = await service.getSavedBalance();
-          if (savedBalance != null && mounted) {
-            _balanceInfo = savedBalance;
+          if (card.selectedArea != null) {
+            card.buildings = await service.getBuildings(card.selectedArea!.name);
+            ElectricityBuilding? targetBuilding;
+            if (savedRoom != null && savedRoom.buildingName.isNotEmpty) {
+              targetBuilding = card.buildings.where((e) => e.name == savedRoom.buildingName).firstOrNull;
+            } else if (slot == 0) {
+              targetBuilding = card.buildings.isNotEmpty ? card.buildings.first : null;
+            }
+            card.selectedBuilding = targetBuilding;
+
+            if (card.selectedBuilding != null) {
+              card.rooms = await service.getRooms(card.selectedArea!.name, card.selectedBuilding!.name);
+              ElectricityRoom? targetRoom;
+              if (savedRoom != null && savedRoom.roomId.isNotEmpty) {
+                targetRoom = card.rooms.where((e) => e.id == savedRoom.roomId || e.name == savedRoom.roomName).firstOrNull;
+              } else if (slot == 0) {
+                targetRoom = card.rooms.isNotEmpty ? card.rooms.first : null;
+              }
+              card.selectedRoom = targetRoom;
+            }
+          }
+
+          if (card.selectedRoom != null) {
+            final savedBalance = await service.getSavedBalance(slot: slot);
+            if (savedBalance != null) {
+              card.balanceInfo = savedBalance;
+            }
+            _saveSlotSelection(slot);
           }
         }
-
-        _saveCurrentSelection();
       }
 
       // 静默后台预加载校园卡信息
@@ -115,8 +130,10 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
         setState(() {
           _isLoading = false;
         });
-        if (_selectedRoom != null) {
-          _loadBalance();
+        for (int slot = 0; slot < 2; slot++) {
+          if (_cardSlots[slot].selectedRoom != null) {
+            _loadBalance(slot);
+          }
         }
       }
     } catch (e) {
@@ -130,13 +147,14 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
     }
   }
 
-  Future<void> _loadBalance() async {
-    if (_selectedArea == null || _selectedBuilding == null || _selectedRoom == null) {
+  Future<void> _loadBalance(int slot) async {
+    final card = _cardSlots[slot];
+    if (card.selectedArea == null || card.selectedBuilding == null || card.selectedRoom == null) {
       if (mounted) {
         setState(() {
-          _balanceInfo = null;
-          _balanceError = null;
-          _isLoadingBalance = false;
+          card.balanceInfo = null;
+          card.balanceError = null;
+          card.isLoadingBalance = false;
         });
       }
       return;
@@ -144,91 +162,147 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
 
     if (mounted) {
       setState(() {
-        _isLoadingBalance = true;
-        _balanceError = null;
+        card.isLoadingBalance = true;
+        card.balanceError = null;
       });
     }
 
     try {
       final service = ref.read(electricityServiceProvider);
       final info = await service.getBalance(
-        areaName: _selectedArea!.name,
-        buildingName: _selectedBuilding!.name,
-        roomId: _selectedRoom!.id,
-        mertype: _selectedRoom!.mertype,
+        areaName: card.selectedArea!.name,
+        buildingName: card.selectedBuilding!.name,
+        roomId: card.selectedRoom!.id,
+        mertype: card.selectedRoom!.mertype,
       );
       if (mounted) {
         setState(() {
-          _balanceInfo = info;
-          _isLoadingBalance = false;
+          card.balanceInfo = info;
+          card.isLoadingBalance = false;
         });
       }
-      ref.read(electricityCacheProvider.notifier).updateBalance(info);
+      ref.read(electricityCacheProvider.notifier).updateBalance(info, slot: slot);
+      await service.saveSavedBalance(info, slot: slot);
     } catch (e) {
-      _logger.w('Failed to load electricity balance: $e');
+      _logger.w('Failed to load electricity balance for slot $slot: $e');
       if (mounted) {
         setState(() {
-          _balanceError = e.toString();
-          _isLoadingBalance = false;
+          card.balanceError = e.toString();
+          card.isLoadingBalance = false;
         });
       }
     }
   }
 
-  void _saveCurrentSelection() {
-    if (_selectedArea != null && _selectedBuilding != null && _selectedRoom != null) {
+  void _saveSlotSelection(int slot) {
+    final card = _cardSlots[slot];
+    if (card.selectedArea != null && card.selectedBuilding != null && card.selectedRoom != null) {
       final room = SavedElectricityRoom(
-        areaName: _selectedArea!.name,
-        buildingName: _selectedBuilding!.name,
-        roomId: _selectedRoom!.id,
-        roomName: _selectedRoom!.name,
-        mertype: _selectedRoom!.mertype,
+        areaName: card.selectedArea!.name,
+        buildingName: card.selectedBuilding!.name,
+        roomId: card.selectedRoom!.id,
+        roomName: card.selectedRoom!.name,
+        mertype: card.selectedRoom!.mertype,
       );
-      ref.read(electricityServiceProvider).saveSavedRoom(room);
+      ref.read(electricityServiceProvider).saveSavedRoom(room, slot: slot);
       ref
           .read(electricityCacheProvider.notifier)
-          .updateRoomAndBalance(room, _balanceInfo);
+          .updateRoomAndBalance(room, card.balanceInfo, slot: slot);
     }
   }
 
-  Future<void> _loadBuildings(String areaName) async {
+  Future<void> _onAreaChanged(int slot, String? areaName) async {
+    if (areaName == null) return;
+    final area = _areas.firstWhere((e) => e.name == areaName);
+    setState(() {
+      final card = _cardSlots[slot];
+      card.selectedArea = area;
+      card.selectedBuilding = null;
+      card.selectedRoom = null;
+      card.buildings = [];
+      card.rooms = [];
+      card.balanceInfo = null;
+      card.balanceError = null;
+    });
     try {
       final service = ref.read(electricityServiceProvider);
-      final buildings = await service.getBuildings(areaName);
+      final buildings = await service.getBuildings(area.name);
       if (mounted) {
         setState(() {
-          _buildings = buildings;
-          _selectedBuilding = buildings.isNotEmpty ? buildings.first : null;
-          _rooms = [];
-          _selectedRoom = null;
-          _balanceInfo = null;
-          _balanceError = null;
+          final card = _cardSlots[slot];
+          card.buildings = buildings;
+          card.selectedBuilding = buildings.isNotEmpty ? buildings.first : null;
         });
-        if (_selectedBuilding != null) {
-          await _loadRooms(areaName, _selectedBuilding!.name);
+        final selectedBuilding = _cardSlots[slot].selectedBuilding;
+        if (selectedBuilding != null) {
+          await _onBuildingChanged(slot, selectedBuilding.name);
         }
       }
     } catch (e) {
-      _logger.w('Failed to load buildings: $e');
+      _logger.w('Failed to load buildings for slot $slot: $e');
     }
   }
 
-  Future<void> _loadRooms(String areaName, String buildingName) async {
-    try {
-      final service = ref.read(electricityServiceProvider);
-      final rooms = await service.getRooms(areaName, buildingName);
-      if (mounted) {
-        setState(() {
-          _rooms = rooms;
-          _selectedRoom = rooms.isNotEmpty ? rooms.first : null;
-        });
-        _saveCurrentSelection();
-        if (_selectedRoom != null) {
-          _loadBalance();
+  Future<void> _onBuildingChanged(int slot, String? buildingName) async {
+    if (buildingName == null) return;
+    final card = _cardSlots[slot];
+    final building = card.buildings.firstWhere((e) => e.name == buildingName);
+    setState(() {
+      card.selectedBuilding = building;
+      card.selectedRoom = null;
+      card.rooms = [];
+      card.balanceInfo = null;
+      card.balanceError = null;
+    });
+    if (card.selectedArea != null) {
+      try {
+        final service = ref.read(electricityServiceProvider);
+        final rooms = await service.getRooms(card.selectedArea!.name, building.name);
+        if (mounted) {
+          setState(() {
+            card.rooms = rooms;
+            card.selectedRoom = rooms.isNotEmpty ? rooms.first : null;
+          });
+          _saveSlotSelection(slot);
+          if (card.selectedRoom != null) {
+            _loadBalance(slot);
+          }
         }
+      } catch (e) {
+        _logger.w('Failed to load rooms for slot $slot: $e');
       }
-    } catch (e) {
-      _logger.w('Failed to load rooms: $e');
+    }
+  }
+
+  void _onRoomChanged(int slot, String? roomName) {
+    if (roomName == null) return;
+    final card = _cardSlots[slot];
+    final room = card.rooms.firstWhere((e) => e.name == roomName);
+    setState(() {
+      card.selectedRoom = room;
+    });
+    _saveSlotSelection(slot);
+    _loadBalance(slot);
+  }
+
+  Future<void> _handleClearCard(int slot) async {
+    final service = ref.read(electricityServiceProvider);
+    await service.clearSavedRoom(slot: slot);
+    await service.clearSavedBalance(slot: slot);
+    ref.read(electricityCacheProvider.notifier).clearRoom(slot: slot);
+
+    if (mounted) {
+      setState(() {
+        final card = _cardSlots[slot];
+        card.selectedArea = null;
+        card.selectedBuilding = null;
+        card.selectedRoom = null;
+        card.buildings = [];
+        card.rooms = [];
+        card.balanceInfo = null;
+        card.balanceError = null;
+        card.isLoadingBalance = false;
+      });
     }
   }
 
@@ -240,7 +314,8 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
   }
 
   Future<void> _handleCampusCardRecharge() async {
-    if (_selectedArea == null || _selectedBuilding == null || _selectedRoom == null) {
+    final card = _cardSlots[_expandedIndex];
+    if (card.selectedArea == null || card.selectedBuilding == null || card.selectedRoom == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.pleaseSelectCompleteRoom)),
       );
@@ -277,12 +352,13 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
     try {
       final service = ref.read(electricityServiceProvider);
       final success = await service.recharge(
-        areaName: _selectedArea!.name,
-        buildingName: _selectedBuilding!.name,
-        roomId: _selectedRoom!.id,
-        roomName: _selectedRoom!.name,
-        mertype: _selectedRoom!.mertype,
+        areaName: card.selectedArea!.name,
+        buildingName: card.selectedBuilding!.name,
+        roomId: card.selectedRoom!.id,
+        roomName: card.selectedRoom!.name,
+        mertype: card.selectedRoom!.mertype,
         amount: amount.toDouble(),
+        slot: _expandedIndex,
       );
 
       if (mounted) {
@@ -299,7 +375,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
             ),
           );
           ref.read(campusCardServiceProvider).fetchRechargeInfo();
-          _loadBalance();
+          _loadBalance(_expandedIndex);
         } else {
           showModalBottomSheet(
             context: context,
@@ -332,7 +408,8 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
   }
 
   Future<void> _handleThirdPartyRecharge(PaymentMethod method) async {
-    if (_selectedArea == null || _selectedBuilding == null || _selectedRoom == null) {
+    final card = _cardSlots[_expandedIndex];
+    if (card.selectedArea == null || card.selectedBuilding == null || card.selectedRoom == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(context.l10n.pleaseSelectCompleteRoom)),
       );
@@ -373,7 +450,8 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
 
     if (!mounted) return;
 
-    final roomDesc = '${_selectedArea!.name} ${_selectedBuilding!.name} ${_selectedRoom!.name}';
+    final roomDesc = '${card.selectedArea!.name} ${card.selectedBuilding!.name} ${card.selectedRoom!.name}';
+    final rechargeFailedMsg = context.l10n.electricityRechargeFailed;
 
     showModalBottomSheet(
       context: context,
@@ -388,24 +466,251 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
         onCardRechargeSuccess: () async {
           final service = ref.read(electricityServiceProvider);
           final success = await service.recharge(
-            areaName: _selectedArea!.name,
-            buildingName: _selectedBuilding!.name,
-            roomId: _selectedRoom!.id,
-            roomName: _selectedRoom!.name,
-            mertype: _selectedRoom!.mertype,
+            areaName: card.selectedArea!.name,
+            buildingName: card.selectedBuilding!.name,
+            roomId: card.selectedRoom!.id,
+            roomName: card.selectedRoom!.name,
+            mertype: card.selectedRoom!.mertype,
             amount: amount.toDouble(),
+            slot: _expandedIndex,
           );
           if (!success) {
-            throw Exception(context.l10n.electricityRechargeFailed);
+            throw Exception(rechargeFailedMsg);
           }
         },
       ),
     ).then((_) {
       if (mounted) {
         ref.read(campusCardServiceProvider).fetchRechargeInfo();
-        _loadBalance();
+        _loadBalance(_expandedIndex);
       }
     });
+  }
+
+  Widget _buildDormitoryCard(int slot, bool isDark, Color themeColor, Color amberColor) {
+    final isExpanded = _expandedIndex == slot;
+    final card = _cardSlots[slot];
+
+    if (!isExpanded) {
+      // 收缩状态：单行条状展示
+      final String collapsedText;
+      if (card.selectedRoom != null) {
+        final roomDesc = '${card.selectedArea?.name} - ${card.selectedBuilding?.name} - ${card.selectedRoom?.name}';
+        final balanceVal = card.balanceInfo != null
+            ? '${card.balanceInfo!.balance}元'
+            : (card.isLoadingBalance ? '...元' : '--元');
+        collapsedText = '> $roomDesc $balanceVal';
+      } else {
+        collapsedText = '> 宿舍 ${slot + 1} (${context.l10n.noRoomSelectedYet})';
+      }
+
+      return InkWell(
+        onTap: () {
+          setState(() {
+            _expandedIndex = slot;
+          });
+        },
+        borderRadius: BorderRadius.circular(6),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+          decoration: BoxDecoration(
+            color: isDark ? themeColor.withValues(alpha: 0.08) : amberColor.withValues(alpha: 0.04),
+            borderRadius: BorderRadius.circular(6),
+            border: Border.all(
+              color: isDark ? themeColor.withValues(alpha: 0.2) : amberColor.withValues(alpha: 0.2),
+            ),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  collapsedText,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              Icon(
+                Icons.keyboard_arrow_down,
+                size: 18,
+                color: isDark ? Colors.white54 : Colors.black45,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // 展开状态：完整卡片
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? themeColor.withValues(alpha: 0.1) : amberColor.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(color: isDark ? themeColor.withValues(alpha: 0.2) : amberColor.withValues(alpha: 0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${context.l10n.currentRechargeRoom} · 宿舍 ${slot + 1}',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white54 : Colors.black54,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // 清空按钮
+                  InkWell(
+                    onTap: () => _handleClearCard(slot),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            size: 13,
+                            color: isDark ? Colors.white54 : Colors.black54,
+                          ),
+                          const SizedBox(width: 3),
+                          Text(
+                            context.l10n.clear,
+                            style: TextStyle(
+                              fontSize: 11,
+                              color: isDark ? Colors.white54 : Colors.black54,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (card.selectedRoom != null) ...[
+                    const SizedBox(width: 10),
+                    InkWell(
+                      onTap: card.isLoadingBalance ? null : () => _loadBalance(slot),
+                      borderRadius: BorderRadius.circular(12),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (card.isLoadingBalance)
+                              SizedBox(
+                                width: 11,
+                                height: 11,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.5,
+                                  color: isDark ? Colors.white70 : Colors.black54,
+                                ),
+                              )
+                            else
+                              Icon(
+                                Icons.refresh,
+                                size: 13,
+                                color: isDark ? Colors.white54 : Colors.black54,
+                              ),
+                            const SizedBox(width: 3),
+                            Text(
+                              card.isLoadingBalance ? context.l10n.refreshing : context.l10n.refreshBalance,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: isDark ? Colors.white54 : Colors.black54,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            card.selectedRoom != null 
+              ? '${card.selectedArea?.name} - ${card.selectedBuilding?.name} - ${card.selectedRoom?.name}'
+              : context.l10n.noRoomSelectedYet,
+            style: TextStyle(fontSize: 15, color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            context.l10n.electricityBalance,
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? Colors.white54 : Colors.black54,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          if (card.balanceError != null && card.balanceInfo == null)
+            InkWell(
+              onTap: () => _loadBalance(slot),
+              child: Row(
+                children: [
+                  Text(
+                    context.l10n.fetchFailedClickRetry,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.red.shade400,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Icon(Icons.refresh, size: 13, color: Colors.red.shade400),
+                ],
+              ),
+            )
+          else
+            Text(
+              card.balanceInfo != null
+                  ? context.l10n.amountYuan(card.balanceInfo!.balance)
+                  : (card.isLoadingBalance ? context.l10n.checkingPaymentStatus : context.l10n.amountYuan('0.00')),
+              style: TextStyle(
+                fontSize: 15,
+                color: isDark ? Colors.white : Colors.black87,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          const SizedBox(height: 16),
+          // 3 Dropdown boxes inside card
+          _buildRoomSelectionBox(
+            context.l10n.campusArea,
+            _areas.map((e) => e.name).toList(),
+            card.selectedArea?.name,
+            (val) => _onAreaChanged(slot, val),
+          ),
+          const SizedBox(height: 12),
+          _buildRoomSelectionBox(
+            context.l10n.dormBuilding,
+            card.buildings.map((e) => e.name).toList(),
+            card.selectedBuilding?.name,
+            (val) => _onBuildingChanged(slot, val),
+          ),
+          const SizedBox(height: 12),
+          _buildRoomSelectionBox(
+            context.l10n.dormRoom,
+            card.rooms.map((e) => e.name).toList(),
+            card.selectedRoom?.name,
+            (val) => _onRoomChanged(slot, val),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -423,7 +728,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
         ),
       ),
       body: _isLoading 
-        ? Center(child: CircularProgressIndicator(color: themeColor))
+        ? const Center(child: CircularProgressIndicator(color: themeColor))
         : _error != null
           ? Center(
               child: Column(
@@ -444,133 +749,15 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Flat Header (Amber)
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? themeColor.withValues(alpha: 0.1) : amberColor.withValues(alpha: 0.05),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: isDark ? themeColor.withValues(alpha: 0.2) : amberColor.withValues(alpha: 0.2)),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              context.l10n.currentRechargeRoom,
-                              style: TextStyle(fontSize: 12, color: isDark ? Colors.white54 : Colors.black54, fontWeight: FontWeight.bold),
-                            ),
-                            if (_selectedRoom != null)
-                              InkWell(
-                                onTap: _isLoadingBalance ? null : _loadBalance,
-                                borderRadius: BorderRadius.circular(12),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (_isLoadingBalance)
-                                        SizedBox(
-                                          width: 11,
-                                          height: 11,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 1.5,
-                                            color: isDark ? Colors.white70 : Colors.black54,
-                                          ),
-                                        )
-                                      else
-                                        Icon(
-                                          Icons.refresh,
-                                          size: 13,
-                                          color: isDark ? Colors.white54 : Colors.black54,
-                                        ),
-                                      const SizedBox(width: 3),
-                                      Text(
-                                        _isLoadingBalance ? context.l10n.refreshing : context.l10n.refreshBalance,
-                                        style: TextStyle(fontSize: 11, color: isDark ? Colors.white54 : Colors.black54),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                        const SizedBox(height: 6),
-                        Text(
-                          _selectedRoom != null 
-                            ? '${_selectedArea?.name} - ${_selectedBuilding?.name} - ${_selectedRoom?.name}'
-                            : context.l10n.noRoomSelectedYet,
-                          style: TextStyle(fontSize: 15, color: isDark ? Colors.white : Colors.black87, fontWeight: FontWeight.w600),
-                        ),
-                        const SizedBox(height: 12),
-                        Text(
-                          context.l10n.electricityBalance,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: isDark ? Colors.white54 : Colors.black54,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        if (_balanceError != null && _balanceInfo == null)
-                          InkWell(
-                            onTap: _loadBalance,
-                            child: Row(
-                              children: [
-                                Text(
-                                  context.l10n.fetchFailedClickRetry,
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Colors.red.shade400,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Icon(Icons.refresh, size: 13, color: Colors.red.shade400),
-                              ],
-                            ),
-                          )
-                        else
-                          Text(
-                            _balanceInfo != null
-                                ? context.l10n.amountYuan(_balanceInfo!.balance)
-                                : (_isLoadingBalance ? context.l10n.checkingPaymentStatus : context.l10n.amountYuan('0.00')),
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: isDark ? Colors.white : Colors.black87,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
+                  // 宿舍卡片 1
+                  _buildDormitoryCard(0, isDark, themeColor, amberColor),
+                  
+                  const SizedBox(height: 12),
+                  
+                  // 宿舍卡片 2
+                  _buildDormitoryCard(1, isDark, themeColor, amberColor),
                   
                   const SizedBox(height: 24),
-                  
-                  // Independent Room Selection Boxes (No Fill Color)
-                  _buildRoomSelectionBox(context.l10n.campusArea, _areas.map((e) => e.name).toList(), _selectedArea?.name, (val) {
-                    final area = _areas.firstWhere((e) => e.name == val);
-                    setState(() => _selectedArea = area);
-                    _loadBuildings(area.name);
-                  }),
-                  const SizedBox(height: 12),
-                  _buildRoomSelectionBox(context.l10n.dormBuilding, _buildings.map((e) => e.name).toList(), _selectedBuilding?.name, (val) {
-                    final building = _buildings.firstWhere((e) => e.name == val);
-                    setState(() => _selectedBuilding = building);
-                    _loadRooms(_selectedArea!.name, building.name);
-                  }),
-                  const SizedBox(height: 12),
-                  _buildRoomSelectionBox(context.l10n.dormRoom, _rooms.map((e) => e.name).toList(), _selectedRoom?.name, (val) {
-                    final room = _rooms.firstWhere((e) => e.name == val);
-                    setState(() => _selectedRoom = room);
-                    _saveCurrentSelection();
-                    _loadBalance();
-                  }),
-                  
-                  const SizedBox(height: 32),
                   
                   Text(context.l10n.selectRechargeAmount, style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: isDark ? Colors.white54 : Colors.black54)),
                   const SizedBox(height: 12),
@@ -593,9 +780,9 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
                         onTap: () => _handlePresetAmountSelect(amount),
                         child: Container(
                           decoration: BoxDecoration(
-                            color: isSelected ? themeColor : (isDark ? Colors.white.withOpacity(0.05) : Colors.white),
+                            color: isSelected ? themeColor : (isDark ? Colors.white.withValues(alpha: 0.05) : Colors.white),
                             borderRadius: BorderRadius.circular(6),
-                            border: Border.all(color: isSelected ? themeColor : (isDark ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.3))),
+                            border: Border.all(color: isSelected ? themeColor : (isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.3))),
                           ),
                           alignment: Alignment.center,
                           child: Text(
@@ -619,14 +806,14 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     decoration: InputDecoration(
                       labelText: context.l10n.customAmount,
-                      labelStyle: TextStyle(color: isDark ? themeColor.withOpacity(0.8) : themeColor),
+                      labelStyle: TextStyle(color: isDark ? themeColor.withValues(alpha: 0.8) : themeColor),
                       prefixText: '¥ ',
                       filled: isDark,
-                      fillColor: isDark ? Colors.white.withOpacity(0.05) : null,
+                      fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : null,
                       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: themeColor.withOpacity(0.3))),
-                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: themeColor.withOpacity(0.4))),
-                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: themeColor, width: 1.5)),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: themeColor.withValues(alpha: 0.3))),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(6), borderSide: BorderSide(color: themeColor.withValues(alpha: 0.4))),
+                      focusedBorder: const OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(6)), borderSide: BorderSide(color: themeColor, width: 1.5)),
                     ),
                     onChanged: (value) => setState(() => _selectedAmount = double.tryParse(value)),
                   ),
@@ -742,16 +929,17 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
   Widget _buildRoomSelectionBox(String label, List<String> items, String? current, Function(String?) onChanged) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DropdownButtonFormField<String>(
-      value: items.contains(current) ? current : null,
+      key: ValueKey('${label}_$current'),
+      initialValue: items.contains(current) ? current : null,
       decoration: InputDecoration(
         labelText: label,
         filled: isDark,
-        fillColor: isDark ? Colors.white.withOpacity(0.05) : null,
+        fillColor: isDark ? Colors.white.withValues(alpha: 0.05) : null,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(6)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(6),
-          borderSide: BorderSide(color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey.withOpacity(0.3)),
+          borderSide: BorderSide(color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.grey.withValues(alpha: 0.3)),
         ),
       ),
       items: items.map((e) => DropdownMenuItem(value: e, child: Text(e, style: const TextStyle(fontSize: 14)))).toList(),
