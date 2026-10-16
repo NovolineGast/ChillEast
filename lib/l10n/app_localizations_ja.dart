@@ -396,7 +396,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get dragToReorderTip => 'アイコンを長押ししてドラッグすると、並び替えや表示・非表示を設定できます';
 
   @override
-  String get widgetSettings => '小组件设置';
+  String get widgetSettings => '小组件';
 
   @override
   String get widgetQuickTitle => '快捷功能（选择 4 个）';
@@ -865,7 +865,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get refreshTimetable => '時間割を更新';
 
   @override
-  String get timetableSettings => '课表设置';
+  String get timetableSettings => '课表';
 
   @override
   String get notSet => '未设置';

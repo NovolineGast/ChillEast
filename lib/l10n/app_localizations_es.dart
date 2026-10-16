@@ -401,7 +401,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Mantén presionado y arrastra para reordenar, mostrar u ocultar servicios';
 
   @override
-  String get widgetSettings => '小组件设置';
+  String get widgetSettings => '小组件';
 
   @override
   String get widgetQuickTitle => '快捷功能（选择 4 个）';
@@ -884,7 +884,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get refreshTimetable => 'Actualizar horario';
 
   @override
-  String get timetableSettings => '课表设置';
+  String get timetableSettings => '课表';
 
   @override
   String get notSet => '未设置';

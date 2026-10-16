@@ -402,7 +402,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Appuyez longuement et glissez les icônes pour réorganiser, afficher ou masquer les services';
 
   @override
-  String get widgetSettings => '小组件设置';
+  String get widgetSettings => '小组件';
 
   @override
   String get widgetQuickTitle => '快捷功能（选择 4 个）';
@@ -886,7 +886,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get refreshTimetable => 'Actualiser l\'emploi du temps';
 
   @override
-  String get timetableSettings => '课表设置';
+  String get timetableSettings => '课表';
 
   @override
   String get notSet => '未设置';

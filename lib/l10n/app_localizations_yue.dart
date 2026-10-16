@@ -396,7 +396,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get dragToReorderTip => '长按拖动图标，移入唔同区域即可显示或隐藏功能';
 
   @override
-  String get widgetSettings => '小组件设置';
+  String get widgetSettings => '小组件';
 
   @override
   String get widgetQuickTitle => '快捷功能（选择 4 个）';
@@ -859,7 +859,7 @@ class AppLocalizationsYue extends AppLocalizations {
   String get refreshTimetable => '重新整理课表';
 
   @override
-  String get timetableSettings => '课表设置';
+  String get timetableSettings => '课表';
 
   @override
   String get notSet => '未设置';

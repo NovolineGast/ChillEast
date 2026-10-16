@@ -399,7 +399,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Удерживайте и перетаскивайте значки для изменения порядка, отображения или скрытия';
 
   @override
-  String get widgetSettings => '小组件设置';
+  String get widgetSettings => '小组件';
 
   @override
   String get widgetQuickTitle => '快捷功能（选择 4 个）';
@@ -879,7 +879,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get refreshTimetable => 'Обновить расписание';
 
   @override
-  String get timetableSettings => '课表设置';
+  String get timetableSettings => '课表';
 
   @override
   String get notSet => '未设置';

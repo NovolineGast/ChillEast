@@ -15,16 +15,16 @@ class AppLocalizationsZh extends AppLocalizations {
   String get settings => '设置';
 
   @override
-  String get agentSettings => 'Agent 设置';
+  String get agentSettings => 'Agent';
 
   @override
-  String get appearanceSettings => '外观设置';
+  String get appearanceSettings => '外观';
 
   @override
-  String get notificationSettings => '通知设置';
+  String get notificationSettings => '通知';
 
   @override
-  String get language => '语言设置';
+  String get language => '语言';
 
   @override
   String get followSystem => '跟随系统';
@@ -396,7 +396,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get dragToReorderTip => '长按拖动图标，移入不同区域可显示或隐藏功能';
 
   @override
-  String get widgetSettings => '小组件设置';
+  String get widgetSettings => '小组件';
 
   @override
   String get widgetQuickTitle => '快捷功能（选择 4 个）';
@@ -858,7 +858,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get refreshTimetable => '刷新课表';
 
   @override
-  String get timetableSettings => '课表设置';
+  String get timetableSettings => '课表';
 
   @override
   String get notSet => '未设置';
@@ -2897,16 +2897,16 @@ class AppLocalizationsZhHk extends AppLocalizationsZh {
   String get settings => '設定';
 
   @override
-  String get agentSettings => 'Agent 設定';
+  String get agentSettings => 'Agent';
 
   @override
-  String get appearanceSettings => '外觀設定';
+  String get appearanceSettings => '外觀';
 
   @override
-  String get notificationSettings => '通知設定';
+  String get notificationSettings => '通知';
 
   @override
-  String get language => '語言設定';
+  String get language => '語言';
 
   @override
   String get followSystem => '跟隨系統';
@@ -5212,16 +5212,16 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get settings => '設定';
 
   @override
-  String get agentSettings => 'Agent 設定';
+  String get agentSettings => 'Agent';
 
   @override
-  String get appearanceSettings => '外觀設定';
+  String get appearanceSettings => '外觀';
 
   @override
-  String get notificationSettings => '通知設定';
+  String get notificationSettings => '通知';
 
   @override
-  String get language => '語言設定';
+  String get language => '語言';
 
   @override
   String get followSystem => '跟隨系統';

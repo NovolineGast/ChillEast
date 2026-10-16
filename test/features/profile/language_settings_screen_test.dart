@@ -53,7 +53,7 @@ void main() {
 
       // Verify AppBar title exists
       expect(find.byType(AppBar), findsOneWidget);
-      expect(find.text('语言设置'), findsOneWidget);
+      expect(find.text('语言'), findsOneWidget);
 
       // Verify first and last options are present by scrolling
       expect(find.text('跟随系统'), findsOneWidget);
@@ -108,6 +108,7 @@ void main() {
       // Verify SharedPreferences persisted 'en'
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString(LocaleNotifier.localeKey), equals('en'));
+      await tester.pump(const Duration(seconds: 11));
     });
 
     testWidgets('SettingsScreen navigates to LanguageSettingsScreen on tap',
@@ -118,7 +119,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Find language row
-      final languageRowFinder = find.widgetWithText(InkWell, '语言设置');
+      final languageRowFinder = find.widgetWithText(InkWell, '语言');
       expect(languageRowFinder, findsOneWidget);
 
       // Tap to navigate

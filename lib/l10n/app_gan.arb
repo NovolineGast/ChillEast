@@ -8,19 +8,19 @@
   "@settings": {
     "description": "设置页面标题"
   },
-  "agentSettings": "Agent 设置",
+  "agentSettings": "Agent",
   "@agentSettings": {
     "description": "Agent 设置项"
   },
-  "appearanceSettings": "外观设置",
+  "appearanceSettings": "外观",
   "@appearanceSettings": {
     "description": "外观设置项"
   },
-  "notificationSettings": "通知设置",
+  "notificationSettings": "通知",
   "@notificationSettings": {
     "description": "通知设置项"
   },
-  "language": "语言设置",
+  "language": "语言",
   "@language": {
     "description": "语言设置项"
   },

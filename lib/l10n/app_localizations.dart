@@ -134,25 +134,25 @@ abstract class AppLocalizations {
   /// Agent 设置项
   ///
   /// In zh, this message translates to:
-  /// **'Agent 设置'**
+  /// **'Agent'**
   String get agentSettings;
 
   /// 外观设置项
   ///
   /// In zh, this message translates to:
-  /// **'外观设置'**
+  /// **'外观'**
   String get appearanceSettings;
 
   /// 通知设置项
   ///
   /// In zh, this message translates to:
-  /// **'通知设置'**
+  /// **'通知'**
   String get notificationSettings;
 
   /// 语言设置项
   ///
   /// In zh, this message translates to:
-  /// **'语言设置'**
+  /// **'语言'**
   String get language;
 
   /// 跟随系统选项
@@ -896,7 +896,7 @@ abstract class AppLocalizations {
   /// No description provided for @widgetSettings.
   ///
   /// In zh, this message translates to:
-  /// **'小组件设置'**
+  /// **'小组件'**
   String get widgetSettings;
 
   /// No description provided for @widgetQuickTitle.
@@ -1760,7 +1760,7 @@ abstract class AppLocalizations {
   /// No description provided for @timetableSettings.
   ///
   /// In zh, this message translates to:
-  /// **'课表设置'**
+  /// **'课表'**
   String get timetableSettings;
 
   /// No description provided for @notSet.

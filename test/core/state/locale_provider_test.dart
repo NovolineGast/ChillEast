@@ -155,7 +155,7 @@ void main() {
       final l10n = lookupAppLocalizations(const Locale('zh'));
       expect(l10n.appTitle, equals('自在东湖'));
       expect(l10n.settings, equals('设置'));
-      expect(l10n.language, equals('语言设置'));
+      expect(l10n.language, equals('语言'));
       expect(l10n.followSystem, equals('跟随系统'));
       expect(l10n.simplifiedChinese, equals('简体中文'));
       expect(l10n.traditionalChineseHK, equals('繁体中文（中国香港）'));
