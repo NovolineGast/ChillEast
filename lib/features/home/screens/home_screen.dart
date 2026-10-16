@@ -1077,23 +1077,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       orElse: () => <ExamScheduleModel>[],
     );
 
-    // 当天待办作业（截止时间为预览日期），排在课程前面，日程页同款
-    final homeworkAsync = ref.watch(homeworkProvider);
-    final dayHomework = homeworkAsync.maybeWhen(
-      data: (list) {
-        final items = list
-            .where((h) =>
-                h.status == HomeworkStatus.pending &&
-                h.endTime != null &&
-                h.endTime!.year == _previewDate.year &&
-                h.endTime!.month == _previewDate.month &&
-                h.endTime!.day == _previewDate.day)
-            .toList();
-        items.sort((a, b) => a.endTime!.compareTo(b.endTime!));
-        return items;
-      },
-      orElse: () => <HomeworkModel>[],
-    );
+    if (!_isLoadingTimetable &&
+        _todayCourses.isEmpty &&
+        dayExams.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1134,28 +1122,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: CircularProgressIndicator(),
             ),
           )
-        else if (_todayCourses.isEmpty && dayHomework.isEmpty && dayExams.isEmpty)
-          Container(
-            padding: const EdgeInsets.all(16),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF1E1E1E)
-                  : Colors.grey[50],
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Center(
-              child: Text(
-                _isShowingTomorrow
-                    ? context.l10n.noCoursesTomorrow
-                    : context.l10n.noCoursesToday,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-          )
         else
           Column(
             mainAxisSize: MainAxisSize.min,
@@ -1164,12 +1130,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 if (i > 0) const SizedBox(height: 12),
                 _buildExamTask(dayExams[i]),
               ],
-              for (int i = 0; i < dayHomework.length; i++) ...[
-                if (i > 0 || dayExams.isNotEmpty) const SizedBox(height: 12),
-                _buildHomeworkTask(dayHomework[i]),
-              ],
               for (int i = 0; i < _todayCourses.length; i++) ...[
-                if (i > 0 || dayHomework.isNotEmpty || dayExams.isNotEmpty)
+                if (i > 0 || dayExams.isNotEmpty)
                   const SizedBox(height: 12),
                 _buildCourseItem(_todayCourses[i]),
               ],
@@ -1277,54 +1239,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 日程页同款作业卡片（黄色底 + 截止时间）
-  Widget _buildHomeworkTask(HomeworkModel item) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF3D3D29) : const Color(0xFFFFF9E6),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.assignment_late_outlined,
-              size: 22, color: Color(0xFFF39C12)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
-                    color: isDark ? Colors.white : const Color(0xFF2D3436),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${item.courseName} · ${context.l10n.deadlinePrefix} ${item.endTime != null ? DateFormat('HH:mm').format(item.endTime!) : context.l10n.noDeadline}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.2,
-                    color: isDark ? Colors.white70 : const Color(0xFF7F8C8D),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCourseItem(CourseModel course) {
     final baseColor = CourseColorUtils.getColorForCourse(course.name);
@@ -1798,12 +1712,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final cardInfo = cachedCardAsync.value;
 
     final eleState = ref.watch(electricityCacheProvider);
-    final room = eleState.room;
+    final hasAnyRoom = eleState.rooms.any((r) => r != null);
 
     final authState = ref.watch(authStateProvider);
     final isAuthenticated = authState.status == AuthStatus.authenticated;
 
-    if (cardInfo == null && room == null && !isAuthenticated) {
+    if (cardInfo == null && !hasAnyRoom && !isAuthenticated) {
       return const SizedBox.shrink();
     }
 
@@ -1842,8 +1756,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     }
 
-    // 2. 宿舍电费卡片（若无保存的房间则不显示）
-    if (room != null) {
+    // 2. 宿舍电费卡片（若无保存的房间则不显示，保存两个则显示两个）
+    for (int i = 0; i < eleState.rooms.length; i++) {
+      final room = eleState.rooms[i];
+      if (room == null) continue;
+
       final roomDisplayName =
           room.roomName.isNotEmpty ? room.roomName : room.roomId;
       final eleTitle =
@@ -1857,7 +1774,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         eleSubtitle = roomDisplayName;
       }
 
-      final balanceInfo = eleState.balanceInfo;
+      final balanceInfo = (i < eleState.balances.length) ? eleState.balances[i] : null;
       final balanceText = balanceInfo != null
           ? '¥${balanceInfo.balance}'
           : (eleState.isLoading ? '...' : '¥--');
@@ -1870,7 +1787,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           subtitle: eleSubtitle,
           balanceText: balanceText,
           balanceColor: isDark ? Colors.white : const Color(0xFFFF9800),
-          onTap: () => _openElectricity(context),
+          onTap: () => _openElectricity(context, initialSlot: i),
           isDark: isDark,
         ),
       );
@@ -1908,10 +1825,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Future<void> _openElectricity(BuildContext context) async {
+  Future<void> _openElectricity(BuildContext context, {int initialSlot = 0}) async {
     await Navigator.push(
       context,
-      createSlideUpRoute(const ElectricityRechargeScreen()),
+      createSlideUpRoute(ElectricityRechargeScreen(initialSlot: initialSlot)),
     );
     if (context.mounted) {
       ref.read(electricityCacheProvider.notifier).refresh();
