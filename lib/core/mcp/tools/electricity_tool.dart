@@ -81,7 +81,7 @@ class ElectricityTool {
     return McpTool(
       name: effectiveToolName,
       description:
-          '湖南农业大学宿舍电费余额查询与在线充值工具。支持查询指定宿舍房间的电费剩余金额（query_balance, 默认），以及从校园卡扣款执行在线充值（recharge），并支持获取校区、楼栋、房间列表。若未指定 areaName、buildingName、roomId，则默认自动使用用户已保存的宿舍。',
+          '湖南农业大学宿舍电费余额查询与在线充值工具。支持查询指定宿舍房间的电费剩余金额（query_balance, 默认），以及从校园卡扣款执行在线充值（recharge），并支持获取校区、楼栋、房间列表。若用户记录了两个宿舍房间，执行充值时且未指定具体房间，工具会要求向用户询问充哪一个；若仅记录一个宿舍房间，则默认使用已保存的宿舍。',
       inputSchema: {
         'type': 'object',
         'properties': {
@@ -107,6 +107,10 @@ class ElectricityTool {
             'type': 'string',
             'description': '友好房间展示名称（例如“302室”）。若未指定，系统会自动匹配并解析真实房间号。',
           },
+          'roomIndex': {
+            'type': 'integer',
+            'description': '记录的宿舍序号（1 代表第 1 个宿舍，2 代表第 2 个宿舍）。用户若指定充第几个宿舍时传入。',
+          },
           'mertype': {
             'type': 'string',
             'description': '电表类型代码（例如“yk”预付费表或“rt”实时表），默认为已保存的宿舍表类型或“yk”。',
@@ -131,6 +135,7 @@ class ElectricityTool {
         final roomName = arguments['roomName'] as String?;
         final mertype = arguments['mertype'] as String? ?? 'yk';
         final amountNum = arguments['amount'] as num?;
+        final roomIndex = arguments['roomIndex'] as int?;
 
         try {
           switch (action) {
@@ -169,11 +174,77 @@ class ElectricityTool {
               var targetRoomName = roomName;
               var targetMertype = mertype;
 
-              final saved = await service.getSavedRoom();
+              final savedRooms = await service.getSavedRooms();
+              final validRooms = savedRooms.whereType<SavedElectricityRoom>().toList();
+
+              if (roomIndex != null && roomIndex >= 1 && roomIndex <= validRooms.length) {
+                final selected = validRooms[roomIndex - 1];
+                targetArea ??= selected.areaName;
+                targetBuilding ??= selected.buildingName;
+                targetRoomId ??= selected.roomId;
+                targetRoomName ??= selected.roomName;
+                targetMertype = selected.mertype;
+              }
+
+              // 未提供具体房间且有两个已记录的房间时，同时查询两个房间并返回
+              if (validRooms.length >= 2 &&
+                  (targetArea == null || targetArea.trim().isEmpty) &&
+                  (targetBuilding == null || targetBuilding.trim().isEmpty) &&
+                  (targetRoomId == null || targetRoomId.trim().isEmpty) &&
+                  (targetRoomName == null || targetRoomName.trim().isEmpty)) {
+                final resultsList = [];
+                for (int i = 0; i < validRooms.length; i++) {
+                  final s = validRooms[i];
+                  try {
+                    final resolved = await _resolveRoom(
+                      service: service,
+                      areaName: s.areaName,
+                      buildingName: s.buildingName,
+                      inputRoomId: s.roomId,
+                      inputRoomName: s.roomName,
+                      fallbackMertype: s.mertype,
+                      saved: s,
+                    );
+                    final bInfo = await service.getBalance(
+                      areaName: s.areaName,
+                      buildingName: s.buildingName,
+                      roomId: resolved.roomId,
+                      mertype: resolved.mertype,
+                    );
+                    final dName = (resolved.roomName.isNotEmpty && !RegExp(r'^[A-Fa-f0-9]{32}$').hasMatch(resolved.roomName))
+                        ? resolved.roomName
+                        : resolved.roomId;
+                    resultsList.add({
+                      'roomIndex': i + 1,
+                      'location': '${s.areaName} - ${s.buildingName} - $dName',
+                      'areaName': s.areaName,
+                      'buildingName': s.buildingName,
+                      'roomName': dName,
+                      'balance': bInfo.balance,
+                      'balanceYuan': '${bInfo.balance} 元',
+                    });
+                  } catch (e) {
+                    resultsList.add({
+                      'roomIndex': i + 1,
+                      'location': '${s.areaName} - ${s.buildingName} - ${s.roomName}',
+                      'error': e.toString(),
+                    });
+                  }
+                }
+                return McpToolResult.json({
+                  'status': 'success',
+                  'count': resultsList.length,
+                  'rooms': resultsList,
+                  'tip': '如需充值电费，请告诉我为哪个宿舍充值以及充值金额。',
+                });
+              }
+
+              SavedElectricityRoom? saved;
               if (targetArea == null || targetArea.trim().isEmpty ||
                   targetBuilding == null || targetBuilding.trim().isEmpty ||
                   targetRoomId == null || targetRoomId.trim().isEmpty) {
-                if (saved != null) {
+                if (validRooms.isNotEmpty) {
+                  saved = validRooms.first;
                   targetArea ??= saved.areaName.isNotEmpty ? saved.areaName : null;
                   targetBuilding ??= saved.buildingName.isNotEmpty ? saved.buildingName : null;
                   if (targetRoomId == null || targetRoomId.trim().isEmpty) {
@@ -227,6 +298,9 @@ class ElectricityTool {
                 if (extracted != null && extracted.isNotEmpty) {
                   targetRoomName = extracted;
                   if (saved != null) {
+                    final savedRoomsList = await service.getSavedRooms();
+                    int sSlot = savedRoomsList.indexWhere((s) => s?.roomId == targetRoomId);
+                    if (sSlot < 0) sSlot = 0;
                     await service.saveSavedRoom(
                       SavedElectricityRoom(
                         areaName: targetArea,
@@ -235,6 +309,7 @@ class ElectricityTool {
                         roomName: extracted,
                         mertype: targetMertype,
                       ),
+                      slot: sSlot,
                     );
                   }
                 }
@@ -267,11 +342,48 @@ class ElectricityTool {
               var targetRoomName = roomName;
               var targetMertype = mertype;
 
-              final saved = await service.getSavedRoom();
+              final savedRooms = await service.getSavedRooms();
+              final validRooms = savedRooms.whereType<SavedElectricityRoom>().toList();
+
+              if (roomIndex != null && roomIndex >= 1 && roomIndex <= validRooms.length) {
+                final selected = validRooms[roomIndex - 1];
+                targetArea ??= selected.areaName;
+                targetBuilding ??= selected.buildingName;
+                targetRoomId ??= selected.roomId;
+                targetRoomName ??= selected.roomName;
+                targetMertype = selected.mertype;
+              }
+
+              // 如果有记录两个房间，且调用时未指定具体目标房间或序号，必须先询问充哪一个
+              if (validRooms.length >= 2 &&
+                  (targetArea == null || targetArea.trim().isEmpty) &&
+                  (targetBuilding == null || targetBuilding.trim().isEmpty) &&
+                  (targetRoomId == null || targetRoomId.trim().isEmpty) &&
+                  (targetRoomName == null || targetRoomName.trim().isEmpty)) {
+                final r1 = validRooms[0];
+                final r2 = validRooms[1];
+                final r1Desc = '${r1.areaName} - ${r1.buildingName} - ${r1.roomName}';
+                final r2Desc = '${r2.areaName} - ${r2.buildingName} - ${r2.roomName}';
+                return McpToolResult.json({
+                  'status': 'ask_room_selection',
+                  'need_user_choice': true,
+                  'message': '用户记录了两个宿舍房间，无法直接确定充值目标。请先询问用户充哪一个房间，亦或者都不是而是选择别的：\n'
+                      '1. $r1Desc\n'
+                      '2. $r2Desc\n'
+                      '3. 其它宿舍房间',
+                  'savedRooms': [
+                    {'roomIndex': 1, 'location': r1Desc, 'areaName': r1.areaName, 'buildingName': r1.buildingName, 'roomName': r1.roomName, 'roomId': r1.roomId},
+                    {'roomIndex': 2, 'location': r2Desc, 'areaName': r2.areaName, 'buildingName': r2.buildingName, 'roomName': r2.roomName, 'roomId': r2.roomId},
+                  ],
+                });
+              }
+
+              SavedElectricityRoom? saved;
               if (targetArea == null || targetArea.trim().isEmpty ||
                   targetBuilding == null || targetBuilding.trim().isEmpty ||
                   targetRoomId == null || targetRoomId.trim().isEmpty) {
-                if (saved != null) {
+                if (validRooms.isNotEmpty) {
+                  saved = validRooms.first;
                   targetArea ??= saved.areaName.isNotEmpty ? saved.areaName : null;
                   targetBuilding ??= saved.buildingName.isNotEmpty ? saved.buildingName : null;
                   if (targetRoomId == null || targetRoomId.trim().isEmpty) {

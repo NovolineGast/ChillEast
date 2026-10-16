@@ -151,34 +151,60 @@ class FakeCampusCardService extends CampusCardService {
 }
 
 class FakeElectricityService implements ElectricityService {
-  SavedElectricityRoom? _savedRoom;
-  ElectricityBalanceInfo? _savedBalance;
+  final List<SavedElectricityRoom?> _savedRooms = [null, null];
+  final List<ElectricityBalanceInfo?> _savedBalances = [null, null];
 
   @override
-  Future<SavedElectricityRoom?> getSavedRoom() async => _savedRoom;
+  Future<SavedElectricityRoom?> getSavedRoom({int slot = 0}) async =>
+      slot < _savedRooms.length ? _savedRooms[slot] : null;
 
   @override
-  Future<void> saveSavedRoom(SavedElectricityRoom room) async {
-    _savedRoom = room;
+  Future<List<SavedElectricityRoom?>> getSavedRooms({int maxSlots = 2}) async =>
+      _savedRooms.take(maxSlots).toList();
+
+  @override
+  Future<void> saveSavedRoom(SavedElectricityRoom room, {int slot = 0}) async {
+    while (_savedRooms.length <= slot) {
+      _savedRooms.add(null);
+    }
+    _savedRooms[slot] = room;
   }
 
   @override
-  Future<void> clearSavedRoom() async {
-    _savedRoom = null;
-    _savedBalance = null;
+  Future<void> clearSavedRoom({int slot = 0}) async {
+    if (slot < _savedRooms.length) _savedRooms[slot] = null;
+    if (slot < _savedBalances.length) _savedBalances[slot] = null;
   }
 
   @override
-  Future<ElectricityBalanceInfo?> getSavedBalance() async => _savedBalance;
-
-  @override
-  Future<void> saveSavedBalance(ElectricityBalanceInfo info) async {
-    _savedBalance = info;
+  Future<void> clearAllSavedRooms({int maxSlots = 2}) async {
+    for (int i = 0; i < _savedRooms.length; i++) {
+      _savedRooms[i] = null;
+    }
+    for (int i = 0; i < _savedBalances.length; i++) {
+      _savedBalances[i] = null;
+    }
   }
 
   @override
-  Future<void> clearSavedBalance() async {
-    _savedBalance = null;
+  Future<ElectricityBalanceInfo?> getSavedBalance({int slot = 0}) async =>
+      slot < _savedBalances.length ? _savedBalances[slot] : null;
+
+  @override
+  Future<List<ElectricityBalanceInfo?>> getSavedBalances({int maxSlots = 2}) async =>
+      _savedBalances.take(maxSlots).toList();
+
+  @override
+  Future<void> saveSavedBalance(ElectricityBalanceInfo info, {int slot = 0}) async {
+    while (_savedBalances.length <= slot) {
+      _savedBalances.add(null);
+    }
+    _savedBalances[slot] = info;
+  }
+
+  @override
+  Future<void> clearSavedBalance({int slot = 0}) async {
+    if (slot < _savedBalances.length) _savedBalances[slot] = null;
   }
 
   @override
@@ -213,14 +239,20 @@ class FakeElectricityService implements ElectricityService {
     String? roomName,
     required String mertype,
     required double amount,
+    int? slot,
   }) async {
-    _savedRoom = SavedElectricityRoom(
+    final room = SavedElectricityRoom(
       areaName: areaName,
       buildingName: buildingName,
       roomId: roomId,
-      roomName: roomName ?? roomId,
+      roomName: (roomName != null && roomName.isNotEmpty) ? roomName : roomId,
       mertype: mertype,
     );
+    final targetSlot = slot ?? 0;
+    while (_savedRooms.length <= targetSlot) {
+      _savedRooms.add(null);
+    }
+    _savedRooms[targetSlot] = room;
     return true;
   }
 }

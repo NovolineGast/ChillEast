@@ -77,4 +77,46 @@ void main() {
     expect(text.contains('302'), true);
     expect(text.contains('56.80'), true);
   });
+
+  test('ElectricityTool prompts to ask user when 2 rooms exist and recharge has no room specified', () async {
+    final container = ProviderContainer(
+      overrides: [
+        electricityServiceProvider.overrideWith((ref) => FakeElectricityService(ref)),
+      ],
+    );
+    final service = container.read(electricityServiceProvider);
+    await service.saveSavedRoom(
+      const SavedElectricityRoom(
+        areaName: '金岸公寓空调',
+        buildingName: '金岸1栋',
+        roomId: '81E3C6EE733048798CC518A0FAE33A03',
+        roomName: '302',
+        mertype: 'yk',
+      ),
+      slot: 0,
+    );
+    await service.saveSavedRoom(
+      const SavedElectricityRoom(
+        areaName: '东湖校区',
+        buildingName: '东湖公寓2栋',
+        roomId: '501',
+        roomName: '501',
+        mertype: 'yk',
+      ),
+      slot: 1,
+    );
+
+    final tool = ElectricityTool.create(service: service);
+    final result = await tool.execute({
+      'action': 'recharge',
+      'amount': 50,
+    });
+
+    expect(result.isError, false);
+    final text = result.content.first.text!;
+    expect(text.contains('ask_room_selection'), true);
+    expect(text.contains('用户记录了两个宿舍房间'), true);
+    expect(text.contains('金岸1栋 - 302'), true);
+    expect(text.contains('东湖公寓2栋 - 501'), true);
+  });
 }
