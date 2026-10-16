@@ -103,6 +103,7 @@ class BackupExportService {
         'rawCourses': await _readDocFileJson('raw_courses.json'),
         'timetableRules': await _readDocFileJson('timetable_rules.json'),
         'homeworkList': await _readManualHomeworkJson(),
+        'aiMemories': await _readDocFileJson('ai_memories.json'),
       },
     };
   }
@@ -329,6 +330,7 @@ class BackupExportService {
     await _writeDocFile(
         'timetable_rules.json', localData, 'timetableRules');
     await _applyManualHomeworkList(localData['homeworkList']);
+    await _writeDocFile('ai_memories.json', localData, 'aiMemories');
 
     // —— AI 设置（SecureStorage）——
     final ai = settings['ai'] is Map
