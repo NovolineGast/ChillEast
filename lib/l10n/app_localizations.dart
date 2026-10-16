@@ -731,6 +731,18 @@ abstract class AppLocalizations {
   /// **'信息流设置'**
   String get feedButtonsTitle;
 
+  /// No description provided for @feedAutoSort.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动排序'**
+  String get feedAutoSort;
+
+  /// No description provided for @feedAutoSortSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启后忽视手动排序和显隐，按智能规则动态排序'**
+  String get feedAutoSortSubtitle;
+
   /// No description provided for @visibleFunctions.
   ///
   /// In zh, this message translates to:

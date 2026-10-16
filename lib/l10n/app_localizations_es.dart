@@ -318,6 +318,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get feedButtonsTitle => '信息流设置';
 
   @override
+  String get feedAutoSort => '自动排序';
+
+  @override
+  String get feedAutoSortSubtitle => '开启后忽视手动排序和显隐，按智能规则动态排序';
+
+  @override
   String get visibleFunctions => 'Servicios visibles';
 
   @override

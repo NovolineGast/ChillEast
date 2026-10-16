@@ -83,6 +83,7 @@ class BackupExportService {
               _decodeJson(prefs.getString('function_group_order')),
           'hiddenFunctionGroups':
               _decodeJson(prefs.getString('hidden_function_groups')),
+          'feedAutoSort': prefs.getBool('feed_auto_sort') ?? false,
         },
         'electricityRoom':
             _decodeJson(prefs.getString('saved_electricity_room')),
@@ -256,6 +257,11 @@ class BackupExportService {
           defaultVisibility: defaultFeedVis,
         );
         await prefs.setString('home_feed_items', jsonEncode(merged));
+      }
+
+      if (appearance.containsKey('feedAutoSort')) {
+        await prefs.setBool(
+            'feed_auto_sort', appearance['feedAutoSort'] == true);
       }
 
       if (appearance.containsKey('widgetItems')) {

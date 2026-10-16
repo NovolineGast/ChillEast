@@ -71,6 +71,8 @@ class ButtonReorderScreen extends ConsumerWidget {
       ),
       body: Column(
         children: [
+          if (listType == 'feed')
+            _buildAutoSortTile(context, ref, appearance, isDark),
           _buildInfoBanner(context, isDark),
           Expanded(
             child: ReorderableListView(
@@ -340,6 +342,46 @@ class ButtonReorderScreen extends ConsumerWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildAutoSortTile(
+      BuildContext context, WidgetRef ref, AppearanceState appearance, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.12)
+              : const Color(0xFFE0E0E0),
+          width: 1,
+        ),
+      ),
+      child: SwitchListTile(
+        title: Text(
+          context.l10n.feedAutoSort,
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : const Color(0xFF202124),
+          ),
+        ),
+        subtitle: Text(
+          context.l10n.feedAutoSortSubtitle,
+          style: TextStyle(
+            fontSize: 12,
+            color: isDark ? Colors.white60 : Colors.grey[600],
+          ),
+        ),
+        value: appearance.feedAutoSort,
+        activeThumbColor: const Color(0xFF09C489),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        onChanged: (val) {
+          ref.read(appearanceProvider.notifier).updateFeedAutoSort(val);
+        },
       ),
     );
   }

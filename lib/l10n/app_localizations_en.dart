@@ -317,6 +317,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get feedButtonsTitle => 'Home Feed';
 
   @override
+  String get feedAutoSort => 'Auto Sort';
+
+  @override
+  String get feedAutoSortSubtitle =>
+      'Ignore custom order and visibility, sort dynamically by priority';
+
+  @override
   String get visibleFunctions => 'Visible Services';
 
   @override

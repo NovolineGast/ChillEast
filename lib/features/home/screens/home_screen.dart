@@ -25,6 +25,7 @@ import '../../homework/providers/homework_provider.dart';
 import '../../homework/models/homework_model.dart';
 import '../../exam/providers/exam_provider.dart';
 import '../../exam/models/exam_schedule_model.dart';
+import '../../exam/screens/exam_screen.dart';
 import '../../../core/utils/location_helper.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
@@ -54,6 +55,7 @@ import '../../library/screens/library_home_screen.dart';
 import '../../campus_bus/screens/campus_bus_map_screen.dart';
 import '../../../core/utils/date_format_utils.dart';
 import '../../../core/network/cookie_manager.dart';
+import '../utils/feed_sorter.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final Function(int)? onNavigateToTab;
@@ -217,12 +219,55 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const SizedBox(height: 8),
-                  // 信息流区块（顺序与显隐来自外观设置，可配置）
-                  for (final section in ref
-                      .watch(appearanceProvider)
-                      .feedItems
-                      .where((e) => e.isVisible))
-                    switch (section.id) {
+                  for (final sectionId in () {
+                    final appearance = ref.watch(appearanceProvider);
+                    if (!appearance.feedAutoSort) {
+                      return appearance.feedItems
+                          .where((e) => e.isVisible)
+                          .map((e) => e.id)
+                          .toList();
+                    }
+
+                    final reserves =
+                        ref.watch(cachedLibraryReserveProvider).value ?? [];
+                    final hasLibraryP0 =
+                        FeedSorter.checkLibraryP0(reserves: reserves);
+
+                    final leaves = ref.watch(leaveCacheProvider).value ?? [];
+                    final hasLeaveP1 = FeedSorter.checkLeaveP1(leaves: leaves);
+
+                    final exams = ref.watch(examProvider).value ?? [];
+                    final hasAgendaP2 = FeedSorter.checkAgendaP2(
+                      courses: _todayCourses,
+                      exams: exams,
+                      previewDate: _previewDate,
+                    );
+
+                    final homeworks =
+                        ref.watch(homeworkProvider).value ?? [];
+                    final hasHomeworkP3 =
+                        FeedSorter.checkHomeworkP3(homeworks: homeworks);
+
+                    final eleState = ref.watch(electricityCacheProvider);
+                    final hasBalanceP4 = FeedSorter.checkBalanceP4(
+                      balances: eleState.balances,
+                      balanceInfo: eleState.balanceInfo,
+                    );
+
+                    return FeedSorter.sortFeedItems(
+                      autoSort: true,
+                      manualOrder: appearance.feedItems
+                          .where((e) => e.isVisible)
+                          .map((e) => e.id)
+                          .toList(),
+                      hasLibraryP0: hasLibraryP0,
+                      hasLeaveP1: hasLeaveP1,
+                      hasAgendaP2: hasAgendaP2,
+                      hasHomeworkP3: hasHomeworkP3,
+                      hasBalanceP4: hasBalanceP4,
+                    );
+                  }())
+                    switch (sectionId) {
                       'feed_quick' => _buildQuickActions(context, authState),
                       'feed_library' => _buildLibrarySeatCard(context),
                       'feed_agenda' => _buildTodayTimetablePreview(context),
@@ -543,6 +588,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         isLoggedIn
             ? Navigator.push(context, createSlideUpRoute(const ScoreScreen()))
             : _showLoginDialog(context);
+        break;
+      case 'exam':
+        Navigator.push(context, createSlideUpRoute(const ExamScreen()));
         break;
       case 'vpn':
         Navigator.push(context, createSlideUpRoute(const VpnConverterScreen()));

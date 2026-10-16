@@ -21,6 +21,7 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
   static const String _widgetItemsKey = 'widget_function_items';
   static const String _groupOrderKey = 'function_group_order';
   static const String _hiddenGroupsKey = 'hidden_function_groups';
+  static const String _feedAutoSortKey = 'feed_auto_sort';
 
   static final List<FunctionItem> _masterPool = [
     const FunctionItem(id: 'sunshine', label: '阳光服务', icon: Icons.wb_sunny_outlined, color: Color(0xFF09C489)),
@@ -238,6 +239,9 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
         debugPrint('Error loading hidden groups: $e');
       }
     }
+
+    final feedAutoSort = prefs.getBool(_feedAutoSortKey) ?? false;
+    state = state.copyWith(feedAutoSort: feedAutoSort);
   }
 
   /// 备份导入后重新从持久化层加载（新功能自动合并追加）。
@@ -527,5 +531,12 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
       hiddenFunctionGroups: hiddenSet.toList(),
     );
     _saveSettings();
+  }
+
+  Future<void> updateFeedAutoSort(bool value) async {
+    state = state.copyWith(feedAutoSort: value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_feedAutoSortKey, value);
+    CloudBackupManager.instance.markDirty();
   }
 }

@@ -52,6 +52,7 @@ class AppearanceState {
   final List<FunctionItem> widgetItems;
   final List<String> functionGroupOrder;
   final List<String> hiddenFunctionGroups;
+  final bool feedAutoSort;
 
   const AppearanceState({
     required this.homeItems,
@@ -60,6 +61,7 @@ class AppearanceState {
     required this.widgetItems,
     required this.functionGroupOrder,
     required this.hiddenFunctionGroups,
+    this.feedAutoSort = false,
   });
 
   AppearanceState copyWith({
@@ -69,6 +71,7 @@ class AppearanceState {
     List<FunctionItem>? widgetItems,
     List<String>? functionGroupOrder,
     List<String>? hiddenFunctionGroups,
+    bool? feedAutoSort,
   }) {
     return AppearanceState(
       homeItems: homeItems ?? this.homeItems,
@@ -77,6 +80,7 @@ class AppearanceState {
       widgetItems: widgetItems ?? this.widgetItems,
       functionGroupOrder: functionGroupOrder ?? this.functionGroupOrder,
       hiddenFunctionGroups: hiddenFunctionGroups ?? this.hiddenFunctionGroups,
+      feedAutoSort: feedAutoSort ?? this.feedAutoSort,
     );
   }
 }
