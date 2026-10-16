@@ -469,6 +469,13 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
 
     final l10n = context.l10n;
     try {
+      // 确保分享出去的 ICS 已经完整应用所有调课、停课及自定义规则
+      try {
+        await TimetableRuleService().applyRulesAndRegenerate();
+      } catch (e) {
+        AppLogger.instance.w('Regenerating rules before sharing failed: $e');
+      }
+
       final filePath = await _storage.getTimetableFilePath();
       if (filePath == null) {
         throw Exception(l10n.timetableFileNotFound);
