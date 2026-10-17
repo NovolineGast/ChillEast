@@ -61,7 +61,8 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => ref.read(examProvider.notifier).refresh(),
+                      onPressed: () =>
+                          ref.read(examProvider.notifier).refresh(),
                       child: Text(context.l10n.refreshTimetable),
                     ),
                   ],
@@ -248,26 +249,48 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                 ),
                 const SizedBox(height: 12),
                 // 时间行
-                Row(
-                  children: [
-                    Icon(
-                      Icons.access_time_rounded,
-                      size: 16,
-                      color: isDark ? Colors.white60 : Colors.grey[600],
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      DateFormat('yyyy-MM-dd HH:mm').format(exam.time),
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.87)
-                            : const Color(0xFF3C4043),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    _buildRelativeTimeBadge(exam.time, now, isPast),
-                  ],
+                Builder(
+                  builder: (context) {
+                    final String timeDisplay;
+                    if (exam.endTime != null) {
+                      if (exam.time.year == exam.endTime!.year &&
+                          exam.time.month == exam.endTime!.month &&
+                          exam.time.day == exam.endTime!.day) {
+                        timeDisplay =
+                            '${DateFormat('yyyy-MM-dd HH:mm').format(exam.time)} ~ ${DateFormat('HH:mm').format(exam.endTime!)}';
+                      } else {
+                        timeDisplay =
+                            '${DateFormat('yyyy-MM-dd HH:mm').format(exam.time)} ~ ${DateFormat('yyyy-MM-dd HH:mm').format(exam.endTime!)}';
+                      }
+                    } else {
+                      timeDisplay = DateFormat('yyyy-MM-dd HH:mm').format(exam.time);
+                    }
+
+                    return Row(
+                      children: [
+                        Icon(
+                          Icons.access_time_rounded,
+                          size: 16,
+                          color: isDark ? Colors.white60 : Colors.grey[600],
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            timeDisplay,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: isDark
+                                  ? Colors.white.withValues(alpha: 0.87)
+                                  : const Color(0xFF3C4043),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        _buildRelativeTimeBadge(exam.time, now, isPast),
+                      ],
+                    );
+                  },
                 ),
                 // 地点行 (若有)
                 if (exam.location != null && exam.location!.isNotEmpty) ...[

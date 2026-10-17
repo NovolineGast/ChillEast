@@ -7,6 +7,11 @@ class ExamScheduleModel {
   final String courseName;
   /// 日程显示的主时间（必须为 watermark 容器内第一个出现的时间）
   final DateTime time;
+  /// 考试结束时间（watermark 容器内第二个出现的时间，若有）
+  final DateTime? endTime;
+
+  /// 开始时间（等同于 time，即 watermark 容器内第一个出现的时间）
+  DateTime get startTime => time;
   /// watermark 容器内提取到的全部时间列表
   final List<DateTime> allTimes;
   /// 原始时间字符串列表（如 ["2026-05-10 17:00", "2026-05-10 23:59"]）
@@ -33,6 +38,7 @@ class ExamScheduleModel {
     required this.title,
     this.courseName = '',
     required this.time,
+    this.endTime,
     this.allTimes = const [],
     this.rawTimeStrs = const [],
     this.detailUrl = '',
@@ -50,6 +56,7 @@ class ExamScheduleModel {
         'title': title,
         'courseName': courseName,
         'time': time.toIso8601String(),
+        'endTime': endTime?.toIso8601String(),
         'allTimes': allTimes.map((t) => t.toIso8601String()).toList(),
         'rawTimeStrs': rawTimeStrs,
         'detailUrl': detailUrl,
@@ -67,7 +74,10 @@ class ExamScheduleModel {
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? '',
       courseName: json['courseName'] as String? ?? '',
-      time: DateTime.parse(json['time'] as String),
+      time: DateTime.parse((json['time'] ?? json['startTime']) as String),
+      endTime: json['endTime'] != null
+          ? DateTime.parse(json['endTime'] as String)
+          : null,
       allTimes: (json['allTimes'] as List<dynamic>?)
               ?.map((t) => DateTime.parse(t as String))
               .toList() ??
@@ -94,6 +104,7 @@ class ExamScheduleModel {
     String? title,
     String? courseName,
     DateTime? time,
+    DateTime? endTime,
     List<DateTime>? allTimes,
     List<String>? rawTimeStrs,
     String? detailUrl,
@@ -110,6 +121,7 @@ class ExamScheduleModel {
       title: title ?? this.title,
       courseName: courseName ?? this.courseName,
       time: time ?? this.time,
+      endTime: endTime ?? this.endTime,
       allTimes: allTimes ?? this.allTimes,
       rawTimeStrs: rawTimeStrs ?? this.rawTimeStrs,
       detailUrl: detailUrl ?? this.detailUrl,

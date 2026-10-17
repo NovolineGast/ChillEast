@@ -48,8 +48,11 @@ class ExamQueryTool {
         if (forceRefresh) {
           try {
             final local = await examStorage.readExamList();
-            final updated = await examService.fetchExams(cachedExams: local);
-            await examStorage.saveExamList(updated);
+            final manual = local.where((e) => e.isManual).toList();
+            final updated = await examService.fetchExams();
+            final merged = [...manual, ...updated]
+              ..sort((a, b) => a.time.compareTo(b.time));
+            await examStorage.saveExamList(merged);
           } catch (e) {
             return McpToolResult.error('刷新考试数据失败: $e');
           }

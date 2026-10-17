@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logger/logger.dart';
+import '../../../core/network/cookie_manager.dart';
 import '../../../core/state/auth_state.dart';
 import '../models/exam_schedule_model.dart';
 import '../services/exam_service.dart';
@@ -79,14 +80,17 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
   /// 静默刷新（不阻塞 UI）
   Future<void> _silentRefresh() async {
     try {
+      try {
+        await AppCookieManager().syncMultiDomainCookiesFromWebView();
+      } catch (_) {}
+
       final manual = await _collectManualUnion();
       final storage = _ref.read(examStorageProvider);
-      final local = await storage.readExamList();
       final scraped = await _ref
           .read(examServiceProvider)
-          .fetchExams(cachedExams: local);
+          .fetchExams();
 
-      // 合并手动作业与抓取的考试日程
+      // 强行同步超星云端数据，仅保留用户手动创建的考试，旧的超星缓存不合入
       final merged = [...manual, ...scraped];
       merged.sort((a, b) => a.time.compareTo(b.time));
 
@@ -101,13 +105,16 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
   /// 手动刷新（显示 loading 状态）
   Future<void> refresh() async {
     try {
+      try {
+        await AppCookieManager().syncMultiDomainCookiesFromWebView();
+      } catch (_) {}
+
       final manual = await _collectManualUnion();
       state = const AsyncValue.loading();
       final storage = _ref.read(examStorageProvider);
-      final local = await storage.readExamList();
       final scraped = await _ref
           .read(examServiceProvider)
-          .fetchExams(cachedExams: local);
+          .fetchExams();
 
       final merged = [...manual, ...scraped];
       merged.sort((a, b) => a.time.compareTo(b.time));
