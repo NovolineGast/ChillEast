@@ -46,7 +46,7 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  createSlideUpRoute(const SettingsScreen()),
+                  createSlideHorizontalRoute(const SettingsScreen()),
                 );
               },
             ),
@@ -57,7 +57,7 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  createSlideUpRoute(const HelpFeedbackScreen()),
+                  createSlideHorizontalRoute(const HelpFeedbackScreen()),
                 );
               },
             ),
@@ -68,7 +68,7 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  createSlideUpRoute(const AboutScreen()),
+                  createSlideHorizontalRoute(const AboutScreen()),
                 );
               },
             ),

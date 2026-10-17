@@ -221,7 +221,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    createSlideUpRoute(const AiSettingsScreen()),
+                    createSlideHorizontalRoute(const AiSettingsScreen()),
                   );
                 },
                 child: Padding(
@@ -409,7 +409,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    createSlideUpRoute(const AiSettingsScreen()),
+                    createSlideHorizontalRoute(const AiSettingsScreen()),
                   );
                 },
                 child: Text(
@@ -446,7 +446,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
             onPressed: () {
               Navigator.push(
                 context,
-                createSlideUpRoute(const AiSettingsScreen()),
+                createSlideHorizontalRoute(const AiSettingsScreen()),
               );
             },
             icon: const Icon(Icons.code_rounded, size: 16),
@@ -489,7 +489,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    createSlideUpRoute(const AiSettingsScreen()),
+                    createSlideHorizontalRoute(const AiSettingsScreen()),
                   );
                 },
                 child: Padding(

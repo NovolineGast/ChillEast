@@ -1649,6 +1649,12 @@ abstract class AppLocalizations {
   /// **'通知详情'**
   String get noticeDetail;
 
+  /// No description provided for @selectNoticeHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择左侧通知查看详情'**
+  String get selectNoticeHint;
+
   /// No description provided for @noticeNotFound.
   ///
   /// In zh, this message translates to:

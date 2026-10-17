@@ -817,6 +817,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noticeDetail => 'Notice Details';
 
   @override
+  String get selectNoticeHint => 'Select a notice to view details';
+
+  @override
   String get noticeNotFound => 'Notice details not found';
 
   @override

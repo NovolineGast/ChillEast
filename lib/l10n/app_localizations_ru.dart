@@ -818,6 +818,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get noticeDetail => 'Подробности объявления';
 
   @override
+  String get selectNoticeHint =>
+      'Выберите уведомление слева для просмотра деталей';
+
+  @override
   String get noticeNotFound => 'Данные объявления не найдены';
 
   @override

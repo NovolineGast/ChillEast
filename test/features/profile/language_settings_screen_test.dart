@@ -126,9 +126,15 @@ void main() {
       await tester.tap(languageRowFinder);
       await tester.pumpAndSettle();
 
-      // Verify LanguageSettingsScreen is pushed
+      // Verify LanguageSettingsScreen is shown (in split-screen or pushed)
       expect(find.byType(LanguageSettingsScreen), findsOneWidget);
-      expect(find.text('跟随系统'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(LanguageSettingsScreen),
+          matching: find.text('跟随系统'),
+        ),
+        findsOneWidget,
+      );
     });
   });
 }

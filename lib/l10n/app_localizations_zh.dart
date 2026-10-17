@@ -798,6 +798,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get noticeDetail => '通知详情';
 
   @override
+  String get selectNoticeHint => '选择左侧通知查看详情';
+
+  @override
   String get noticeNotFound => '未找到详情数据';
 
   @override
@@ -3569,6 +3572,9 @@ class AppLocalizationsZhHk extends AppLocalizationsZh {
   String get noticeDetail => '通知詳情';
 
   @override
+  String get selectNoticeHint => '選擇左側通知查看詳情';
+
+  @override
   String get noticeNotFound => '未找到詳情數據';
 
   @override
@@ -5882,6 +5888,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
 
   @override
   String get noticeDetail => '通知詳情';
+
+  @override
+  String get selectNoticeHint => '選擇左側通知查看詳情';
 
   @override
   String get noticeNotFound => '未找到詳情資料';
@@ -8234,6 +8243,9 @@ class AppLocalizationsZhHefei extends AppLocalizationsZh {
 
   @override
   String get noticeDetail => '通知细情';
+
+  @override
+  String get selectNoticeHint => '选左边通知看详细内容';
 
   @override
   String get noticeNotFound => '没找着细情数据';

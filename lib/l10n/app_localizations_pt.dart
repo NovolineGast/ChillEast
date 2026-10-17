@@ -819,6 +819,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noticeDetail => 'Detalhes do Aviso';
 
   @override
+  String get selectNoticeHint =>
+      'Selecione um aviso à esquerda para ver os detalhes';
+
+  @override
   String get noticeNotFound => 'Detalhes do aviso não encontrados';
 
   @override

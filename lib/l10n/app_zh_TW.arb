@@ -191,6 +191,7 @@
   "copy": "複製",
   "aiThinking": "正在思考中...",
   "noticeDetail": "通知詳情",
+  "selectNoticeHint": "選擇左側通知查看詳情",
   "noticeNotFound": "未找到詳情資料",
   "noTitle": "無標題",
   "senderSystem": "系統",

@@ -798,6 +798,9 @@ class AppLocalizationsGan extends AppLocalizations {
   String get noticeDetail => '通知详情';
 
   @override
+  String get selectNoticeHint => '拣左边个通知看详情';
+
+  @override
   String get noticeNotFound => '冒找到详情信息';
 
   @override

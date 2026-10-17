@@ -799,6 +799,9 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get noticeDetail => '通告详细内容';
 
   @override
+  String get selectNoticeHint => '选左面通知看详情';
+
+  @override
   String get noticeNotFound => '寻勿到详细数据';
 
   @override

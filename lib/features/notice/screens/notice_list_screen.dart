@@ -6,8 +6,7 @@ import 'notice_detail_screen.dart';
 import '../../../core/state/auth_state.dart';
 import '../../../core/widgets/login_required_placeholder.dart';
 import '../../../core/utils/l10n_extension.dart';
-import '../../auth/screens/login_screen.dart';
-import 'package:logger/logger.dart';
+import '../../../core/utils/route_utils.dart';
 
 class NoticeListScreen extends ConsumerStatefulWidget {
   const NoticeListScreen({super.key});
@@ -17,8 +16,9 @@ class NoticeListScreen extends ConsumerStatefulWidget {
 }
 
 class _NoticeListScreenState extends ConsumerState<NoticeListScreen> with AutomaticKeepAliveClientMixin {
-  final Logger _logger = Logger();
   final ScrollController _scrollController = ScrollController();
+  String? _selectedNoticeId;
+  bool _isTransitioningToRoute = false;
   
   @override
   bool get wantKeepAlive => true; // ✅ 保持页面状态，切换 Tab 不会销毁
@@ -50,12 +50,115 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> with Automa
     final authState = ref.watch(authStateProvider);
     final noticeState = ref.watch(noticeProvider);
     
-    return Scaffold(
-      body: _buildBody(authState, noticeState),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isLargeScreen = constraints.maxWidth >= 600;
+
+        if (!isLargeScreen && _selectedNoticeId != null && !_isTransitioningToRoute) {
+          _isTransitioningToRoute = true;
+          final noticeIdToOpen = _selectedNoticeId!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            setState(() {
+              _selectedNoticeId = null;
+              _isTransitioningToRoute = false;
+            });
+            Navigator.of(context).push(
+              createSlideHorizontalRoute(
+                NoticeDetailScreen(noticeId: noticeIdToOpen),
+              ),
+            );
+          });
+        }
+
+        if (isLargeScreen) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Scaffold(
+            body: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: _buildBody(authState, noticeState, isLargeScreen: true),
+                ),
+                VerticalDivider(
+                  width: 1,
+                  thickness: 0.5,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : const Color(0x1A000000),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: _buildDetailPane(context),
+                ),
+              ],
+            ),
+          );
+        }
+        return Scaffold(
+          body: _buildBody(authState, noticeState, isLargeScreen: false),
+        );
+      },
+    );
+  }
+
+  Widget _buildDetailPane(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      reverseDuration: const Duration(milliseconds: 250),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        final tween = Tween<Offset>(
+          begin: const Offset(0.08, 0.0),
+          end: Offset.zero,
+        ).chain(CurveTween(curve: Curves.easeOutCubic));
+
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(
+            position: animation.drive(tween),
+            child: child,
+          ),
+        );
+      },
+      child: _selectedNoticeId == null
+          ? Center(
+              key: const ValueKey('notice_empty_pane'),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.mark_email_unread_outlined,
+                    size: 64,
+                    color: isDark ? Colors.white24 : Colors.grey[400],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    context.l10n.selectNoticeHint,
+                    style: TextStyle(
+                      fontSize: 15,
+                      color: isDark ? Colors.white54 : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : NoticeDetailScreen(
+              key: ValueKey(_selectedNoticeId),
+              noticeId: _selectedNoticeId!,
+              isEmbedded: true,
+              onClose: () {
+                setState(() {
+                  _selectedNoticeId = null;
+                });
+              },
+            ),
     );
   }
   
-  Widget _buildBody(AuthState authState, NoticeState noticeState) {
+  Widget _buildBody(AuthState authState, NoticeState noticeState, {required bool isLargeScreen}) {
     // 只有在完全没有本地账号信息时，才显示登录占位符
     if (authState.status == AuthStatus.unauthenticated && !authState.hasAccount) {
       return LoginRequiredPlaceholder(
@@ -149,7 +252,7 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> with Automa
             return _buildLoadMoreIndicator(noticeState);
           }
           final message = noticeState.messages[index];
-          return _buildMessageCard(message);
+          return _buildMessageCard(message, isLargeScreen: isLargeScreen);
         },
       ),
     );
@@ -179,7 +282,7 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> with Automa
     );
   }
   
-  Widget _buildMessageCard(MessageModel message) {
+  Widget _buildMessageCard(MessageModel message, {required bool isLargeScreen}) {
     // 提取时间 (仅显示时分或月日)
     String timeDisplay = message.sendTime;
     try {
@@ -201,38 +304,43 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> with Automa
 
     // 为不同的发送者生成固定的颜色
     final avatarColor = Colors.primaries[message.createrName.hashCode % Colors.primaries.length];
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isSelected = isLargeScreen && _selectedNoticeId == message.idCode;
 
-    return Column(
-      children: [
-        InkWell(
-          onTap: () {
-            Navigator.push(
-              context,
-              PageRouteBuilder(
-                pageBuilder: (context, animation, secondaryAnimation) => NoticeDetailScreen(
-                  noticeId: message.idCode,
-                ),
-                transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                  const begin = Offset(0.0, 0.05); // 从下方 5% 处开始
-                  const end = Offset.zero;
-                  const curve = Curves.easeOutCubic;
-
-                  var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-                  var opacityTween = Tween<double>(begin: 0.0, end: 1.0);
-
-                  return FadeTransition(
-                    opacity: animation.drive(opacityTween),
-                    child: SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
+    return Padding(
+      padding: isLargeScreen
+          ? const EdgeInsets.symmetric(horizontal: 10, vertical: 2)
+          : EdgeInsets.zero,
+      child: Container(
+        decoration: BoxDecoration(
+          color: isSelected
+              ? (isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : const Color(0xFFEBEBEB))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(10),
+            onTap: () {
+              if (isLargeScreen) {
+                setState(() {
+                  _selectedNoticeId = message.idCode;
+                });
+              } else {
+                Navigator.push(
+                  context,
+                  createSlideHorizontalRoute(
+                    NoticeDetailScreen(
+                      noticeId: message.idCode,
                     ),
-                  );
-                },
-                transitionDuration: const Duration(milliseconds: 300),
-                reverseTransitionDuration: const Duration(milliseconds: 250),
-              ),
-            );
-          },
+                  ),
+                );
+              }
+            },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
@@ -312,14 +420,12 @@ class _NoticeListScreenState extends ConsumerState<NoticeListScreen> with Automa
             ),
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ),
+  );
+}
 
   String _twoDigits(int n) => n.toString().padLeft(2, '0');
   
-  /// 显示登录对话框
-  void _showLoginDialog(BuildContext context) {
-    Navigator.push(context, LoginScreen.route());
-  }
+
 }

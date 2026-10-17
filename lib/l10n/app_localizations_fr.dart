@@ -825,6 +825,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get noticeDetail => 'Détails de l\'annonce';
 
   @override
+  String get selectNoticeHint =>
+      'Sélectionnez une notification pour afficher les détails';
+
+  @override
   String get noticeNotFound => 'Détails de l\'annonce introuvables';
 
   @override

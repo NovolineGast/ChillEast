@@ -26,6 +26,7 @@ import '../../library/screens/library_home_screen.dart';
 import '../../campus_bus/screens/campus_bus_map_screen.dart';
 import '../../dormitory/screens/dormitory_screen.dart';
 import '../../exam/screens/exam_screen.dart';
+import '../../../core/widgets/embedded_detail_pane.dart';
 
 /// 功能页 - 展示各种功能入口
 class FunctionsScreen extends ConsumerStatefulWidget {
@@ -37,6 +38,9 @@ class FunctionsScreen extends ConsumerStatefulWidget {
 
 class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
   bool _isNavigating = false;
+  Widget? _embeddedScreen;
+  String? _selectedFunctionId;
+  bool _isTransitioningToRoute = false;
 
   @override
   void initState() {
@@ -52,16 +56,33 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
     });
   }
 
-  void _safeNavigate(Widget screen) async {
+  bool _canSplitScreen() {
+    final size = MediaQuery.sizeOf(context);
+    final orientation = MediaQuery.orientationOf(context);
+    final isTabletOrLandscape = size.width >= 600 ||
+        (orientation == Orientation.landscape && size.width >= 500);
+    final pageWidth = isTabletOrLandscape ? (size.width - 76.0) : size.width;
+    return pageWidth >= 600;
+  }
+
+  void _safeNavigate(Widget screen, {String? id}) async {
     if (_isNavigating) return;
-    
+
+    if (_canSplitScreen()) {
+      setState(() {
+        _embeddedScreen = screen;
+        _selectedFunctionId = id;
+      });
+      return;
+    }
+
     setState(() => _isNavigating = true);
-    
+
     await Navigator.push(
       context,
-      createSlideUpRoute(screen),
+      createSlideHorizontalRoute(screen),
     );
-    
+
     if (mounted) {
       setState(() => _isNavigating = false);
     }
@@ -116,115 +137,179 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
         .where((group) => group.items.isNotEmpty)
         .toList();
 
-    return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                for (int gi = 0; gi < visibleGroups.length; gi++) ...[
-                  if (gi > 0) const SizedBox(height: 20),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 10),
-                    child: Text(
-                      functionGroupTitle(context, visibleGroups[gi].titleKey),
-                      style: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.w600,
-                        color:
-                            Theme.of(context).brightness == Brightness.dark
-                                ? Colors.white70
-                                : Colors.grey[700],
-                      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isLargeScreen = constraints.maxWidth >= 600;
+
+        if (!isLargeScreen && _embeddedScreen != null && !_isTransitioningToRoute) {
+          _isTransitioningToRoute = true;
+          final screenToOpen = _embeddedScreen!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            setState(() {
+              _embeddedScreen = null;
+              _selectedFunctionId = null;
+              _isTransitioningToRoute = false;
+            });
+            Navigator.of(context).push(
+              createSlideHorizontalRoute(screenToOpen),
+            );
+          });
+        }
+
+        final listContent =
+            _buildFunctionsList(context, visibleGroups, isLoggedIn);
+
+        if (isLargeScreen && _embeddedScreen != null) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: listContent,
+              ),
+              VerticalDivider(
+                width: 1,
+                thickness: 0.5,
+                color: isDark
+                    ? Colors.white.withValues(alpha: 0.08)
+                    : const Color(0x1A000000),
+              ),
+              Expanded(
+                flex: 1,
+                child: EmbeddedDetailPane(
+                  key: ValueKey(
+                      _selectedFunctionId ?? _embeddedScreen.runtimeType),
+                  onClose: () {
+                    setState(() {
+                      _embeddedScreen = null;
+                      _selectedFunctionId = null;
+                    });
+                  },
+                  child: _embeddedScreen!,
+                ),
+              ),
+            ],
+          );
+        }
+
+        return listContent;
+      },
+    );
+  }
+
+  Widget _buildFunctionsList(
+    BuildContext context,
+    List<({List<FunctionItem> items, String titleKey})> visibleGroups,
+    bool isLoggedIn,
+  ) {
+    return SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (int gi = 0; gi < visibleGroups.length; gi++) ...[
+                if (gi > 0) const SizedBox(height: 20),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 10),
+                  child: Text(
+                    functionGroupTitle(context, visibleGroups[gi].titleKey),
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color:
+                          Theme.of(context).brightness == Brightness.dark
+                              ? Colors.white70
+                              : Colors.grey[700],
                     ),
                   ),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                      mainAxisExtent: 52,
-                    ),
-                    itemCount: visibleGroups[gi].items.length,
-                    itemBuilder: (context, index) {
-                      final item = visibleGroups[gi].items[index];
-                      return _buildFunctionGridCard(
-                        context,
-                        title: item.getLocalizedTitle(context),
-                        icon: item.icon,
-                        color: item.color,
-                        onTap: () =>
-                            _handleFunctionTap(context, item.id, isLoggedIn),
-                      );
-                    },
+                ),
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate:
+                      const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 240,
+                    mainAxisSpacing: 10,
+                    crossAxisSpacing: 10,
+                    mainAxisExtent: 52,
                   ),
-                ],
+                  itemCount: visibleGroups[gi].items.length,
+                  itemBuilder: (context, index) {
+                    final item = visibleGroups[gi].items[index];
+                    final isSelected = _selectedFunctionId == item.id;
+                    return _buildFunctionGridCard(
+                      context,
+                      title: item.getLocalizedTitle(context),
+                      icon: item.icon,
+                      color: item.color,
+                      isSelected: isSelected,
+                      onTap: () =>
+                          _handleFunctionTap(context, item.id, isLoggedIn),
+                    );
+                  },
+                ),
               ],
-            ),
+            ],
           ),
         ),
-      ),
-    );
+      );
   }
 
   void _handleFunctionTap(BuildContext context, String id, bool isLoggedIn) async {
     switch (id) {
       case 'payment_code':
         isLoggedIn 
-            ? _safeNavigate(const PaymentCodeScreen())
+            ? _safeNavigate(const PaymentCodeScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'recharge':
         isLoggedIn 
-            ? _safeNavigate(const CampusCardRechargeScreen())
+            ? _safeNavigate(const CampusCardRechargeScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'ele_recharge':
         isLoggedIn 
-            ? _safeNavigate(const ElectricityRechargeScreen())
+            ? _safeNavigate(const ElectricityRechargeScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'library':
         isLoggedIn 
-            ? _safeNavigate(const LibraryHomeScreen())
+            ? _safeNavigate(const LibraryHomeScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'empty_classroom':
         isLoggedIn 
-            ? _safeNavigate(const ClassroomInquiryScreen())
+            ? _safeNavigate(const ClassroomInquiryScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'sunshine':
         isLoggedIn
-            ? _safeNavigate(const SunshineScreen())
+            ? _safeNavigate(const SunshineScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'questionnaire':
         isLoggedIn
-            ? _safeNavigate(const QuestionnaireListScreen())
+            ? _safeNavigate(const QuestionnaireListScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'leave':
         isLoggedIn
-            ? _safeNavigate(const LeaveListScreen())
+            ? _safeNavigate(const LeaveListScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'repairs':
         isLoggedIn 
             ? _safeNavigate(
                 const RepairScreen(),
+                id: id,
               )
             : _showLoginDialog();
         break;
       case 'dormitory':
         isLoggedIn
-            ? _safeNavigate(const DormitoryScreen())
+            ? _safeNavigate(const DormitoryScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'gym':
@@ -235,6 +320,7 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
                   url: AppConstants.gymReservationUrl,
                   showWebBack: true,
                 ),
+                id: id,
               )
             : _showLoginDialog();
         break;
@@ -249,6 +335,7 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
                   showWebBack: false,
                   appBarColor: const Color(0xFF1E88E5),
                 ),
+                id: id,
               )
             : _showLoginDialog();
         break;
@@ -265,6 +352,7 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
                   appBarColor: Colors.white,
                   allowExternalLinks: true,
                 ),
+                id: id,
               )
             : _showLoginDialog();
         break;
@@ -278,6 +366,7 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
                   showWebBack: false,
                   appBarColor: const Color(0xFF3C8DBC),
                 ),
+                id: id,
               )
             : _showLoginDialog();
         break;
@@ -291,19 +380,20 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
                   showWebBack: false,
                   appBarColor: Colors.white,
                 ),
+                id: id,
               )
             : _showLoginDialog();
         break;
       case 'score':
         isLoggedIn 
-            ? _safeNavigate(const ScoreScreen())
+            ? _safeNavigate(const ScoreScreen(), id: id)
             : _showLoginDialog();
         break;
       case 'exam':
-        _safeNavigate(const ExamScreen());
+        _safeNavigate(const ExamScreen(), id: id);
         break;
       case 'vpn':
-        _safeNavigate(const VpnConverterScreen());
+        _safeNavigate(const VpnConverterScreen(), id: id);
         break;
       case 'campus_card':
         if (isLoggedIn) {
@@ -322,16 +412,17 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
               showAppBar: false,
               appBarColor: const Color(0xFF008268),
             ),
+            id: id,
           );
         } else {
           _showLoginDialog();
         }
         break;
       case 'bus':
-        _safeNavigate(const BusTrackingScreen());
+        _safeNavigate(const BusTrackingScreen(), id: id);
         break;
       case 'campus_bus_route':
-        _safeNavigate(const CampusBusMapScreen());
+        _safeNavigate(const CampusBusMapScreen(), id: id);
         break;
       case 'cs_bus':
         final csBusTitle = context.l10n.funcCsBus;
@@ -347,6 +438,7 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
               showAppBar: true,
               appBarColor: const Color(0xFFF4F4F4),
             ),
+            id: id,
           );
         } else {
           if (context.mounted) {
@@ -368,18 +460,27 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
     required String title,
     required IconData icon,
     required Color color,
+    bool isSelected = false,
     required VoidCallback onTap,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    const activeColor = Color(0xFF09C489);
+
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        color: isSelected
+            ? (isDark
+                ? activeColor.withValues(alpha: 0.15)
+                : activeColor.withValues(alpha: 0.08))
+            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : const Color(0xFFE0E0E0),
-          width: 1,
+          color: isSelected
+              ? activeColor
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : const Color(0xFFE0E0E0)),
+          width: isSelected ? 1.5 : 1,
         ),
       ),
       child: Material(
@@ -400,8 +501,11 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? activeColor
+                          : (isDark ? Colors.white : Colors.black87),
                     ),
                   ),
                 ),

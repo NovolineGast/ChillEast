@@ -190,6 +190,7 @@
   "copy": "Copiar",
   "aiThinking": "Pensando...",
   "noticeDetail": "Detalles del aviso",
+  "selectNoticeHint": "Seleccione un aviso de la izquierda para ver los detalles",
   "noticeNotFound": "No se encontraron detalles del aviso",
   "noTitle": "Sin título",
   "senderSystem": "Sistema",

@@ -255,6 +255,7 @@
   "copy": "Copy",
   "aiThinking": "Thinking...",
   "noticeDetail": "Notice Details",
+  "selectNoticeHint": "Select a notice to view details",
   "noticeNotFound": "Notice details not found",
   "noTitle": "No Title",
   "senderSystem": "System",

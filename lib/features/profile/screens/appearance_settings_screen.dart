@@ -36,7 +36,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                createSlideUpRoute(ButtonReorderScreen(
+                createSlideHorizontalRoute(ButtonReorderScreen(
                   title: l10n.homeButtonsTitle,
                   listType: 'home',
                 )),
@@ -50,7 +50,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                createSlideUpRoute(ButtonReorderScreen(
+                createSlideHorizontalRoute(ButtonReorderScreen(
                   title: l10n.functionsButtonsTitle,
                   listType: 'functions',
                 )),
@@ -64,7 +64,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                createSlideUpRoute(ButtonReorderScreen(
+                createSlideHorizontalRoute(ButtonReorderScreen(
                   title: l10n.feedButtonsTitle,
                   listType: 'feed',
                 )),

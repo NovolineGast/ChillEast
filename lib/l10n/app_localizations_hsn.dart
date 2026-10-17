@@ -798,6 +798,9 @@ class AppLocalizationsHsn extends AppLocalizations {
   String get noticeDetail => '通知详情';
 
   @override
+  String get selectNoticeHint => '选左边通知看细情';
+
+  @override
   String get noticeNotFound => '冒找到详情数据';
 
   @override

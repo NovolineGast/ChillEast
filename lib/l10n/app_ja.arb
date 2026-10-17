@@ -190,6 +190,7 @@
   "copy": "コピー",
   "aiThinking": "思考中...",
   "noticeDetail": "お知らせ詳細",
+  "selectNoticeHint": "左側の通知を選択して詳細を表示",
   "noticeNotFound": "詳細情報が見つかりません",
   "noTitle": "タイトルなし",
   "senderSystem": "システム",

@@ -368,6 +368,7 @@
   "copy": "复制",
   "aiThinking": "正思量...",
   "noticeDetail": "通知详情",
+  "selectNoticeHint": "拣左边个通知看详情",
   "noticeNotFound": "冒找到详情信息",
   "noTitle": "无标题",
   "senderSystem": "系统",

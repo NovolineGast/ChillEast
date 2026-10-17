@@ -190,6 +190,7 @@
   "copy": "Copier",
   "aiThinking": "Réflexion en cours...",
   "noticeDetail": "Détails de l'annonce",
+  "selectNoticeHint": "Sélectionnez une notification pour afficher les détails",
   "noticeNotFound": "Détails de l'annonce introuvables",
   "noTitle": "Sans titre",
   "senderSystem": "Système",

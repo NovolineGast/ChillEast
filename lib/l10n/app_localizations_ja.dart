@@ -805,6 +805,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get noticeDetail => 'お知らせ詳細';
 
   @override
+  String get selectNoticeHint => '左側の通知を選択して詳細を表示';
+
+  @override
   String get noticeNotFound => '詳細情報が見つかりません';
 
   @override

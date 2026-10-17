@@ -823,6 +823,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get noticeDetail => 'Detalles del aviso';
 
   @override
+  String get selectNoticeHint =>
+      'Seleccione un aviso de la izquierda para ver los detalles';
+
+  @override
   String get noticeNotFound => 'No se encontraron detalles del aviso';
 
   @override

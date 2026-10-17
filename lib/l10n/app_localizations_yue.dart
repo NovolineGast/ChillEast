@@ -799,6 +799,9 @@ class AppLocalizationsYue extends AppLocalizations {
   String get noticeDetail => '通知详情';
 
   @override
+  String get selectNoticeHint => '揀左邊通知睇詳情';
+
+  @override
   String get noticeNotFound => '揾唔到详情资料';
 
   @override

@@ -56,6 +56,7 @@ import '../../campus_bus/screens/campus_bus_map_screen.dart';
 import '../../../core/utils/date_format_utils.dart';
 import '../../../core/network/cookie_manager.dart';
 import '../utils/feed_sorter.dart';
+import '../../../core/widgets/embedded_detail_pane.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final Function(int)? onNavigateToTab;
@@ -76,6 +77,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _quickPageIndex = 0;
   // 小组件同步节流
   DateTime _lastWidgetSync = DateTime.fromMillisecondsSinceEpoch(0);
+  Widget? _embeddedScreen;
+  String? _selectedActionId;
+  bool _isTransitioningToRoute = false;
+
+  bool _canSplitScreen(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final orientation = MediaQuery.orientationOf(context);
+    final isTabletOrLandscape = size.width >= 600 ||
+        (orientation == Orientation.landscape && size.width >= 500);
+    final pageWidth = isTabletOrLandscape ? (size.width - 76.0) : size.width;
+    return pageWidth >= 600;
+  }
+
+  void _safeNavigate(BuildContext context, Widget screen, {String? id}) {
+    if (_canSplitScreen(context)) {
+      setState(() {
+        _embeddedScreen = screen;
+        _selectedActionId = id;
+      });
+      return;
+    }
+
+    Navigator.push(context, createSlideHorizontalRoute(screen));
+  }
 
   @override
   void initState() {
@@ -208,85 +233,241 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       });
     });
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  for (final sectionId in () {
-                    final appearance = ref.watch(appearanceProvider);
-                    if (!appearance.feedAutoSort) {
-                      return appearance.feedItems
-                          .where((e) => e.isVisible)
-                          .map((e) => e.id)
-                          .toList();
-                    }
+    final orderedSectionIds = () {
+      final appearance = ref.watch(appearanceProvider);
+      if (!appearance.feedAutoSort) {
+        return appearance.feedItems
+            .where((e) => e.isVisible)
+            .map((e) => e.id)
+            .toList();
+      }
 
-                    final reserves =
-                        ref.watch(cachedLibraryReserveProvider).value ?? [];
-                    final hasLibraryP0 =
-                        FeedSorter.checkLibraryP0(reserves: reserves);
+      final reserves =
+          ref.watch(cachedLibraryReserveProvider).value ?? [];
+      final hasLibraryP0 =
+          FeedSorter.checkLibraryP0(reserves: reserves);
 
-                    final leaves = ref.watch(leaveCacheProvider).value ?? [];
-                    final hasLeaveP1 = FeedSorter.checkLeaveP1(leaves: leaves);
+      final leaves = ref.watch(leaveCacheProvider).value ?? [];
+      final hasLeaveP1 = FeedSorter.checkLeaveP1(leaves: leaves);
 
-                    final exams = ref.watch(examProvider).value ?? [];
-                    final hasAgendaP2 = FeedSorter.checkAgendaP2(
-                      courses: _todayCourses,
-                      exams: exams,
-                      previewDate: _previewDate,
-                    );
+      final exams = ref.watch(examProvider).value ?? [];
+      final hasAgendaP2 = FeedSorter.checkAgendaP2(
+        courses: _todayCourses,
+        exams: exams,
+        previewDate: _previewDate,
+      );
 
-                    final homeworks =
-                        ref.watch(homeworkProvider).value ?? [];
-                    final hasHomeworkP3 =
-                        FeedSorter.checkHomeworkP3(homeworks: homeworks);
+      final homeworks =
+          ref.watch(homeworkProvider).value ?? [];
+      final hasHomeworkP3 =
+          FeedSorter.checkHomeworkP3(homeworks: homeworks);
 
-                    final eleState = ref.watch(electricityCacheProvider);
-                    final hasBalanceP4 = FeedSorter.checkBalanceP4(
-                      balances: eleState.balances,
-                      balanceInfo: eleState.balanceInfo,
-                    );
+      final eleState = ref.watch(electricityCacheProvider);
+      final hasBalanceP4 = FeedSorter.checkBalanceP4(
+        balances: eleState.balances,
+        balanceInfo: eleState.balanceInfo,
+      );
 
-                    return FeedSorter.sortFeedItems(
-                      autoSort: true,
-                      manualOrder: appearance.feedItems
-                          .where((e) => e.isVisible)
-                          .map((e) => e.id)
-                          .toList(),
-                      hasLibraryP0: hasLibraryP0,
-                      hasLeaveP1: hasLeaveP1,
-                      hasAgendaP2: hasAgendaP2,
-                      hasHomeworkP3: hasHomeworkP3,
-                      hasBalanceP4: hasBalanceP4,
-                    );
-                  }())
-                    switch (sectionId) {
-                      'feed_quick' => _buildQuickActions(context, authState),
-                      'feed_library' => _buildLibrarySeatCard(context),
-                      'feed_agenda' => _buildTodayTimetablePreview(context),
-                      'feed_homework' => _buildHomeworkSection(context),
-                      'feed_questionnaire' =>
-                        _buildPendingQuestionnaires(context),
-                      'feed_leave' => _buildOngoingLeaves(context),
-                      'feed_repair' => _buildOngoingRepairs(context),
-                      'feed_balance' => _buildBalanceSection(context),
-                      _ => const SizedBox.shrink(),
-                    },
-                  const SizedBox(height: 24),
-                ],
+      return FeedSorter.sortFeedItems(
+        autoSort: true,
+        manualOrder: appearance.feedItems
+            .where((e) => e.isVisible)
+            .map((e) => e.id)
+            .toList(),
+        hasLibraryP0: hasLibraryP0,
+        hasLeaveP1: hasLeaveP1,
+        hasAgendaP2: hasAgendaP2,
+        hasHomeworkP3: hasHomeworkP3,
+        hasBalanceP4: hasBalanceP4,
+      );
+    }();
+
+    final builtWidgets = <Widget>[];
+    for (final sectionId in orderedSectionIds) {
+      final widget = _buildFeedSection(sectionId, context, authState);
+      if (_isNonEmptyWidget(widget)) {
+        builtWidgets.add(widget);
+      }
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMultiColumn = constraints.maxWidth >= 600;
+
+        if (!isMultiColumn && _embeddedScreen != null && !_isTransitioningToRoute) {
+          _isTransitioningToRoute = true;
+          final screenToOpen = _embeddedScreen!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            setState(() {
+              _embeddedScreen = null;
+              _selectedActionId = null;
+              _isTransitioningToRoute = false;
+            });
+            Navigator.of(context).push(
+              createSlideHorizontalRoute(screenToOpen),
+            );
+          });
+        }
+
+          if (isMultiColumn) {
+            if (_embeddedScreen != null) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 8),
+                            for (final w in builtWidgets) ...[
+                              w,
+                              const SizedBox(height: 16),
+                            ],
+                            const SizedBox(height: 24),
+                          ],
+                        ),
+                      ),
+                    ),
+                    VerticalDivider(
+                      width: 16,
+                      thickness: 0.5,
+                      color: isDark
+                          ? Colors.white.withValues(alpha: 0.08)
+                          : const Color(0x1A000000),
+                    ),
+                    Expanded(
+                      child: EmbeddedDetailPane(
+                        key: ValueKey(
+                            _selectedActionId ?? _embeddedScreen.runtimeType),
+                        onClose: () {
+                          setState(() {
+                            _embeddedScreen = null;
+                            _selectedActionId = null;
+                          });
+                          ref.read(campusCardCacheProvider.notifier).refresh();
+                          ref.read(electricityCacheProvider.notifier).refresh();
+                          ref.read(leaveCacheProvider.notifier).refresh();
+                          ref.read(repairCacheProvider.notifier).refresh();
+                          ref.read(questionnaireCacheProvider.notifier).refresh();
+                        },
+                        child: _embeddedScreen!,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final leftItems = <Widget>[];
+            final rightItems = <Widget>[];
+            for (int i = 0; i < builtWidgets.length; i++) {
+              if (i.isEven) {
+                leftItems.add(builtWidgets[i]);
+              } else {
+                rightItems.add(builtWidgets[i]);
+              }
+            }
+
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (final w in leftItems) ...[
+                                w,
+                                const SizedBox(height: 16),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (final w in rightItems) ...[
+                                w,
+                                const SizedBox(height: 16),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
+            );
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      for (final w in builtWidgets) ...[
+                        w,
+                        const SizedBox(height: 16),
+                      ],
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          );
+        },
+      );
+  }
+
+  Widget _buildFeedSection(
+      String sectionId, BuildContext context, AuthState authState) {
+    switch (sectionId) {
+      case 'feed_quick':
+        return _buildQuickActions(context, authState);
+      case 'feed_library':
+        return _buildLibrarySeatCard(context);
+      case 'feed_agenda':
+        return _buildTodayTimetablePreview(context);
+      case 'feed_homework':
+        return _buildHomeworkSection(context);
+      case 'feed_questionnaire':
+        return _buildPendingQuestionnaires(context);
+      case 'feed_leave':
+        return _buildOngoingLeaves(context);
+      case 'feed_repair':
+        return _buildOngoingRepairs(context);
+      case 'feed_balance':
+        return _buildBalanceSection(context);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  bool _isNonEmptyWidget(Widget widget) {
+    if (widget is SizedBox && widget.child == null) {
+      return false;
+    }
+    return true;
   }
 
   Widget _buildQuickActions(BuildContext context, AuthState authState) {
@@ -433,11 +614,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       itemBuilder: (context, index) {
         if (index < items.length) {
           final item = items[index];
+          final isSelected = _selectedActionId == item.id;
           return _buildQuickActionCard(
             context,
             icon: item.icon,
             label: item.getLocalizedTitle(context),
             iconColor: item.color,
+            isSelected: isSelected,
             isDark: isDark,
             onTap: () => _handleActionTap(context, item.id, isLoggedIn),
           );
@@ -460,95 +643,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     switch (id) {
       case 'payment_code':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const PaymentCodeScreen()))
+            ? _safeNavigate(context, const PaymentCodeScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'recharge':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const CampusCardRechargeScreen()))
+            ? _safeNavigate(context, const CampusCardRechargeScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'ele_recharge':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const ElectricityRechargeScreen()))
+            ? _safeNavigate(context, const ElectricityRechargeScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'library':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const LibraryHomeScreen()))
+            ? _safeNavigate(context, const LibraryHomeScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'empty_classroom':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const ClassroomInquiryScreen()))
+            ? _safeNavigate(context, const ClassroomInquiryScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'xgxt':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcXgxt,
                   url: AppConstants.xgxtWapUrl,
                   showAppBar: false,
                   showWebBack: false,
                   appBarColor: const Color(0xFF3C8DBC),
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'sunshine':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const SunshineScreen()))
+            ? _safeNavigate(context, const SunshineScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'questionnaire':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const QuestionnaireListScreen()))
+            ? _safeNavigate(context, const QuestionnaireListScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'leave':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const LeaveListScreen()))
+            ? _safeNavigate(context, const LeaveListScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'repairs':
         isLoggedIn
-            ? Navigator.push(context, createSlideUpRoute(const RepairScreen()))
+            ? _safeNavigate(context, const RepairScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'dormitory':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const DormitoryScreen()))
+            ? _safeNavigate(context, const DormitoryScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'ehall':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcEhall,
                   url: AppConstants.ehallUrl,
                   userAgent: AppConstants.ehallUA,
                   showAppBar: false,
                   showWebBack: false,
                   appBarColor: const Color(0xFF1E88E5),
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'info_portal':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcInfoPortal,
                   url: AppConstants.infoPortalUrl,
                   homeUrl: AppConstants.infoPortalUrl,
@@ -557,43 +735,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   showWebBack: false,
                   appBarColor: Colors.white,
                   allowExternalLinks: true,
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'gym':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcGym,
                   url: AppConstants.gymReservationUrl,
                   showWebBack: true,
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'teaching_eval':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcTeachingEval,
                   url: AppConstants.teachingEvalUrl,
                   showAppBar: false,
                   showWebBack: false,
                   appBarColor: Colors.white,
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'score':
         isLoggedIn
-            ? Navigator.push(context, createSlideUpRoute(const ScoreScreen()))
+            ? _safeNavigate(context, const ScoreScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'exam':
-        Navigator.push(context, createSlideUpRoute(const ExamScreen()));
+        _safeNavigate(context, const ExamScreen(), id: id);
         break;
       case 'vpn':
-        Navigator.push(context, createSlideUpRoute(const VpnConverterScreen()));
+        _safeNavigate(context, const VpnConverterScreen(), id: id);
         break;
       case 'campus_card':
         if (isLoggedIn) {
@@ -603,43 +787,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           final url = service.getCampusCardHomeUrl();
 
           if (!context.mounted) return;
-          Navigator.push(
-              context,
-              createSlideUpRoute(
-                WebViewDetailScreen(
-                  title: context.l10n.funcCampusCard,
-                  url: url,
-                  userAgent: AppConstants.campusCardUA,
-                  showWebBack: false,
-                  showAppBar: false,
-                  appBarColor: const Color(0xFF008268),
-                ),
-              ));
+          _safeNavigate(
+            context,
+            WebViewDetailScreen(
+              title: context.l10n.funcCampusCard,
+              url: url,
+              userAgent: AppConstants.campusCardUA,
+              showWebBack: false,
+              showAppBar: false,
+              appBarColor: const Color(0xFF008268),
+            ),
+            id: id,
+          );
         } else {
           _showLoginDialog(context);
         }
         break;
       case 'bus':
-        Navigator.push(context, createSlideUpRoute(const BusTrackingScreen()));
+        _safeNavigate(context, const BusTrackingScreen(), id: id);
         break;
       case 'campus_bus_route':
-        Navigator.push(context, createSlideUpRoute(const CampusBusMapScreen()));
+        _safeNavigate(context, const CampusBusMapScreen(), id: id);
         break;
       case 'cs_bus':
         final hasPermission = await LocationHelper.requestPermission();
         if (hasPermission) {
           if (!context.mounted) return;
-          Navigator.push(
-              context,
-              createSlideUpRoute(
-                WebViewDetailScreen(
-                  title: context.l10n.funcCsBus,
-                  url: AppConstants.changshaBusUrl,
-                  showWebBack: true,
-                  showAppBar: true,
-                  appBarColor: const Color(0xFFF4F4F4),
-                ),
-              ));
+          _safeNavigate(
+            context,
+            WebViewDetailScreen(
+              title: context.l10n.funcCsBus,
+              url: AppConstants.changshaBusUrl,
+              showWebBack: true,
+              showAppBar: true,
+              appBarColor: const Color(0xFFF4F4F4),
+            ),
+            id: id,
+          );
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -659,18 +843,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required IconData icon,
     required String label,
     required Color iconColor,
+    bool isSelected = false,
     required bool isDark,
     required VoidCallback onTap,
   }) {
+    const activeColor = Color(0xFF09C489);
+
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        color: isSelected
+            ? (isDark
+                ? activeColor.withValues(alpha: 0.15)
+                : activeColor.withValues(alpha: 0.08))
+            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : const Color(0xFFE0E0E0),
-          width: 1,
+          color: isSelected
+              ? activeColor
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : const Color(0xFFE0E0E0)),
+          width: isSelected ? 1.5 : 1,
         ),
       ),
       child: Material(
@@ -695,8 +888,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? activeColor
+                          : (isDark ? Colors.white : Colors.black87),
                     ),
                   ),
                 ),
@@ -774,8 +970,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(6),
           onTap: () {
-            Navigator.push(
-                context, createSlideUpRoute(const LibraryHomeScreen()));
+            _safeNavigate(
+                context, const LibraryHomeScreen(), id: 'library');
           },
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -1203,8 +1399,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (item.detailUrl.isNotEmpty) {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => WebViewDetailScreen(
+            createSlideHorizontalRoute(
+              WebViewDetailScreen(
                 url: item.detailUrl,
                 title: item.title,
               ),
@@ -1219,7 +1415,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           color: isDark ? const Color(0xFF382326) : const Color(0xFFFFEBEE),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: const Color(0xFFE53935).withOpacity(isDark ? 0.3 : 0.2),
+            color: const Color(0xFFE53935).withValues(alpha: isDark ? 0.3 : 0.2),
             width: 1,
           ),
         ),
@@ -1256,7 +1452,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE53935).withOpacity(0.12),
+                            color: const Color(0xFFE53935).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -1426,7 +1622,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (context.mounted) {
         Navigator.push(
           context,
-          createSlideUpRoute(WebViewDetailScreen(
+          createSlideHorizontalRoute(WebViewDetailScreen(
             title: context.l10n.homeworkDetail,
             url: item.dataUrl,
           )),
@@ -1593,8 +1789,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return _buildMergedSection(
       title: context.l10n.pendingQuestionnaires,
       onMore: () {
-        Navigator.push(
-            context, createSlideUpRoute(const QuestionnaireListScreen()));
+        _safeNavigate(
+            context, const QuestionnaireListScreen(), id: 'questionnaire');
       },
       items: display
           .map((item) => _buildSectionItem(
@@ -1616,9 +1812,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _openQuestionnaireDetail(
       BuildContext context, QuestionnaireItem item) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        QuestionnaireDetailScreen(item: item),
+        id: 'questionnaire_${item.hashCode}',
+      );
+      return;
+    }
     final changed = await Navigator.push<bool>(
       context,
-      createSlideUpRoute(QuestionnaireDetailScreen(item: item)),
+      createSlideHorizontalRoute(QuestionnaireDetailScreen(item: item)),
     );
     if (changed == true && context.mounted) {
       ref.read(questionnaireCacheProvider.notifier).refresh();
@@ -1687,8 +1891,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return _buildMergedSection(
       title: context.l10n.funcLeave,
       onMore: () {
-        Navigator.push(
-            context, createSlideUpRoute(const LeaveListScreen()));
+        _safeNavigate(context, const LeaveListScreen(), id: 'leave');
       },
       items: display.map((record) {
         final duration = record.getLocalizedDuration(context);
@@ -1713,9 +1916,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _openLeaveDetail(
       BuildContext context, LeaveRecord record) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        LeaveDetailScreen(item: record),
+        id: 'leave_${record.hashCode}',
+      );
+      return;
+    }
     final changed = await Navigator.push<bool>(
       context,
-      createSlideUpRoute(LeaveDetailScreen(item: record)),
+      createSlideHorizontalRoute(LeaveDetailScreen(item: record)),
     );
     if (changed == true && context.mounted) {
       ref.read(leaveCacheProvider.notifier).refresh();
@@ -1740,7 +1951,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return _buildMergedSection(
       title: context.l10n.repairWorkOrders,
       onMore: () {
-        Navigator.push(context, createSlideUpRoute(const RepairScreen()));
+        _safeNavigate(context, const RepairScreen(), id: 'repairs');
       },
       items: display
           .map((order) => _buildSectionItem(
@@ -1761,9 +1972,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _openRepairDetail(
       BuildContext context, RepairOrder order) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        RepairDetailScreen(order: order),
+        id: 'repair_${order.id}',
+      );
+      return;
+    }
     await Navigator.push(
       context,
-      createSlideUpRoute(RepairDetailScreen(order: order)),
+      createSlideHorizontalRoute(RepairDetailScreen(order: order)),
     );
     if (context.mounted) {
       ref.read(repairCacheProvider.notifier).refresh();
@@ -1779,17 +1998,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required Color balanceColor,
     required VoidCallback onTap,
     required bool isDark,
+    bool isSelected = false,
   }) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        color: isSelected
+            ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.08)
+            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : const Color(0xFFE0E0E0),
-          width: 1,
+          color: isSelected
+              ? theme.colorScheme.primary
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : const Color(0xFFE0E0E0)),
+          width: isSelected ? 1.5 : 1,
         ),
       ),
       child: Material(
@@ -1908,6 +2133,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           balanceColor: eleBalanceColor,
           onTap: () => _openElectricity(context, initialSlot: i),
           isDark: isDark,
+          isSelected: _selectedActionId == 'ele_recharge_$i',
         ),
       );
     }
@@ -1940,6 +2166,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           balanceColor: isDark ? Colors.white : const Color(0xFF202124),
           onTap: () => _openCampusCard(context),
           isDark: isDark,
+          isSelected: _selectedActionId == 'campus_card',
         ),
       );
     }
@@ -1967,9 +2194,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _openCampusCard(BuildContext context) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        const CampusCardRechargeScreen(),
+        id: 'campus_card',
+      );
+      return;
+    }
     await Navigator.push(
       context,
-      createSlideUpRoute(const CampusCardRechargeScreen()),
+      createSlideHorizontalRoute(const CampusCardRechargeScreen()),
     );
     if (context.mounted) {
       ref.read(campusCardCacheProvider.notifier).refresh();
@@ -1977,9 +2212,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _openElectricity(BuildContext context, {int initialSlot = 0}) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        ElectricityRechargeScreen(initialSlot: initialSlot),
+        id: 'ele_recharge_$initialSlot',
+      );
+      return;
+    }
     await Navigator.push(
       context,
-      createSlideUpRoute(ElectricityRechargeScreen(initialSlot: initialSlot)),
+      createSlideHorizontalRoute(ElectricityRechargeScreen(initialSlot: initialSlot)),
     );
     if (context.mounted) {
       ref.read(electricityCacheProvider.notifier).refresh();

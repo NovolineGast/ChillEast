@@ -8,16 +8,15 @@ import '../../cloudisk/screens/cloud_sync_prompt_screen.dart';
 import '../../../core/utils/route_utils.dart';
 import '../../../core/services/update_service.dart';
 import '../../../core/services/home_widget_service.dart';
+import '../../../core/services/hitokoto_service.dart';
 import '../../../core/state/auth_state.dart';
 import '../../../core/state/widget_action_provider.dart';
-import '../../auth/screens/login_screen.dart';
 import 'home_screen.dart';
 import '../../timetable/screens/timetable_screen.dart';
 import '../../homework/screens/homework_screen.dart';
 import '../../notice/screens/notice_list_screen.dart';
 import '../../workspace/screens/functions_screen.dart';
 import '../../profile/screens/profile_screen.dart';
-import '../../../core/services/hitokoto_service.dart';
 import '../../timetable/providers/timetable_status_provider.dart';
 import '../../timetable/providers/reminder_trigger_provider.dart';
 import '../../../core/widgets/triangle_painter.dart';
@@ -84,8 +83,6 @@ class MainScaffold extends ConsumerStatefulWidget {
 class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
   late AnimationController _aiAnimController;
-  String? _hitokoto;
-  final HitokotoService _hitokotoService = HitokotoService();
   bool _hasSeenReminder = false;
   DateTime _lastReschedule = DateTime.fromMillisecondsSinceEpoch(0);
 
@@ -95,11 +92,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   String? _selectedImagePath;
   final TextEditingController _aiInputController = TextEditingController();
   final FocusNode _aiInputFocusNode = FocusNode();
+  String? _hitokoto;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    _initHitokoto();
     _tabController = TabController(length: 5, vsync: this);
     // 无条件重绘：点击帧 controller 就同步翻 index 并 notify，
     // 顶栏要和这一帧一起重绘，一言动画才能与页面动画严格并行。
@@ -118,7 +117,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       setState(() {});
     });
 
-    _initHitokoto();
     _loadReminderState();
 
     // 桌面小组件点进来时，取原生暂存的动作并路由
@@ -132,6 +130,27 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
         UpdateService().checkUpdate(context);
       }
     });
+  }
+
+  Future<void> _initHitokoto() async {
+    final hitokotoService = HitokotoService();
+    final cached = await hitokotoService.getCachedHitokoto();
+    if (mounted && cached != null) {
+      setState(() {
+        _hitokoto = cached;
+      });
+    }
+
+    try {
+      final fresh = await hitokotoService.prefetchNextHitokoto();
+      if (mounted && fresh != null) {
+        setState(() {
+          _hitokoto = fresh;
+        });
+      }
+    } catch (_) {
+      // 失败静默使用缓存或缺省
+    }
   }
 
   /// 消费小组件点击动作：agenda/homework 切 tab，功能 id 打开对应页面
@@ -291,30 +310,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     }
   }
 
-  Future<void> _initHitokoto() async {
-    // 1. 获取并显示上一次缓存的结果
-    final cached = await _hitokotoService.getCachedHitokoto();
-    if (cached != null) {
-      if (mounted) {
-        setState(() {
-          _hitokoto = cached;
-        });
-      }
-    }
-    
-    // 2. 异步获取下一次要显示的内容 (后台执行)
-    final fresh = await _hitokotoService.prefetchNextHitokoto();
-    
-    // 3. 如果当前还是默认值且获取到了新值，则立即刷新
-    if (cached == null && fresh != null) {
-      if (mounted) {
-        setState(() {
-          _hitokoto = fresh;
-        });
-      }
-    }
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -446,7 +441,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
 
     return PopScope(
       canPop: !_isAiMode,
-      onPopInvoked: (didPop) {
+      onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (_isAiMode) {
           _exitAiMode();
@@ -454,135 +449,173 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       },
       child: Stack(
         children: [
-          Scaffold(
-            appBar: _buildGlobalTopBar(context, authState, hasTimetable),
-            drawer: Drawer(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              child: Column(
-                children: [
-                  UserAccountsDrawerHeader(
-                    decoration: BoxDecoration(
-                      color: Theme.of(context).primaryColor.withOpacity(0.8),
-                    ),
-                    accountName: Text(context.l10n.appTitle),
-                    accountEmail: const Text('v1.0.0'),
-                    currentAccountPicture: CircleAvatar(
-                      backgroundColor: Theme.of(context).cardColor,
-                      child: Icon(Icons.school, color: Theme.of(context).primaryColor),
-                    ),
-                  ),
-                  ListTile(
-                    leading: const Icon(Icons.settings),
-                    title: Text(context.l10n.settings),
-                    onTap: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-            ),
-            body: Container(
-              color: Theme.of(context).scaffoldBackgroundColor,
-              child: AnimatedBuilder(
-                animation: _tabController,
-                builder: (context, _) {
-                  return AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    transitionBuilder: (Widget child, Animation<double> animation) {
-                      return FadeTransition(
-                        opacity: animation,
-                        child: SlideTransition(
-                          position: Tween<Offset>(
-                            begin: const Offset(0.0, 0.05), // 从下方稍微偏移
-                            end: Offset.zero,
-                          ).animate(CurvedAnimation(
-                            parent: animation,
-                            curve: Curves.easeOutCubic,
-                          )),
-                          child: child,
+          Builder(
+            builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final size = MediaQuery.sizeOf(context);
+              final orientation = MediaQuery.orientationOf(context);
+              final isTabletOrLandscape = size.width >= 600 ||
+                  (orientation == Orientation.landscape && size.width >= 500);
+
+              return Scaffold(
+                appBar: isTabletOrLandscape
+                    ? null
+                    : _buildGlobalTopBar(context, authState, hasTimetable),
+                drawer: Drawer(
+                  backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+                  child: Column(
+                    children: [
+                      UserAccountsDrawerHeader(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context).primaryColor.withOpacity(0.8),
                         ),
-                      );
-                    },
-                    child: KeyedSubtree(
-                      key: ValueKey<int>(_tabController.index),
-                      child: _getPages(authState.status)[_tabController.index],
-                    ),
-                  );
-                },
-              ),
-            ),
-            bottomNavigationBar: Material(
-              color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
-              elevation: 8,
-              child: SafeArea(
-                child: Container(
-                  height: 60,
-                  decoration: BoxDecoration(
-                    border: Border(
-                      top: BorderSide(
-                        color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : const Color(0x0D000000), 
-                        width: 0.5
+                        accountName: Text(context.l10n.appTitle),
+                        accountEmail: const Text('v1.0.0'),
+                        currentAccountPicture: CircleAvatar(
+                          backgroundColor: Theme.of(context).cardColor,
+                          child: Icon(Icons.school, color: Theme.of(context).primaryColor),
+                        ),
                       ),
-                    ),
-                  ),
-                  child: TabBar(
-                    controller: _tabController,
-                    indicator: const MD2TopIndicator(
-                      color: Color(0xFF09C489),
-                      indicatorHeight: 3,
-                      radius: 3,
-                    ),
-                    indicatorSize: TabBarIndicatorSize.label,
-                    // 这里不再需要 hacky 的 padding，因为自定义指示器就在顶部绘制
-                    indicatorPadding: EdgeInsets.zero,
-                    labelColor: const Color(0xFF09C489),
-                    unselectedLabelColor: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.grey,
-                    labelPadding: EdgeInsets.zero,
-                    labelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-                    unselectedLabelStyle: const TextStyle(fontSize: 10),
-                    onTap: (index) {
-                      // 如果正在登录中，拦截通知页的访问 (index 3)
-                      if (authState.status == AuthStatus.authenticating && index == 3) {
-                        _tabController.index = _tabController.previousIndex;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(context.l10n.loggingInWait),
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                        return;
-                      }
-                    },
-                    tabs: [
-                      Tab(
-                        icon: const Icon(Icons.home_outlined),
-                        text: context.l10n.tabHome,
-                        iconMargin: const EdgeInsets.only(bottom: 4),
-                      ),
-                      Tab(
-                        icon: const Icon(Icons.calendar_month_outlined),
-                        text: context.l10n.tabTimetable,
-                        iconMargin: const EdgeInsets.only(bottom: 4),
-                      ),
-                      Tab(
-                        icon: const Icon(Icons.assignment_outlined),
-                        text: context.l10n.tabHomework,
-                        iconMargin: const EdgeInsets.only(bottom: 4),
-                      ),
-                      Tab(
-                        icon: const Icon(Icons.inbox_outlined),
-                        text: context.l10n.tabNotice,
-                        iconMargin: const EdgeInsets.only(bottom: 4),
-                      ),
-                      Tab(
-                        icon: const Icon(Icons.dashboard_outlined),
-                        text: context.l10n.tabFunctions,
-                        iconMargin: const EdgeInsets.only(bottom: 4),
+                      ListTile(
+                        leading: const Icon(Icons.settings),
+                        title: Text(context.l10n.settings),
+                        onTap: () => Navigator.pop(context),
                       ),
                     ],
                   ),
                 ),
-              ),
-            ),
+                body: Row(
+                  children: [
+                    if (isTabletOrLandscape)
+                      _buildLeftRail(context, authState, hasTimetable, isDark),
+                    Expanded(
+                      child: Column(
+                        children: [
+                          if (isTabletOrLandscape)
+                            SizedBox(
+                              height: MediaQuery.paddingOf(context).top > 0
+                                  ? (MediaQuery.paddingOf(context).top + 10)
+                                  : 16.0,
+                            ),
+                          Expanded(
+                            child: MediaQuery.removePadding(
+                              context: context,
+                              removeTop: true,
+                              child: Container(
+                                color: Theme.of(context).scaffoldBackgroundColor,
+                                child: AnimatedBuilder(
+                                  animation: _tabController,
+                                  builder: (context, _) {
+                                    return AnimatedSwitcher(
+                                      duration: const Duration(milliseconds: 300),
+                                      transitionBuilder: (Widget child, Animation<double> animation) {
+                                        return FadeTransition(
+                                          opacity: animation,
+                                          child: SlideTransition(
+                                            position: Tween<Offset>(
+                                              begin: const Offset(0.0, 0.05), // 从下方稍微偏移
+                                              end: Offset.zero,
+                                            ).animate(CurvedAnimation(
+                                              parent: animation,
+                                              curve: Curves.easeOutCubic,
+                                            )),
+                                            child: child,
+                                          ),
+                                        );
+                                      },
+                                      child: KeyedSubtree(
+                                        key: ValueKey<int>(_tabController.index),
+                                        child: _getPages(authState.status)[_tabController.index],
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                bottomNavigationBar: isTabletOrLandscape
+                    ? null
+                    : Material(
+                        color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+                        elevation: 8,
+                        child: SafeArea(
+                          child: Container(
+                            height: 60,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                top: BorderSide(
+                                  color: Theme.of(context).brightness == Brightness.dark ? Colors.white.withOpacity(0.05) : const Color(0x0D000000), 
+                                  width: 0.5
+                                ),
+                              ),
+                            ),
+                            child: TabBar(
+                              controller: _tabController,
+                              indicator: const MD2TopIndicator(
+                                color: Color(0xFF09C489),
+                                indicatorHeight: 3,
+                                radius: 3,
+                              ),
+                              indicatorSize: TabBarIndicatorSize.label,
+                              // 这里不再需要 hacky 的 padding，因为自定义指示器就在顶部绘制
+                              indicatorPadding: EdgeInsets.zero,
+                              labelColor: const Color(0xFF09C489),
+                              unselectedLabelColor: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : Colors.grey,
+                              labelPadding: EdgeInsets.zero,
+                              labelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+                              unselectedLabelStyle: const TextStyle(fontSize: 10),
+                              onTap: (index) {
+                                // 如果正在登录中，拦截通知页的访问 (index 3)
+                                if (authState.status == AuthStatus.authenticating && index == 3) {
+                                  _tabController.index = _tabController.previousIndex;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(context.l10n.loggingInWait),
+                                      duration: const Duration(seconds: 2),
+                                      behavior: SnackBarBehavior.floating,
+                                    ),
+                                  );
+                                  return;
+                                }
+                              },
+                              tabs: [
+                                Tab(
+                                  icon: const Icon(Icons.home_outlined),
+                                  text: context.l10n.tabHome,
+                                  iconMargin: const EdgeInsets.only(bottom: 4),
+                                ),
+                                Tab(
+                                  icon: const Icon(Icons.calendar_month_outlined),
+                                  text: context.l10n.tabTimetable,
+                                  iconMargin: const EdgeInsets.only(bottom: 4),
+                                ),
+                                Tab(
+                                  icon: const Icon(Icons.assignment_outlined),
+                                  text: context.l10n.tabHomework,
+                                  iconMargin: const EdgeInsets.only(bottom: 4),
+                                ),
+                                Tab(
+                                  icon: const Icon(Icons.inbox_outlined),
+                                  text: context.l10n.tabNotice,
+                                  iconMargin: const EdgeInsets.only(bottom: 4),
+                                ),
+                                Tab(
+                                  icon: const Icon(Icons.dashboard_outlined),
+                                  text: context.l10n.tabFunctions,
+                                  iconMargin: const EdgeInsets.only(bottom: 4),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+              );
+            },
           ),
 
           // AI 模式下：全屏统一暗色背景遮罩 + 底部悬浮卡片与输入底栏
@@ -597,19 +630,30 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                   onTap: _exitAiMode,
                   behavior: HitTestBehavior.opaque,
                   child: Container(
-                    color: Colors.black.withOpacity(0.54),
+                    color: Colors.black.withValues(alpha: 0.54),
                   ),
                 ),
               ),
             ),
-            Positioned(
-              left: 0,
-              right: 0,
-              top: MediaQuery.of(context).padding.top + 8,
-              bottom: (MediaQuery.of(context).viewInsets.bottom > 0
-                  ? MediaQuery.of(context).viewInsets.bottom + 8
-                  : MediaQuery.of(context).padding.bottom + 8),
-              child: FadeTransition(
+            Builder(
+              builder: (context) {
+                final size = MediaQuery.sizeOf(context);
+                final orientation = MediaQuery.orientationOf(context);
+                final isTabletOrLandscape = size.width >= 600 ||
+                    (orientation == Orientation.landscape && size.width >= 500);
+                final pageWidth = isTabletOrLandscape ? (size.width - 76.0) : size.width;
+                final canSplit = pageWidth >= 600;
+                final aiLeft = isTabletOrLandscape ? 76.0 : 0.0;
+                final aiRight = canSplit ? (pageWidth / 2) : 0.0;
+
+                return Positioned(
+                  left: aiLeft,
+                  right: aiRight,
+                  top: MediaQuery.of(context).padding.top + 8,
+                  bottom: (MediaQuery.of(context).viewInsets.bottom > 0
+                      ? MediaQuery.of(context).viewInsets.bottom + 8
+                      : MediaQuery.of(context).padding.bottom + 8),
+                  child: FadeTransition(
                 opacity: CurvedAnimation(
                   parent: _aiAnimController,
                   curve: Curves.easeOutCubic,
@@ -626,67 +670,242 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      // 点击之后先不展示卡片，而是直接暴露原本的快捷提问按钮（一行一个）；
-                      // 出现对话或正在加载时才展示卡片
-                      Flexible(
-                        child: AnimatedSwitcher(
-                          duration: const Duration(milliseconds: 220),
-                          switchInCurve: Curves.easeOutCubic,
-                          switchOutCurve: Curves.easeOutCubic,
-                          layoutBuilder: (currentChild, previousChildren) {
-                            return Stack(
-                              alignment: Alignment.bottomLeft,
-                              children: [
-                                ...previousChildren,
-                                if (currentChild != null) currentChild,
-                              ],
-                            );
-                          },
-                          child: hasChat
-                              ? KeyedSubtree(
-                                  key: const ValueKey('ai_response_card'),
-                                  child: AiResponseCard(
-                                    onClose: _exitAiMode,
-                                    onQuickQuerySelected: (query) {
-                                      _aiInputController.clear();
-                                      setState(() {
-                                        _selectedImagePath = null;
-                                      });
-                                    },
-                                  ),
-                                )
-                              : KeyedSubtree(
-                                  key: const ValueKey('ai_exposed_quick_prompts'),
-                                  child: AiQuickPromptsList(
-                                    onDismiss: _exitAiMode,
-                                    onPromptSelected: (prompt) {
-                                      _aiInputController.clear();
-                                      _aiInputFocusNode.unfocus();
-                                      setState(() {
-                                        _selectedImagePath = null;
-                                      });
-                                    },
-                                  ),
-                                ),
-                        ),
+                          // 点击之后先不展示卡片，而是直接暴露原本的快捷提问按钮（一行一个）；
+                          // 出现对话或正在加载时才展示卡片
+                          Flexible(
+                            child: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 220),
+                              switchInCurve: Curves.easeOutCubic,
+                              switchOutCurve: Curves.easeOutCubic,
+                              layoutBuilder: (currentChild, previousChildren) {
+                                return Stack(
+                                  alignment: Alignment.bottomLeft,
+                                  children: [
+                                    ...previousChildren,
+                                    if (currentChild != null) currentChild,
+                                  ],
+                                );
+                              },
+                              child: hasChat
+                                  ? KeyedSubtree(
+                                      key: const ValueKey('ai_response_card'),
+                                      child: AiResponseCard(
+                                        onClose: _exitAiMode,
+                                        onQuickQuerySelected: (query) {
+                                          _aiInputController.clear();
+                                          setState(() {
+                                            _selectedImagePath = null;
+                                          });
+                                        },
+                                      ),
+                                    )
+                                  : KeyedSubtree(
+                                      key: const ValueKey('ai_exposed_quick_prompts'),
+                                      child: AiQuickPromptsList(
+                                        onDismiss: _exitAiMode,
+                                        onPromptSelected: (prompt) {
+                                          _aiInputController.clear();
+                                          _aiInputFocusNode.unfocus();
+                                          setState(() {
+                                            _selectedImagePath = null;
+                                          });
+                                        },
+                                      ),
+                                    ),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          // 原顶栏现成为底栏（拦截内部点击，避免误触退出）
+                          Material(
+                            type: MaterialType.transparency,
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () {},
+                              child: _buildAiBottomBar(context),
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      // 原顶栏现成为底栏（拦截内部点击，避免误触退出）
-                      Material(
-                        type: MaterialType.transparency,
-                        child: GestureDetector(
-                          behavior: HitTestBehavior.opaque,
-                          onTap: () {},
-                          child: _buildAiBottomBar(context),
-                        ),
+                    ),
+                  ),
+                );
+              },
+            ),
+            ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLeftRail(BuildContext context, AuthState authState,
+      bool hasTimetable, bool isDark) {
+    final navItems = [
+      (
+        icon: Icons.home_outlined,
+        selectedIcon: Icons.home,
+        label: context.l10n.tabHome
+      ),
+      (
+        icon: Icons.calendar_month_outlined,
+        selectedIcon: Icons.calendar_month,
+        label: context.l10n.tabTimetable
+      ),
+      (
+        icon: Icons.assignment_outlined,
+        selectedIcon: Icons.assignment,
+        label: context.l10n.tabHomework
+      ),
+      (
+        icon: Icons.inbox_outlined,
+        selectedIcon: Icons.inbox,
+        label: context.l10n.tabNotice
+      ),
+      (
+        icon: Icons.dashboard_outlined,
+        selectedIcon: Icons.dashboard,
+        label: context.l10n.tabFunctions
+      ),
+    ];
+
+    return Container(
+      key: const ValueKey('tablet_navigation_rail'),
+      width: 76,
+      decoration: BoxDecoration(
+        color: Theme.of(context).bottomNavigationBarTheme.backgroundColor,
+        border: Border(
+          right: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.05)
+                : const Color(0x0D000000),
+            width: 0.5,
+          ),
+        ),
+      ),
+      child: SafeArea(
+        right: false,
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            // 上方放置底栏的5个页面导航项
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    for (int i = 0; i < navItems.length; i++) ...[
+                      _buildRailItem(
+                        context,
+                        index: i,
+                        icon: navItems[i].icon,
+                        selectedIcon: navItems[i].selectedIcon,
+                        label: navItems[i].label,
+                        isSelected: _tabController.index == i,
+                        isDark: isDark,
                       ),
+                      if (i < navItems.length - 1) const SizedBox(height: 4),
                     ],
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            // 底部：AI 入口与头像
+            GestureDetector(
+              key: const ValueKey('ai_entry_button'),
+              onTap: _enterAiMode,
+              behavior: HitTestBehavior.opaque,
+              child: SizedBox(
+                width: 44,
+                height: 44,
+                child: Center(
+                  child: SvgPicture.asset(
+                    'assets/images/ai_button.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(
+                      isDark ? Colors.white54 : Colors.grey,
+                      BlendMode.srcIn,
+                    ),
                   ),
                 ),
               ),
             ),
+            const SizedBox(height: 8),
+            _buildAvatar(context, authState, hasTimetable, isDark),
+            const SizedBox(height: 16),
           ],
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRailItem(
+    BuildContext context, {
+    required int index,
+    required IconData icon,
+    required IconData selectedIcon,
+    required String label,
+    required bool isSelected,
+    required bool isDark,
+  }) {
+    const activeColor = Color(0xFF09C489);
+    final unselectedColor = isDark ? Colors.white54 : Colors.grey;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => switchToTab(index),
+        child: SizedBox(
+          width: 76,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isSelected ? selectedIcon : icon,
+                      color: isSelected ? activeColor : unselectedColor,
+                      size: 22,
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isSelected ? activeColor : unselectedColor,
+                        fontWeight:
+                            isSelected ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              if (isSelected)
+                Positioned(
+                  right: 0,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: Container(
+                      width: 3,
+                      height: 24,
+                      decoration: const BoxDecoration(
+                        color: activeColor,
+                        borderRadius: BorderRadius.horizontal(
+                          left: Radius.circular(3),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -707,10 +926,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
               Expanded(
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 300),
-                  // 注意：不要在这里设 switchIn/OutCurve，出场动画 t 是从 1→0，
-                  // 套 easeOut 会让前半段几乎不动（t=0.9 时 opacity 还有 0.999），
-                  // 看起来就像“过一小会才动”。方向曲线在下面按进/出分别指定。
-                  // 左对齐堆叠（默认 layoutBuilder 是居中的，会把一言挤到中间）
                   layoutBuilder: (currentChild, previousChildren) {
                     return Stack(
                       alignment: Alignment.centerLeft,
@@ -721,21 +936,15 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                       ],
                     );
                   },
-                  // 进场从下方滑入，出场向上滑出（各走各的方向，非反播）。
-                  // 方向按目标 tab + 子项 key 判定：只有一言文本可见，
-                  // 回主页=文本进场，离主页=文本出场。
                   transitionBuilder: (child, animation) {
                     final isText =
                         child.key == const ValueKey('hitokoto_text');
                     if (!isText) {
-                      // 空占位不可见，线性淡入淡出即可
                       return FadeTransition(
                         opacity: animation,
                         child: child,
                       );
                     }
-                    // 进场用 easeOut、出场用 easeIn，保证两边都是“快起”：
-                    // 出场 t 从 1→0，若用 easeOut 则前半段几乎不动。
                     final curve =
                         isHomeTab ? Curves.easeOutCubic : Curves.easeInCubic;
                     final curved = CurvedAnimation(
@@ -743,11 +952,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                       curve: curve,
                     );
                     final slide = isHomeTab
-                        // 回主页：从下方滑入
                         ? Tween<Offset>(
                             begin: const Offset(0, 0.5), end: Offset.zero)
                             .animate(curved)
-                        // 离主页：向上滑出
                         : Tween<Offset>(
                             begin: const Offset(0, -0.5),
                             end: Offset.zero)
@@ -1017,7 +1224,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
             _dismissReminder(); // 点击后标记为已看
             Navigator.push(
               context,
-              createSlideUpRoute(const ProfileScreen()),
+              createSlideHorizontalRoute(const ProfileScreen()),
             );
           },
           child: SizedBox(
@@ -1136,24 +1343,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     return null;
   }
   
-  void _showLoginDialog(BuildContext context) {
-    if (ref.read(authStateProvider).status == AuthStatus.authenticating) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.loggingInPleaseWait),
-          behavior: SnackBarBehavior.floating,
-        ),
-      );
-      return;
-    }
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      useSafeArea: true,
-      builder: (context) => const LoginScreen(),
-    );
-  }
-
   Color _getAuthStatusColor(AuthStatus status) {
     switch (status) {
       case AuthStatus.authenticated:
@@ -1162,8 +1351,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
         return Colors.red;
       case AuthStatus.authenticating:
         return Colors.orange;
-      default:
-        return Colors.grey;
     }
   }
 }

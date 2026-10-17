@@ -39,38 +39,38 @@ Future<void> openFunctionById(
     case 'payment_code':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const PaymentCodeScreen()))
+              context, createSlideHorizontalRoute(const PaymentCodeScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'recharge':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const CampusCardRechargeScreen()))
+              context, createSlideHorizontalRoute(const CampusCardRechargeScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'ele_recharge':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const ElectricityRechargeScreen()))
+              context, createSlideHorizontalRoute(const ElectricityRechargeScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'library':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const LibraryHomeScreen()))
+              context, createSlideHorizontalRoute(const LibraryHomeScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'empty_classroom':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const ClassroomInquiryScreen()))
+              context, createSlideHorizontalRoute(const ClassroomInquiryScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'xgxt':
       isLoggedIn
           ? Navigator.push(
               context,
-              createSlideUpRoute(WebViewDetailScreen(
+              createSlideHorizontalRoute(WebViewDetailScreen(
                 title: context.l10n.funcXgxt,
                 url: AppConstants.xgxtWapUrl,
                 showAppBar: false,
@@ -82,37 +82,37 @@ Future<void> openFunctionById(
     case 'sunshine':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const SunshineScreen()))
+              context, createSlideHorizontalRoute(const SunshineScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'questionnaire':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const QuestionnaireListScreen()))
+              context, createSlideHorizontalRoute(const QuestionnaireListScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'leave':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const LeaveListScreen()))
+              context, createSlideHorizontalRoute(const LeaveListScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'repairs':
       isLoggedIn
-          ? Navigator.push(context, createSlideUpRoute(const RepairScreen()))
+          ? Navigator.push(context, createSlideHorizontalRoute(const RepairScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'dormitory':
       isLoggedIn
           ? Navigator.push(
-              context, createSlideUpRoute(const DormitoryScreen()))
+              context, createSlideHorizontalRoute(const DormitoryScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'ehall':
       isLoggedIn
           ? Navigator.push(
               context,
-              createSlideUpRoute(WebViewDetailScreen(
+              createSlideHorizontalRoute(WebViewDetailScreen(
                 title: context.l10n.funcEhall,
                 url: AppConstants.ehallUrl,
                 userAgent: AppConstants.ehallUA,
@@ -126,7 +126,7 @@ Future<void> openFunctionById(
       isLoggedIn
           ? Navigator.push(
               context,
-              createSlideUpRoute(WebViewDetailScreen(
+              createSlideHorizontalRoute(WebViewDetailScreen(
                 title: context.l10n.funcInfoPortal,
                 url: AppConstants.infoPortalUrl,
                 homeUrl: AppConstants.infoPortalUrl,
@@ -142,7 +142,7 @@ Future<void> openFunctionById(
       isLoggedIn
           ? Navigator.push(
               context,
-              createSlideUpRoute(WebViewDetailScreen(
+              createSlideHorizontalRoute(WebViewDetailScreen(
                 title: context.l10n.funcGym,
                 url: AppConstants.gymReservationUrl,
                 showWebBack: true,
@@ -153,7 +153,7 @@ Future<void> openFunctionById(
       isLoggedIn
           ? Navigator.push(
               context,
-              createSlideUpRoute(WebViewDetailScreen(
+              createSlideHorizontalRoute(WebViewDetailScreen(
                 title: context.l10n.funcTeachingEval,
                 url: AppConstants.teachingEvalUrl,
                 showAppBar: false,
@@ -164,14 +164,14 @@ Future<void> openFunctionById(
       break;
     case 'score':
       isLoggedIn
-          ? Navigator.push(context, createSlideUpRoute(const ScoreScreen()))
+          ? Navigator.push(context, createSlideHorizontalRoute(const ScoreScreen()))
           : _showLoginDialog(context, ref);
       break;
     case 'exam':
-      Navigator.push(context, createSlideUpRoute(const ExamScreen()));
+      Navigator.push(context, createSlideHorizontalRoute(const ExamScreen()));
       break;
     case 'vpn':
-      Navigator.push(context, createSlideUpRoute(const VpnConverterScreen()));
+      Navigator.push(context, createSlideHorizontalRoute(const VpnConverterScreen()));
       break;
     case 'campus_card':
       if (isLoggedIn) {
@@ -183,7 +183,7 @@ Future<void> openFunctionById(
         if (!context.mounted) return;
         Navigator.push(
             context,
-            createSlideUpRoute(
+            createSlideHorizontalRoute(
               WebViewDetailScreen(
                 title: context.l10n.funcCampusCard,
                 url: url,
@@ -198,10 +198,10 @@ Future<void> openFunctionById(
       }
       break;
     case 'bus':
-      Navigator.push(context, createSlideUpRoute(const BusTrackingScreen()));
+      Navigator.push(context, createSlideHorizontalRoute(const BusTrackingScreen()));
       break;
     case 'campus_bus_route':
-      Navigator.push(context, createSlideUpRoute(const CampusBusMapScreen()));
+      Navigator.push(context, createSlideHorizontalRoute(const CampusBusMapScreen()));
       break;
     case 'cs_bus':
       final hasPermission = await LocationHelper.requestPermission();
@@ -209,7 +209,7 @@ Future<void> openFunctionById(
         if (!context.mounted) return;
         Navigator.push(
             context,
-            createSlideUpRoute(
+            createSlideHorizontalRoute(
               WebViewDetailScreen(
                 title: context.l10n.funcCsBus,
                 url: AppConstants.changshaBusUrl,

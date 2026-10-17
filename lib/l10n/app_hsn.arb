@@ -380,6 +380,7 @@
   "copy": "复制",
   "aiThinking": "正在思考中...",
   "noticeDetail": "通知详情",
+  "selectNoticeHint": "选左边通知看细情",
   "noticeNotFound": "冒找到详情数据",
   "noTitle": "冒得标题",
   "senderSystem": "系统",

@@ -203,6 +203,7 @@
   "copy": "拷一份",
   "aiThinking": "在思考……",
   "noticeDetail": "通知细情",
+  "selectNoticeHint": "选左边通知看详细内容",
   "noticeNotFound": "没找着细情数据",
   "noTitle": "没得名头",
   "senderSystem": "系统",
