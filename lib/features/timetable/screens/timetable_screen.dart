@@ -473,7 +473,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       try {
         await TimetableRuleService().applyRulesAndRegenerate();
       } catch (e) {
-        AppLogger.instance.w('Regenerating rules before sharing failed: $e');
+        _logger.w('Regenerating rules before sharing failed: $e');
       }
 
       final filePath = await _storage.getTimetableFilePath();
