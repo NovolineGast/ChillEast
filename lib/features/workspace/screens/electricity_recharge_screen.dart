@@ -493,15 +493,16 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
 
     if (!isExpanded) {
       // 收缩状态：单行条状展示
-      final String collapsedText;
+      final String roomDesc;
+      final String? balanceVal;
       if (card.selectedRoom != null) {
-        final roomDesc = '${card.selectedArea?.name} - ${card.selectedBuilding?.name} - ${card.selectedRoom?.name}';
-        final balanceVal = card.balanceInfo != null
+        roomDesc = '${card.selectedArea?.name} - ${card.selectedBuilding?.name} - ${card.selectedRoom?.name}';
+        balanceVal = card.balanceInfo != null
             ? '${card.balanceInfo!.balance}元'
             : (card.isLoadingBalance ? '...元' : '--元');
-        collapsedText = '> $roomDesc $balanceVal';
       } else {
-        collapsedText = '> 宿舍 ${slot + 1} (${context.l10n.noRoomSelectedYet})';
+        roomDesc = '宿舍 ${slot + 1} (${context.l10n.noRoomSelectedYet})';
+        balanceVal = null;
       }
 
       return InkWell(
@@ -525,7 +526,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
             children: [
               Expanded(
                 child: Text(
-                  collapsedText,
+                  roomDesc,
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
@@ -535,6 +536,18 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
+              if (balanceVal != null) ...[
+                const SizedBox(width: 8),
+                Text(
+                  balanceVal,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ],
+              const SizedBox(width: 8),
               Icon(
                 Icons.keyboard_arrow_down,
                 size: 18,
@@ -562,7 +575,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${context.l10n.currentRechargeRoom} · 宿舍 ${slot + 1}',
+                context.l10n.currentRechargeRoom,
                 style: TextStyle(
                   fontSize: 12,
                   color: isDark ? Colors.white54 : Colors.black54,

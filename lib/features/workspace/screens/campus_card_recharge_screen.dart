@@ -33,7 +33,7 @@ class _CampusCardRechargeScreenState extends ConsumerState<CampusCardRechargeScr
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    final cached = ref.read(campusCardCacheProvider).value ??
+    final cached = ref.read(campusCardCacheProvider).valueOrNull ??
         ref.read(campusCardServiceProvider).cachedInfo;
     if (cached != null) {
       _info = cached;

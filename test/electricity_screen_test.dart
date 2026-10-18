@@ -108,19 +108,19 @@ void main() {
     await tester.pumpAndSettle();
 
     // Card 1 is expanded, Card 2 is collapsed
-    expect(find.textContaining('当前充值房间 · 宿舍 1'), findsOneWidget);
+    expect(find.textContaining('当前充值房间'), findsOneWidget);
     expect(find.textContaining('金岸公寓空调 - 金岸1栋 - 629'), findsWidgets);
 
-    // Collapsed Card 2 shows single strip with '>'
-    expect(find.textContaining('> 东湖校区 - 金岸2栋 - 630'), findsOneWidget);
+    // Collapsed Card 2 shows single strip without '>'
+    expect(find.textContaining('东湖校区 - 金岸2栋 - 630'), findsOneWidget);
 
     // Tap collapsed Card 2 to expand it
-    await tester.tap(find.textContaining('> 东湖校区 - 金岸2栋 - 630'));
+    await tester.tap(find.textContaining('东湖校区 - 金岸2栋 - 630'));
     await tester.pumpAndSettle();
 
     // Now Card 2 is expanded, Card 1 is collapsed
-    expect(find.textContaining('当前充值房间 · 宿舍 2'), findsOneWidget);
-    expect(find.textContaining('> 金岸公寓空调 - 金岸1栋 - 629'), findsOneWidget);
+    expect(find.textContaining('当前充值房间'), findsOneWidget);
+    expect(find.textContaining('金岸公寓空调 - 金岸1栋 - 629'), findsWidgets);
 
     await tester.pump(const Duration(seconds: 11));
   });
