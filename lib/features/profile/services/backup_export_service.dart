@@ -515,16 +515,6 @@ class BackupExportService {
     return result;
   }
 
-  static Future<void> _setOrRemoveString(
-      SharedPreferences prefs, String key, dynamic value) async {
-    final v = _asStringOrNull(value);
-    if (v == null) {
-      await prefs.remove(key);
-    } else {
-      await prefs.setString(key, v);
-    }
-  }
-
   static String? _asStringOrNull(dynamic value) {
     if (value == null) return null;
     if (value is String) return value;
@@ -570,14 +560,6 @@ class BackupExportService {
     if (v is bool) {
       await prefs.setBool(key, v);
     }
-  }
-
-  static Future<void> _writePrefsJson(SharedPreferences prefs, String key,
-      Map<String, dynamic> parent, String field) async {
-    if (!parent.containsKey(field)) return;
-    final v = parent[field];
-    if (v == null) return;
-    await prefs.setString(key, jsonEncode(v));
   }
 
   static Future<void> _writeDocFile(

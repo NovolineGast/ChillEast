@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/home_widget_service.dart';
+import '../../../core/widgets/brand_switch.dart';
 import '../providers/appearance_provider.dart';
 import '../models/appearance_state.dart';
 import '../../../core/utils/l10n_extension.dart';
@@ -398,43 +399,33 @@ class ButtonReorderScreen extends ConsumerWidget {
 
   Widget _buildAutoSortTile(
       BuildContext context, WidgetRef ref, AppearanceState appearance, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      child: Material(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-          side: BorderSide(
-            color: isDark
-                ? Colors.white.withValues(alpha: 0.12)
-                : const Color(0xFFE0E0E0),
-            width: 1,
-          ),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: SwitchListTile(
-          tileColor: Colors.transparent,
-          title: Text(
-            context.l10n.feedAutoSort,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white : const Color(0xFF202124),
+    return InkWell(
+      onTap: () {
+        ref
+            .read(appearanceProvider.notifier)
+            .updateFeedAutoSort(!appearance.feedAutoSort);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                context.l10n.feedAutoSort,
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+              ),
             ),
-          ),
-          subtitle: Text(
-            context.l10n.feedAutoSortSubtitle,
-            style: TextStyle(
-              fontSize: 12,
-              color: isDark ? Colors.white60 : Colors.grey[600],
+            BrandSwitch(
+              value: appearance.feedAutoSort,
+              onChanged: (val) {
+                ref.read(appearanceProvider.notifier).updateFeedAutoSort(val);
+              },
             ),
-          ),
-          value: appearance.feedAutoSort,
-          activeThumbColor: const Color(0xFF09C489),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          onChanged: (val) {
-            ref.read(appearanceProvider.notifier).updateFeedAutoSort(val);
-          },
+          ],
         ),
       ),
     );
