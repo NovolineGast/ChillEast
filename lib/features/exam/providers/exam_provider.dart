@@ -18,13 +18,32 @@ final examProvider =
   return ExamNotifier(ref);
 });
 
-/// 本学期考试日程列表提供者（本学期超星考试 + 手动添加的考试）
+/// 本学期考试日程列表提供者（本学期超星考试 + 手动添加的未过期考试）
 final currentSemesterExamsProvider =
     Provider<AsyncValue<List<ExamScheduleModel>>>((ref) {
   final allAsync = ref.watch(examProvider);
-  return allAsync.whenData(
-    (list) => list.where((e) => e.isCurrentSemester() || e.isManual).toList(),
-  );
+  final filtered = allAsync.valueOrNull
+      ?.where((e) =>
+          ExamStorage.isUpcomingOrToday(e) &&
+          (e.isCurrentSemester() || e.isManual))
+      .toList();
+
+  if (allAsync.hasError) {
+    return AsyncValue<List<ExamScheduleModel>>.error(
+      allAsync.error!,
+      allAsync.stackTrace ?? StackTrace.current,
+    ).copyWithPrevious(
+      filtered != null
+          ? AsyncValue.data(filtered)
+          : const AsyncValue.data([]),
+    );
+  }
+
+  if (allAsync.isLoading && filtered == null) {
+    return const AsyncValue.loading();
+  }
+
+  return AsyncValue.data(filtered ?? []);
 });
 
 class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
@@ -63,13 +82,15 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
     }
   }
 
-  /// 合并内存中的手动作业与文件存储中的手动作业，防止刷新时丢失
+  /// 合并内存中的手动作业与文件存储中的手动作业，防止刷新时丢失，并清理过期手动考试
   Future<List<ExamScheduleModel>> _collectManualUnion() async {
-    final fromState = (state.value ?? []).where((e) => e.isManual).toList();
+    final fromState = (state.valueOrNull ?? [])
+        .where((e) => e.isManual && !ExamStorage.isManualExamExpired(e))
+        .toList();
     List<ExamScheduleModel> fromStorage = [];
     try {
       fromStorage = (await _ref.read(examStorageProvider).readExamList())
-          .where((e) => e.isManual)
+          .where((e) => e.isManual && !ExamStorage.isManualExamExpired(e))
           .toList();
     } catch (_) {}
     final storageIds = fromStorage.map((e) => e.id).toSet();
@@ -110,7 +131,7 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
       } catch (_) {}
 
       final manual = await _collectManualUnion();
-      state = const AsyncValue.loading();
+      state = const AsyncLoading<List<ExamScheduleModel>>().copyWithPrevious(state);
       final storage = _ref.read(examStorageProvider);
       final scraped = await _ref
           .read(examServiceProvider)
@@ -124,7 +145,14 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
       _rescheduleReminders();
     } catch (e, st) {
       _logger.e('❌ Refresh exams failed: $e');
-      state = AsyncValue.error(e, st);
+      List<ExamScheduleModel>? cached = state.valueOrNull;
+      if (cached == null || cached.isEmpty) {
+        try {
+          cached = await _ref.read(examStorageProvider).readExamList();
+        } catch (_) {}
+      }
+      final prev = cached != null ? AsyncValue.data(cached) : state;
+      state = AsyncValue<List<ExamScheduleModel>>.error(e, st).copyWithPrevious(prev);
     }
   }
 
@@ -150,8 +178,10 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
       createdAt: DateTime.now(),
     );
 
-    final current = state.value ?? [];
-    final updated = [...current, newItem];
+    final current = state.valueOrNull ?? [];
+    final updated = [...current, newItem]
+        .where((e) => ExamStorage.isUpcomingOrToday(e))
+        .toList();
     updated.sort((a, b) => a.time.compareTo(b.time));
 
     await _ref.read(examStorageProvider).saveExamList(updated);
@@ -161,7 +191,7 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
 
   /// 删除考试（通常针对手动添加的考试）
   Future<void> deleteExam(String id) async {
-    final current = state.value ?? [];
+    final current = state.valueOrNull ?? [];
     final updated = current.where((e) => e.id != id).toList();
     await _ref.read(examStorageProvider).saveExamList(updated);
     state = AsyncValue.data(updated);
@@ -176,6 +206,19 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
       _rescheduleReminders();
     } catch (e) {
       _logger.w('⚠️ Reload exams from storage failed: $e');
+    }
+  }
+
+  /// 清理所有已过期的考试（始终只保留开始时间是今天以及今天之后日期的考试）
+  Future<void> pruneExpiredManualExams() async {
+    final current = state.valueOrNull;
+    if (current == null) return;
+    final updated =
+        current.where((e) => ExamStorage.isUpcomingOrToday(e)).toList();
+    if (updated.length != current.length) {
+      await _ref.read(examStorageProvider).saveExamList(updated);
+      state = AsyncValue.data(updated);
+      _rescheduleReminders();
     }
   }
 

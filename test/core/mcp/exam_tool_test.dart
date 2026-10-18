@@ -18,19 +18,19 @@ void main() {
       tempDir = await Directory.systemTemp.createTemp('mcp_exam_test_');
       storage = ExamStorage(baseDirectory: tempDir);
 
-      // 准备测试数据：一场本学期秋季考试，一场上学期春季考试
+      // 准备测试数据：一场本学期秋季考试，一场下学期春季考试（均在今天及之后，可正常储存）
       final autumnExam = ExamScheduleModel(
         id: '10762596',
-        title: '2026年9月10日补考试题',
+        title: '2026年11月10日期中考试题',
         courseName: '高数',
-        time: DateTime(2026, 9, 10, 19, 0),
+        time: DateTime(2026, 11, 10, 19, 0),
         status: '已完成',
       );
       final springExam = ExamScheduleModel(
         id: '9473825',
-        title: '26年春形策期末考试',
+        title: '27年春形策期末考试',
         courseName: '形势与政策',
-        time: DateTime(2026, 5, 10, 17, 0),
+        time: DateTime(2027, 3, 10, 17, 0),
         status: '未交',
       );
 
@@ -54,10 +54,10 @@ void main() {
       expect(data['currentSemesterOnly'], isTrue);
       final exams = data['exams'] as List<dynamic>;
 
-      // 当前系统时间为 2026 年秋季学期，只应包含 2026年9月的考试
+      // 当前系统时间为 2026 年秋季学期，只应包含本学期秋季的考试
       expect(exams.length, equals(1));
-      expect(exams[0]['title'], equals('2026年9月10日补考试题'));
-      expect(exams[0]['time'], equals('2026-09-10 19:00'));
+      expect(exams[0]['title'], equals('2026年11月10日期中考试题'));
+      expect(exams[0]['time'], equals('2026-11-10 19:00'));
     });
 
     test('query_exams with currentSemesterOnly=false returns all exams', () async {

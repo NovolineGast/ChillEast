@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 import 'package:logger/logger.dart';
 import '../../../core/network/dio_client.dart';
 import '../models/exam_schedule_model.dart';
+import 'exam_storage.dart';
 
 /// 考试详情解析结果
 class ExamDetailInfo {
@@ -415,6 +416,11 @@ class ExamService {
         ),
       );
 
+      final realUriStr = response.realUri.toString();
+      if (realUriStr.contains('antispider') || response.statusCode == 202) {
+        throw Exception('触发了超星安全验证');
+      }
+
       if (response.statusCode != 200) {
         throw Exception('Failed to fetch exam list: ${response.statusCode}');
       }
@@ -488,11 +494,12 @@ class ExamService {
         );
       }
 
-      // 按时间升序排序（符合日程时间轴顺序）
-      examResults.sort((a, b) => a.time.compareTo(b.time));
+      // 始终只储存开始时间是今天以及今天之后日期的考试
+      final validResults = ExamStorage.filterUpcomingAndToday(examResults);
+      validResults.sort((a, b) => a.time.compareTo(b.time));
 
-      _logger.i('✅ Successfully synced ${examResults.length} exams from cloud');
-      return examResults;
+      _logger.i('✅ Successfully synced ${validResults.length} exams from cloud');
+      return validResults;
     } catch (e) {
       _logger.e('❌ Fetch exams failed: $e');
       rethrow;

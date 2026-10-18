@@ -16,10 +16,24 @@ class ExamScreen extends ConsumerStatefulWidget {
 }
 
 class _ExamScreenState extends ConsumerState<ExamScreen> {
+  Object? _dismissedError;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(examProvider.notifier).pruneExpiredManualExams();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final examsAsync = ref.watch(currentSemesterExamsProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final error = examsAsync.hasError ? examsAsync.error : null;
+    final exams = examsAsync.valueOrNull ?? [];
+    final bool showErrorCard = error != null && _dismissedError != error;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -36,92 +50,140 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
           IconButton(
             icon: const Icon(Icons.refresh_rounded, size: 22),
             tooltip: context.l10n.refreshTimetable,
-            onPressed: () => ref.read(examProvider.notifier).refresh(),
+            onPressed: () {
+              setState(() {
+                _dismissedError = null;
+              });
+              ref.read(examProvider.notifier).refresh();
+            },
           ),
         ],
       ),
       body: RefreshIndicator(
-        onRefresh: () => ref.read(examProvider.notifier).refresh(),
-        child: examsAsync.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.error_outline, size: 48, color: Colors.grey[400]),
+        onRefresh: () async {
+          setState(() {
+            _dismissedError = null;
+          });
+          await ref.read(examProvider.notifier).refresh();
+        },
+        child: (examsAsync.isLoading && !examsAsync.hasValue)
+            ? const Center(child: CircularProgressIndicator())
+            : ListView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                children: [
+                  if (showErrorCard) ...[
+                    _buildErrorCard(context, error, isDark),
                     const SizedBox(height: 12),
-                    Text(
-                      '$err',
-                      style: TextStyle(color: Colors.grey[600]),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () =>
-                          ref.read(examProvider.notifier).refresh(),
-                      child: Text(context.l10n.refreshTimetable),
-                    ),
                   ],
+                  if (exams.isEmpty)
+                    _buildEmptyState(context, isDark)
+                  else
+                    for (final exam in exams)
+                      _buildExamCard(context, exam, isDark),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildErrorCard(BuildContext context, Object error, bool isDark) {
+    var errorMsg = error.toString().replaceFirst('Exception: ', '');
+    if (errorMsg.contains('超星') &&
+        (errorMsg.contains('验证') ||
+            errorMsg.contains('反爬') ||
+            errorMsg.contains('202'))) {
+      errorMsg = '触发了超星安全验证';
+    }
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF382326) : const Color(0xFFFFEBEE),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: const Color(0xFFE53935).withValues(alpha: isDark ? 0.3 : 0.2),
+          width: 1,
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.error_outline_rounded,
+            size: 20,
+            color: Color(0xFFE53935),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              errorMsg,
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark ? const Color(0xFFFFCDD2) : const Color(0xFFC62828),
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 8),
+
+          IconButton(
+            icon: const Icon(Icons.close_rounded, size: 18),
+            color: isDark ? Colors.white60 : Colors.black54,
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            style: IconButton.styleFrom(
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              minimumSize: Size.zero,
+              padding: const EdgeInsets.all(4),
+            ),
+            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+            onPressed: () {
+              setState(() {
+                _dismissedError = error;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, bool isDark) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 24),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.assignment_turned_in_outlined,
+              size: 64,
+              color: isDark ? Colors.white38 : Colors.grey[400],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              context.l10n.noCurrentSemesterExams,
+              style: TextStyle(
+                fontSize: 16,
+                color: isDark ? Colors.white60 : Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () => _showAddExamSheet(context),
+              icon: const Icon(Icons.add_rounded),
+              label: Text(context.l10n.addExam),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF09C489),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
             ),
-          ),
-          data: (exams) {
-            if (exams.isEmpty) {
-              return Center(
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  child: Padding(
-                    padding: const EdgeInsets.all(32),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.assignment_turned_in_outlined,
-                          size: 64,
-                          color: isDark ? Colors.white38 : Colors.grey[400],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          context.l10n.noCurrentSemesterExams,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: isDark ? Colors.white60 : Colors.grey[600],
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                        ElevatedButton.icon(
-                          onPressed: () => _showAddExamSheet(context),
-                          icon: const Icon(Icons.add_rounded),
-                          label: Text(context.l10n.addExam),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF09C489),
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            }
-
-            return ListView.builder(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              itemCount: exams.length,
-              itemBuilder: (context, index) {
-                final exam = exams[index];
-                return _buildExamCard(context, exam, isDark);
-              },
-            );
-          },
+          ],
         ),
       ),
     );
@@ -137,31 +199,27 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
     final primaryTitle =
         exam.courseName.isNotEmpty ? exam.courseName : exam.title;
     final secondaryTitle =
-        (exam.courseName.isNotEmpty && exam.title != exam.courseName)
-            ? exam.title
+        (exam.courseName.isNotEmpty &&
+                exam.title.trim().isNotEmpty &&
+                exam.title.trim() != exam.courseName.trim())
+            ? exam.title.trim()
             : '';
+    final statusChip = _buildStatusChip(context, exam, isPast);
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
         color: cardColor,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.06),
+          color: isDark ? Colors.white12 : const Color(0xFFE0E0E0),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
       ),
       child: Material(
         color: Colors.transparent,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(6),
         child: InkWell(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(6),
           onTap: exam.detailUrl.isNotEmpty
               ? () {
                   Navigator.push(
@@ -181,73 +239,53 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // 顶部：课程/考试名称 + 标签 + 删除按钮 (若为手动)
+                // 顶部：课程/考试名称 + 删除按钮 (若为手动)
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            primaryTitle,
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: isDark ? Colors.white : const Color(0xFF202124),
-                            ),
-                          ),
-                          if (secondaryTitle.isNotEmpty) ...[
-                            const SizedBox(height: 4),
-                            Text(
-                              secondaryTitle,
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: isDark ? Colors.white60 : Colors.grey[600],
-                              ),
-                            ),
-                          ],
-                        ],
+                      child: Text(
+                        primaryTitle,
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: isDark ? Colors.white : const Color(0xFF202124),
+                        ),
                       ),
                     ),
-                    const SizedBox(width: 8),
-                    if (exam.isManual) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF09C489).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Text(
-                          context.l10n.manualExamTag,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xFF09C489),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
+                    if (statusChip != null) ...[
+                      const SizedBox(width: 8),
+                      statusChip,
                     ],
-                    _buildStatusChip(context, exam, isPast),
-                    if (exam.isManual)
+                    if (exam.isManual) ...[
+                      const SizedBox(width: 6),
                       IconButton(
                         icon: const Icon(Icons.delete_outline_rounded, size: 20),
                         color: Colors.red[400],
-                        padding: const EdgeInsets.only(left: 4),
+                        padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
+                        style: IconButton.styleFrom(
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          minimumSize: Size.zero,
+                          padding: const EdgeInsets.all(4),
+                        ),
                         tooltip: context.l10n.delete,
                         onPressed: () => _confirmDeleteExam(context, exam),
                       ),
+                    ],
                   ],
                 ),
-                const SizedBox(height: 12),
-                Divider(
-                  height: 1,
-                  thickness: 0.5,
-                  color: isDark ? Colors.white12 : Colors.black.withValues(alpha: 0.06),
-                ),
-                const SizedBox(height: 12),
+                if (secondaryTitle.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    secondaryTitle,
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: isDark ? Colors.white60 : Colors.grey[600],
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 10),
                 // 时间行
                 Builder(
                   builder: (context) {
@@ -286,8 +324,6 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        _buildRelativeTimeBadge(exam.time, now, isPast),
                       ],
                     );
                   },
@@ -372,11 +408,14 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
     );
   }
 
-  Widget _buildStatusChip(BuildContext context, ExamScheduleModel exam, bool isPast) {
+  Widget? _buildStatusChip(BuildContext context, ExamScheduleModel exam, bool isPast) {
     String label;
     Color color;
 
     if (exam.status.isNotEmpty) {
+      if (exam.status == '待考' || exam.status == context.l10n.examStatusPending) {
+        return null;
+      }
       label = exam.status;
       if (exam.status == '已完成') {
         color = Colors.green;
@@ -388,8 +427,11 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
         color = isPast ? Colors.grey : const Color(0xFF09C489);
       }
     } else {
-      label = isPast ? context.l10n.examStatusEnded : context.l10n.examStatusPending;
-      color = isPast ? Colors.grey : const Color(0xFF09C489);
+      if (!isPast) {
+        return null;
+      }
+      label = context.l10n.examStatusEnded;
+      color = Colors.grey;
     }
 
     return Container(
@@ -404,46 +446,6 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
           fontSize: 12,
           fontWeight: FontWeight.w600,
           color: color,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRelativeTimeBadge(DateTime examTime, DateTime now, bool isPast) {
-    if (isPast) {
-      return const SizedBox.shrink();
-    }
-
-    final diff = examTime.difference(now);
-    String text;
-    if (diff.inDays == 0) {
-      if (diff.inHours > 0) {
-        text = '${diff.inHours}小时后';
-      } else if (diff.inMinutes > 0) {
-        text = '${diff.inMinutes}分钟后';
-      } else {
-        text = '即将开始';
-      }
-    } else if (diff.inDays == 1) {
-      text = '明天';
-    } else if (diff.inDays == 2) {
-      text = '后天';
-    } else {
-      text = '${diff.inDays}天后';
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: Colors.blue.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          fontSize: 11,
-          color: Colors.blue,
-          fontWeight: FontWeight.w500,
         ),
       ),
     );
@@ -528,20 +530,9 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  // 考试名称（必填）
+                  // 所属课程（必填）
                   TextField(
                     autofocus: true,
-                    decoration: InputDecoration(
-                      labelText: context.l10n.examTitle,
-                      hintText: context.l10n.inputExamTitleHint,
-                      border: const OutlineInputBorder(),
-                      prefixIcon: const Icon(Icons.quiz_outlined),
-                    ),
-                    onChanged: (v) => title = v,
-                  ),
-                  const SizedBox(height: 12),
-                  // 所属课程（可选）
-                  TextField(
                     decoration: InputDecoration(
                       labelText: context.l10n.examCourse,
                       hintText: context.l10n.inputExamCourseHint,
@@ -551,15 +542,29 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                     onChanged: (v) => course = v,
                   ),
                   const SizedBox(height: 12),
+                  // 考试名称（选填）
+                  TextField(
+                    decoration: InputDecoration(
+                      labelText: context.l10n.examTitle,
+                      hintText: context.l10n.inputExamTitleHint,
+                      border: const OutlineInputBorder(),
+                      prefixIcon: const Icon(Icons.quiz_outlined),
+                    ),
+                    onChanged: (v) => title = v,
+                  ),
+                  const SizedBox(height: 12),
                   // 考试时间（必填）
                   InkWell(
                     borderRadius: BorderRadius.circular(4),
                     onTap: () async {
                       final now = DateTime.now();
+                      final today = DateTime(now.year, now.month, now.day);
                       final date = await showDatePicker(
                         context: context,
-                        initialDate: selectedTime ?? now,
-                        firstDate: now.subtract(const Duration(days: 30)),
+                        initialDate: selectedTime != null && !selectedTime!.isBefore(today)
+                            ? selectedTime!
+                            : today,
+                        firstDate: today,
                         lastDate: now.add(const Duration(days: 365)),
                       );
                       if (date != null && context.mounted) {
@@ -645,9 +650,11 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                         ),
                       ),
                       onPressed: () async {
-                        if (title.trim().isEmpty) {
+                        final effCourse = course.trim();
+                        final effTitle = title.trim();
+                        if (effCourse.isEmpty) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(context.l10n.inputExamTitleHint)),
+                            SnackBar(content: Text(context.l10n.inputExamCourseHint)),
                           );
                           return;
                         }
@@ -663,8 +670,8 @@ class _ExamScreenState extends ConsumerState<ExamScreen> {
                         final addedMessage = context.l10n.examAdded;
 
                         await ref.read(examProvider.notifier).addManualExam(
-                              title: title,
-                              courseName: course,
+                              title: effTitle,
+                              courseName: effCourse,
                               time: selectedTime!,
                               location: location,
                               remarks: remarks,
