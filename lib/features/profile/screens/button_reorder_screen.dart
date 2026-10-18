@@ -37,6 +37,8 @@ class ButtonReorderScreen extends ConsumerWidget {
     final visibleItems = rawItems.where((e) => e.isVisible).toList();
     final hiddenItems = rawItems.where((e) => !e.isVisible).toList();
 
+    final isAutoSort = listType == 'feed' && appearance.feedAutoSort;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
@@ -73,55 +75,103 @@ class ButtonReorderScreen extends ConsumerWidget {
         children: [
           if (listType == 'feed')
             _buildAutoSortTile(context, ref, appearance, isDark),
-          _buildInfoBanner(context, isDark),
           Expanded(
-            child: ReorderableListView(
-              padding: const EdgeInsets.only(top: 0, bottom: 60), // 增加底部边距，方便拖拽到最后
-              header: _buildSectionHeader(
-                context,
-                context.l10n.visibleFunctions,
-                Icons.visibility_outlined,
-                isFixed: true,
-              ),
-              proxyDecorator: (Widget child, int index, Animation<double> animation) {
-                return AnimatedBuilder(
-                  animation: animation,
-                  builder: (BuildContext context, Widget? child) {
-                    final double animValue = Curves.easeInOut.transform(animation.value);
-                    final double elevation = lerpDouble(0, 6, animValue)!;
-                    return Material(
-                      elevation: elevation,
-                      color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-                      borderRadius: BorderRadius.circular(animValue * 8),
-                      child: child,
-                    );
-                  },
-                  child: child,
-                );
-              },
-              onReorder: (oldIndex, newIndex) {
-                // 将 UI 层的索引直接传递给 Notifier，由 Notifier 处理 HeaderHidden 的偏移逻辑
-                ref.read(appearanceProvider.notifier).reorderItems(listType, oldIndex, newIndex);
-              },
-              children: [
-                // 1. 显示中的项
-                ...visibleItems.map((item) => _buildReorderItem(context, ref, item)),
-                
-                // 2. 已隐藏的功能区域标题 (分界线)
-                _buildSectionHeader(
-                  context, 
-                  context.l10n.hiddenFunctions, 
-                  Icons.visibility_off_outlined, 
-                  key: const ValueKey('header_hidden'),
-                ),
-                
-                // 3. 隐藏中的项
-                ...hiddenItems.map((item) => _buildReorderItem(context, ref, item)),
-              ],
+            child: _buildSortSection(
+              context,
+              ref,
+              isDark: isDark,
+              listType: listType,
+              isAutoSort: isAutoSort,
+              visibleItems: visibleItems,
+              hiddenItems: hiddenItems,
             ),
           ),
         ],
       ),
+    );
+  }
+
+  static const ColorFilter _grayscaleFilter = ColorFilter.matrix(<double>[
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0,      0,      0,      1, 0,
+  ]);
+
+  Widget _buildSortSection(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool isDark,
+    required String listType,
+    required bool isAutoSort,
+    required List<FunctionItem> visibleItems,
+    required List<FunctionItem> hiddenItems,
+  }) {
+    Widget content = Column(
+      children: [
+        _buildInfoBanner(context, isDark),
+        Expanded(
+          child: ReorderableListView(
+            padding: const EdgeInsets.only(top: 0, bottom: 60), // 增加底部边距，方便拖拽到最后
+            buildDefaultDragHandles: !isAutoSort,
+            header: _buildSectionHeader(
+              context,
+              context.l10n.visibleFunctions,
+              Icons.visibility_outlined,
+              isFixed: true,
+            ),
+            proxyDecorator: (Widget child, int index, Animation<double> animation) {
+              return AnimatedBuilder(
+                animation: animation,
+                builder: (BuildContext context, Widget? child) {
+                  final double animValue = Curves.easeInOut.transform(animation.value);
+                  final double elevation = lerpDouble(0, 6, animValue)!;
+                  return Material(
+                    elevation: elevation,
+                    color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+                    borderRadius: BorderRadius.circular(animValue * 8),
+                    child: child,
+                  );
+                },
+                child: child,
+              );
+            },
+            onReorder: (oldIndex, newIndex) {
+              if (isAutoSort) return;
+              // 将 UI 层的索引直接传递给 Notifier，由 Notifier 处理 HeaderHidden 的偏移逻辑
+              ref.read(appearanceProvider.notifier).reorderItems(listType, oldIndex, newIndex);
+            },
+            children: [
+              // 1. 显示中的项
+              ...visibleItems.map((item) => _buildReorderItem(context, ref, item)),
+              
+              // 2. 已隐藏的功能区域标题 (分界线)
+              _buildSectionHeader(
+                context, 
+                context.l10n.hiddenFunctions, 
+                Icons.visibility_off_outlined, 
+                key: const ValueKey('header_hidden'),
+              ),
+              
+              // 3. 隐藏中的项
+              ...hiddenItems.map((item) => _buildReorderItem(context, ref, item)),
+            ],
+          ),
+        ),
+      ],
+    );
+
+    if (isAutoSort) {
+      content = ColorFiltered(
+        colorFilter: _grayscaleFilter,
+        child: content,
+      );
+    }
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 200),
+      opacity: isAutoSort ? 0.38 : 1.0,
+      child: content,
     );
   }
 
@@ -348,40 +398,44 @@ class ButtonReorderScreen extends ConsumerWidget {
 
   Widget _buildAutoSortTile(
       BuildContext context, WidgetRef ref, AppearanceState appearance, bool isDark) {
-    return Container(
-      margin: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+      child: Material(
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : const Color(0xFFE0E0E0),
-          width: 1,
-        ),
-      ),
-      child: SwitchListTile(
-        title: Text(
-          context.l10n.feedAutoSort,
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white : const Color(0xFF202124),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.12)
+                : const Color(0xFFE0E0E0),
+            width: 1,
           ),
         ),
-        subtitle: Text(
-          context.l10n.feedAutoSortSubtitle,
-          style: TextStyle(
-            fontSize: 12,
-            color: isDark ? Colors.white60 : Colors.grey[600],
+        clipBehavior: Clip.antiAlias,
+        child: SwitchListTile(
+          tileColor: Colors.transparent,
+          title: Text(
+            context.l10n.feedAutoSort,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : const Color(0xFF202124),
+            ),
           ),
+          subtitle: Text(
+            context.l10n.feedAutoSortSubtitle,
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? Colors.white60 : Colors.grey[600],
+            ),
+          ),
+          value: appearance.feedAutoSort,
+          activeThumbColor: const Color(0xFF09C489),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          onChanged: (val) {
+            ref.read(appearanceProvider.notifier).updateFeedAutoSort(val);
+          },
         ),
-        value: appearance.feedAutoSort,
-        activeThumbColor: const Color(0xFF09C489),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-        onChanged: (val) {
-          ref.read(appearanceProvider.notifier).updateFeedAutoSort(val);
-        },
       ),
     );
   }

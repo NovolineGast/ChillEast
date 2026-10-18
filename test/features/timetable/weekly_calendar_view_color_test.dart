@@ -96,6 +96,8 @@ void main() {
       CourseColorUtils.getColorForCourse('高等数学').toARGB32(),
       equals(targetItem.color.toARGB32()),
     );
+
+    await tester.pump(const Duration(seconds: 11));
   });
 
   testWidgets('Overlapping courses show conflict icon at bottom right',

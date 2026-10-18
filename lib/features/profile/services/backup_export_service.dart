@@ -78,6 +78,8 @@ class BackupExportService {
         },
         'manualFirstWeekMonday':
             prefs.getString('timetable_first_week_monday_manual'),
+        'customCourseColors':
+            _decodeJson(prefs.getString('custom_course_colors')),
         'appearance': {
           'homeItems': _decodeJson(prefs.getString('home_function_items')),
           'functionItems': _decodeJson(prefs.getString('function_page_items')),
@@ -108,6 +110,7 @@ class BackupExportService {
         'rawCourses': await _readDocFileJson('raw_courses.json'),
         'timetableRules': await _readDocFileJson('timetable_rules.json'),
         'homeworkList': await _readManualHomeworkJson(),
+        'examList': await _readManualExamJson(),
         'aiMemories': await _readDocFileJson('ai_memories.json'),
       },
     };
@@ -330,6 +333,27 @@ class BackupExportService {
       }
     }
 
+    // —— 课程自定义颜色 ——
+    if (settings.containsKey('customCourseColors')) {
+      final cloudColors = settings['customCourseColors'];
+      if (cloudColors is Map) {
+        final localRaw = prefs.getString('custom_course_colors');
+        final localMap = <String, dynamic>{};
+        if (localRaw != null && localRaw.isNotEmpty) {
+          try {
+            final decoded = jsonDecode(localRaw);
+            if (decoded is Map) {
+              localMap.addAll(Map<String, dynamic>.from(decoded));
+            }
+          } catch (_) {}
+        }
+        for (final entry in cloudColors.entries) {
+          localMap[entry.key.toString()] = entry.value;
+        }
+        await prefs.setString('custom_course_colors', jsonEncode(localMap));
+      }
+    }
+
     // —— 课表云端订阅 ——
     if (settings.containsKey('timetableSubscription')) {
       final sub = settings['timetableSubscription'];
@@ -345,7 +369,7 @@ class BackupExportService {
       }
     }
 
-    // —— 文档目录文件（课表/手动作业）——
+    // —— 文档目录文件（课表/手动作业/手动考试）——
     await _writeDocFile(
         'current_timetable.ics', localData, 'timetableIcs');
     await _writeDocFile(
@@ -355,6 +379,8 @@ class BackupExportService {
     await _writeDocFile(
         'timetable_rules.json', localData, 'timetableRules');
     await _applyManualHomeworkList(localData['homeworkList']);
+    await _applyManualExamList(
+        localData['examList'] ?? localData['manualExamList']);
     await _writeDocFile('ai_memories.json', localData, 'aiMemories');
 
     // —— AI 设置（SecureStorage）——
@@ -670,5 +696,114 @@ class BackupExportService {
     // 3. 保留本地爬取作业 + 合并后的手动作业
     final finalHomework = [...mergedManual, ...localScraped];
     await file.writeAsString(jsonEncode(finalHomework));
+  }
+
+  /// 仅读取本地手动考试（isManual == true 且未过期），排除在线爬取的考试
+  static Future<List<Map<String, dynamic>>?> _readManualExamJson() async {
+    final raw = await _readDocFileJson('exam_schedule_list.json');
+    if (raw is! List) return null;
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final manualOnly = raw
+        .whereType<Map>()
+        .where((item) {
+          if (item['isManual'] != true) return false;
+          try {
+            final timeStr = (item['time'] ?? item['startTime']) as String?;
+            if (timeStr == null) return false;
+            final t = DateTime.parse(timeStr);
+            return !t.isBefore(todayStart);
+          } catch (_) {
+            return false;
+          }
+        })
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+    return manualOnly;
+  }
+
+  /// 合并备份中的手动考试到本地：
+  /// - 云端手动考试覆盖/合并到本地手动考试列表（以 id 为准）
+  /// - 本地原有的爬取考试（isManual != true）不受影响继续保留
+  /// - 本地已有但云端没有的手动考试继续保留
+  /// - 始终只保留开始时间是今天及未来未过期的考试
+  static Future<void> _applyManualExamList(dynamic cloudExams) async {
+    if (cloudExams == null || cloudExams is! List) return;
+
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+
+    final cloudManual = cloudExams
+        .whereType<Map>()
+        .where((item) {
+          if (item['isManual'] != true) return false;
+          try {
+            final timeStr = (item['time'] ?? item['startTime']) as String?;
+            if (timeStr == null) return false;
+            final t = DateTime.parse(timeStr);
+            return !t.isBefore(todayStart);
+          } catch (_) {
+            return false;
+          }
+        })
+        .map((item) => Map<String, dynamic>.from(item))
+        .toList();
+
+    final dir = await getApplicationDocumentsDirectory();
+    final file = File('${dir.path}/exam_schedule_list.json');
+
+    List<Map<String, dynamic>> localList = [];
+    if (await file.exists()) {
+      try {
+        final decoded = jsonDecode(await file.readAsString());
+        if (decoded is List) {
+          localList = decoded
+              .whereType<Map>()
+              .map((item) => Map<String, dynamic>.from(item))
+              .toList();
+        }
+      } catch (_) {}
+    }
+
+    // 分离本地爬取考试和手动考试
+    final localScraped =
+        localList.where((item) => item['isManual'] != true).toList();
+    final localManual =
+        localList.where((item) => item['isManual'] == true).toList();
+
+    final mergedManual = <Map<String, dynamic>>[];
+    final addedIds = <String>{};
+
+    // 1. 云端手动考试覆盖本地
+    for (final item in cloudManual) {
+      final id = item['id']?.toString();
+      if (id != null && !addedIds.contains(id)) {
+        mergedManual.add(item);
+        addedIds.add(id);
+      }
+    }
+
+    // 2. 本地有但云端没有的手动考试：继续保留本地手动考试
+    for (final item in localManual) {
+      final id = item['id']?.toString();
+      if (id != null && !addedIds.contains(id)) {
+        mergedManual.add(item);
+        addedIds.add(id);
+      }
+    }
+
+    // 3. 保留本地爬取考试 + 合并后的手动考试（过滤今天及未来）
+    final finalExams = [...mergedManual, ...localScraped].where((item) {
+      try {
+        final timeStr = (item['time'] ?? item['startTime']) as String?;
+        if (timeStr == null) return false;
+        final t = DateTime.parse(timeStr);
+        return !t.isBefore(todayStart);
+      } catch (_) {
+        return false;
+      }
+    }).toList();
+
+    await file.writeAsString(jsonEncode(finalExams));
   }
 }

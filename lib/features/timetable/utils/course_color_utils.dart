@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../cloudisk/services/cloud_backup_manager.dart';
 
 /// 描述 Material UI 调色板中的单个颜色项
 class MaterialColorItem {
@@ -233,6 +234,15 @@ class CourseColorUtils {
     }
 
     await _persist();
+    CloudBackupManager.instance.markDirty();
+  }
+
+  /// 重新从 SharedPreferences 加载颜色配置（备份恢复或外部变更后调用）
+  static Future<void> reload() async {
+    _assignedColors.clear();
+    _initialized = false;
+    _initFuture = null;
+    await init();
   }
 
   /// 查找当前正在使用指定颜色的课程名称（若有）
