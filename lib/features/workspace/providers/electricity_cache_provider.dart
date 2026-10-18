@@ -68,6 +68,8 @@ class ElectricityCacheNotifier
   final Ref _ref;
   final _logger = AppLogger.instance;
 
+  Future<void>? _runningRefresh;
+
   ElectricityCacheNotifier(this._ref)
       : super(const DormitoryElectricityState(isLoading: true)) {
     _init();
@@ -87,12 +89,34 @@ class ElectricityCacheNotifier
     final rooms = await service.getSavedRooms();
     final balances = await service.getSavedBalances();
 
+    // 检查并清理被历史版本 bug 污染的跨槽位缓存（例如 slot 0 错存了 slot 1 的电费）
+    if (rooms.length >= 2 && balances.length >= 2) {
+      final r0 = rooms[0];
+      final r1 = rooms[1];
+      final b0 = balances[0];
+      final b1 = balances[1];
+      if (r0 != null && r1 != null && r0.roomId != r1.roomId && b0 != null && b1 != null) {
+        final isPolluted = (b0.accname != null &&
+                (b0.accname!.contains(r1.roomId) ||
+                    (r1.roomName.isNotEmpty && b0.accname!.contains(r1.roomName)))) ||
+            b0.balance == b1.balance;
+        if (isPolluted) {
+          _logger.w('🧹 Detected corrupted cross-slot electricity cache for slot 0, resetting slot 0 balance');
+          balances[0] = null;
+        }
+      }
+    }
+
     if (mounted) {
-      state = DormitoryElectricityState(
-        rooms: rooms,
-        balances: balances,
-        isLoading: false,
-      );
+      if (_runningRefresh == null) {
+        state = DormitoryElectricityState(
+          rooms: rooms,
+          balances: balances,
+          isLoading: false,
+        );
+      } else {
+        state = state.copyWith(rooms: rooms);
+      }
     }
 
     final auth = _ref.read(authStateProvider);
@@ -102,6 +126,19 @@ class ElectricityCacheNotifier
   }
 
   Future<void> _silentRefresh() async {
+    if (_runningRefresh != null) {
+      return _runningRefresh!;
+    }
+    final future = _doSilentRefresh();
+    _runningRefresh = future;
+    try {
+      await future;
+    } finally {
+      _runningRefresh = null;
+    }
+  }
+
+  Future<void> _doSilentRefresh() async {
     final service = _ref.read(electricityServiceProvider);
     final savedRooms = await service.getSavedRooms();
     final rooms = List<SavedElectricityRoom?>.generate(
@@ -135,6 +172,7 @@ class ElectricityCacheNotifier
           buildingName: room.buildingName,
           roomId: room.roomId,
           mertype: room.mertype,
+          slot: i,
         );
         newBalances[i] = info;
         await service.saveSavedBalance(info, slot: i);

@@ -41,6 +41,7 @@ class MockElectricityService extends ElectricityService {
     required String buildingName,
     required String roomId,
     required String mertype,
+    int? slot,
   }) async {
     return ElectricityBalanceInfo(balance: '50.88', detail: '正常');
   }

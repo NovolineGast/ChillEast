@@ -22,6 +22,7 @@ class FakeElectricityService extends ElectricityService {
     required String buildingName,
     required String roomId,
     required String mertype,
+    int? slot,
   }) async {
     if (roomId == '81E3C6EE733048798CC518A0FAE33A03') {
       return ElectricityBalanceInfo(balance: '56.80', detail: '已抄表');

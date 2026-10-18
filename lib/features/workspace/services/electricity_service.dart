@@ -21,8 +21,23 @@ class ElectricityService {
 
   CampusCardService get _cardService => _ref.read(campusCardServiceProvider);
 
+  Future<String?>? _pendingAuthFuture;
+
   /// 初始化电费环境 (确保 OpenID 和 Cookie)
   Future<String?> _ensureAuthenticated({bool force = false}) async {
+    if (_pendingAuthFuture != null && !force) {
+      return _pendingAuthFuture!;
+    }
+    final future = _ensureAuthenticatedInternal(force: force);
+    _pendingAuthFuture = future;
+    try {
+      return await future;
+    } finally {
+      _pendingAuthFuture = null;
+    }
+  }
+
+  Future<String?> _ensureAuthenticatedInternal({bool force = false}) async {
     if (force || _cardService.openid == null || _cardService.cachedInfo == null) {
       await _cardService.fetchRechargeInfo(isRetry: force);
     }
@@ -219,6 +234,7 @@ class ElectricityService {
     required String buildingName,
     required String roomId,
     required String mertype,
+    int? slot,
   }) async {
     if (_cardService.openid == null) {
       await _ensureAuthenticated();
@@ -255,7 +271,9 @@ class ElectricityService {
           throw Exception('Unexpected response format for getBalance: $data');
         }
         final balanceInfo = ElectricityBalanceInfo.fromJson(result);
-        saveSavedBalance(balanceInfo);
+        if (slot != null) {
+          await saveSavedBalance(balanceInfo, slot: slot);
+        }
         return balanceInfo;
       }
       throw Exception('无法获取余额数据');

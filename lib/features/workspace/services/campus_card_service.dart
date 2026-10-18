@@ -102,7 +102,12 @@ class CampusCardService {
   }
 
   Future<CampusCardInfo?> getStoredCardInfo() async {
-    if (_cachedInfo != null) return _cachedInfo;
+    if (_cachedInfo != null) {
+      if (_openid == null && _cachedInfo?.openid != null && _cachedInfo!.openid!.isNotEmpty) {
+        _openid = _cachedInfo!.openid;
+      }
+      return _cachedInfo;
+    }
     try {
       final prefs = await SharedPreferences.getInstance();
       final str = prefs.getString(_cardInfoStorageKey);
@@ -110,10 +115,16 @@ class CampusCardService {
         final data = jsonDecode(str);
         if (data is Map<String, dynamic>) {
           _cachedInfo = CampusCardInfo.fromJson(data);
+          if (_openid == null && _cachedInfo?.openid != null && _cachedInfo!.openid!.isNotEmpty) {
+            _openid = _cachedInfo!.openid;
+          }
           return _cachedInfo;
         } else if (data is Map) {
           _cachedInfo =
               CampusCardInfo.fromJson(Map<String, dynamic>.from(data));
+          if (_openid == null && _cachedInfo?.openid != null && _cachedInfo!.openid!.isNotEmpty) {
+            _openid = _cachedInfo!.openid;
+          }
           return _cachedInfo;
         }
       }
@@ -412,8 +423,23 @@ class CampusCardService {
     }
   }
 
+  Future<CampusCardInfo>? _pendingRechargeInfoFuture;
+
   /// 获取校园卡充值页信息（对齐付款码页面的实时余额刷新方式）
   Future<CampusCardInfo> fetchRechargeInfo({bool isRetry = false}) async {
+    if (_pendingRechargeInfoFuture != null && !isRetry) {
+      return _pendingRechargeInfoFuture!;
+    }
+    final future = _fetchRechargeInfoInternal(isRetry: isRetry);
+    _pendingRechargeInfoFuture = future;
+    try {
+      return await future;
+    } finally {
+      _pendingRechargeInfoFuture = null;
+    }
+  }
+
+  Future<CampusCardInfo> _fetchRechargeInfoInternal({bool isRetry = false}) async {
     // 优先通过付款码页面 (openVirtualcard) 获取最新实时余额
     try {
       await fetchPaymentCode(isRetry: isRetry);
