@@ -84,6 +84,7 @@ debug
 .env.json
 
 # Cloudflare Worker (relay)
+.wrangler/
 worker/node_modules/
 worker/.dev.vars
 worker/.wrangler/
