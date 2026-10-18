@@ -116,8 +116,8 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
 
     final current = state.valueOrNull ?? [];
     final updated = [newItem, ...current];
-    await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     state = AsyncValue.data(updated);
+    await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     _scheduleReminders(updated);
   }
 
@@ -125,8 +125,9 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
   Future<void> deleteHomework(String id) async {
     final current = state.valueOrNull ?? [];
     final updated = current.where((e) => e.id != id).toList();
-    await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
+    // 先同步更新内存中的 state，确保 Dismissible 回调后组件树立即移除该项
     state = AsyncValue.data(updated);
+    await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     // 取消幽灵闹钟：删除后重调度
     _rescheduleAll();
   }
@@ -143,8 +144,8 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
       }
       return e;
     }).toList();
-    await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     state = AsyncValue.data(updated);
+    await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     _rescheduleAll();
   }
 
@@ -157,8 +158,8 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
       }
       return e;
     }).toList();
-    await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     state = AsyncValue.data(updated);
+    await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     _rescheduleAll();
   }
 

@@ -65,10 +65,11 @@ class _LibraryQuickReserveSheetState extends State<LibraryQuickReserveSheet> {
     final now = DateTime.now();
     _availableDays = LibraryTimeUtils.availableReserveDays(now: now);
 
-    // 如果今天已没有可约时段（比如晚上 21:30 之后），且明天可选，默认切到明天
+    // 如果 22:00 后或今天已没有可约时段（比如晚上 21:30 之后），且明天可选，默认切到明天
+    final beijing = LibraryTimeUtils.getBeijingNow(now);
     final todayStarts =
         LibraryTimeUtils.availableStartSlots(_availableDays[0], now: now);
-    if (todayStarts.isEmpty && _availableDays.length > 1) {
+    if ((beijing.hour >= 22 || todayStarts.isEmpty) && _availableDays.length > 1) {
       _selectedDay = _availableDays[1];
     } else {
       _selectedDay = _availableDays[0];

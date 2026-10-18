@@ -73,6 +73,52 @@ void main() {
     expect(resolved.weekday, equals(DateTime.monday));
   });
 
+  test('Falls back to manual when metadata is corrupt or invalid date under auto-sync on', () async {
+    final file = io.File('${tempDir.path}/timetable_meta.json');
+    await file.writeAsString('{"firstWeekMonday":"invalid-date-string","semester":"2025-2026-1"}');
+    await storage.saveManualFirstWeekMonday(DateTime(2025, 9, 8));
+
+    final resolved = await storage.resolveFirstWeekMonday();
+    expect(resolved, equals(DateTime(2025, 9, 8)));
+  });
+
+  test('Falls back to metadata when manual date in prefs is corrupt under auto-sync off', () async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(TimetableStorage.autoSyncKey, false);
+    await prefs.setString(TimetableStorage.manualFirstWeekMondayKey, 'not-a-valid-iso-date');
+
+    await storage.saveMetadata(
+      semester: '2025-2026-1',
+      firstWeekMonday: DateTime(2025, 9, 1),
+    );
+
+    final resolved = await storage.resolveFirstWeekMonday();
+    expect(resolved, equals(DateTime(2025, 9, 1)));
+  });
+
+  test('Normalizes various days of week to the preceding Monday when saved', () async {
+    // Sunday 2025-09-07 (weekday 7) -> preceding Monday 2025-09-01
+    await storage.saveManualFirstWeekMonday(DateTime(2025, 9, 7));
+    final readSun = await storage.readManualFirstWeekMonday();
+    expect(readSun, equals(DateTime(2025, 9, 1)));
+    expect(readSun!.weekday, equals(DateTime.monday));
+
+    // Saturday 2025-09-06 (weekday 6) -> preceding Monday 2025-09-01
+    await storage.saveManualFirstWeekMonday(DateTime(2025, 9, 6));
+    final readSat = await storage.readManualFirstWeekMonday();
+    expect(readSat, equals(DateTime(2025, 9, 1)));
+
+    // Monday 2025-09-01 stays Monday
+    await storage.saveManualFirstWeekMonday(DateTime(2025, 9, 1));
+    final readMon = await storage.readManualFirstWeekMonday();
+    expect(readMon, equals(DateTime(2025, 9, 1)));
+  });
+
+  test('guessFirstWeekMonday always returns a Monday', () {
+    final guess = TimetableStorage.guessFirstWeekMonday();
+    expect(guess.weekday, equals(DateTime.monday));
+  });
+
   test('Regenerated ICS uses manual monday when metadata is missing', () async {
     const custom = CourseModel(
       id: 'custom_1',

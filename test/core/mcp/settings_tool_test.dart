@@ -4,7 +4,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:ChillEast/core/mcp/mcp.dart';
-import 'package:ChillEast/core/services/app_settings_service.dart';
 import 'package:ChillEast/core/state/locale_provider.dart';
 import 'package:ChillEast/core/utils/secure_storage_helper.dart';
 import 'package:ChillEast/features/profile/providers/settings_provider.dart';

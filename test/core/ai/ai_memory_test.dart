@@ -65,6 +65,45 @@ void main() {
       final readList = await storage.readMemories();
       expect(readList, isEmpty);
     });
+
+    test('concurrent saveMemories calls are serialized by write queue without corrupting JSON', () async {
+      // Fire 25 concurrent save operations
+      final futures = <Future<void>>[];
+      for (int i = 0; i < 25; i++) {
+        final batch = List.generate(
+          i + 1,
+          (idx) => AiMemoryItem(
+            id: 'mem_${i}_$idx',
+            content: 'Concurrent item $i-$idx',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
+        futures.add(storage.saveMemories(batch));
+      }
+
+      await Future.wait(futures);
+
+      // Verify that the file exists and contains valid JSON with the final batch count
+      final read = await storage.readMemories();
+      expect(read.isNotEmpty, isTrue);
+      // The last write had 25 items (0..24)
+      expect(read.length, equals(25));
+      expect(read.last.content, equals('Concurrent item 24-24'));
+    });
+
+    test('write queue continues processing subsequent tasks reliably', () async {
+      // Test sequential queue execution when mixed with empty clearAll
+      final op1 = storage.addMemory('第一条');
+      final op2 = storage.clearAll();
+      final op3 = storage.addMemory('第二条');
+
+      await Future.wait([op1, op2, op3]);
+
+      final read = await storage.readMemories();
+      expect(read.length, equals(1));
+      expect(read.first.content, equals('第二条'));
+    });
   });
 
   group('AiMemoryNotifier Tests', () {

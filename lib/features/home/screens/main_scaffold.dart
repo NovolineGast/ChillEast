@@ -26,6 +26,7 @@ import '../../../core/ai/ai_provider.dart';
 import '../../profile/providers/settings_provider.dart';
 import '../../../core/utils/l10n_extension.dart';
 import '../widgets/quick_action_router.dart';
+import '../../cloudisk/services/cloud_backup_manager.dart';
 
 
 /// 自定义顶部滑动指示器，圆角朝下
@@ -286,6 +287,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     final query = text.trim();
     final imagePath = _selectedImagePath;
     if (query.isEmpty && (imagePath == null || imagePath.isEmpty)) return;
+    if (ref.read(aiAssistantProvider).isLoading) return;
     _aiInputController.clear();
     setState(() {
       _selectedImagePath = null;
@@ -320,6 +322,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       // 从桌面小组件点进来时（App 活着走 onNewIntent），这里取走暂存动作并路由；
       // 冷启动路径仍由 initState 的 postFrame 消费。
       _consumeWidgetAction();
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // 当应用切入后台时，若有未同步的离线修改，立刻触发一次同步
+      CloudBackupManager.instance.syncNow();
     }
   }
 
@@ -1035,6 +1041,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     final aiState = ref.watch(aiAssistantProvider);
     final isLimitReached = aiState.isRoundLimitReached;
     final canSend = !isLimitReached &&
+        !aiState.isLoading &&
         (_aiInputController.text.trim().isNotEmpty || _selectedImagePath != null);
 
     return Container(
@@ -1076,7 +1083,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                     autofocus: true,
                     enabled: !isLimitReached,
                     textInputAction: TextInputAction.send,
-                    onSubmitted: isLimitReached ? null : _submitAiQuery,
+                    onSubmitted: canSend ? _submitAiQuery : null,
                     cursorColor: const Color(0xFF09C489),
                     style: TextStyle(
                       fontSize: 16,

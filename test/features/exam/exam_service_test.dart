@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ChillEast/features/exam/models/exam_schedule_model.dart';
@@ -339,8 +337,8 @@ void main() {
                   data: '''
 <div id="watermark-wrapper" class="watermark-wrapper"></div>
 <div style="position:relative;z-index:100">
-  <p>领取时间：<span class="din font16">2026-10-18 09:00</span></p>
-  <p>提交时间：<span class="din font16">2026-10-18 11:00</span></p>
+  <p>领取时间：<span class="din font16">2099-10-18 09:00</span></p>
+  <p>提交时间：<span class="din font16">2099-10-18 11:00</span></p>
 </div>
 ''',
                 ),

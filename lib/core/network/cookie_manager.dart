@@ -17,17 +17,27 @@ class AppCookieManager {
   final Logger _logger = Logger();
   
   // Dio 的 CookieJar
-  late final PersistCookieJar _dioCookieJar;
+  late PersistCookieJar _dioCookieJar;
   
   // InAppWebView 的 CookieManager
-  late final webview.CookieManager _webViewCookieManager;
+  late webview.CookieManager _webViewCookieManager;
   
   bool _initialized = false;
+  Future<void>? _initFuture;
   
   /// 初始化 CookieManager
   Future<void> initialize() async {
     if (_initialized) return;
-    
+    _initFuture ??= _doInitialize();
+    try {
+      await _initFuture!;
+    } catch (e) {
+      _initFuture = null;
+      rethrow;
+    }
+  }
+
+  Future<void> _doInitialize() async {
     try {
       // 获取应用文档目录 (可写)
       final appDocDir = await getApplicationDocumentsDirectory();
@@ -465,9 +475,12 @@ class AppCookieManager {
   /// 销毁 CookieManager
   Future<void> dispose() async {
     try {
-      await _dioCookieJar.deleteAll();
-      await _webViewCookieManager.deleteAllCookies();
+      if (_initialized) {
+        await _dioCookieJar.deleteAll();
+        await _webViewCookieManager.deleteAllCookies();
+      }
       _initialized = false;
+      _initFuture = null;
       _logger.i('AppCookieManager disposed');
     } catch (e) {
       _logger.e('Failed to dispose AppCookieManager: $e');

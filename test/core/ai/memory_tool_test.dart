@@ -1,22 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:ChillEast/core/ai/services/ai_memory_storage.dart';
 import 'package:ChillEast/core/mcp/tools/memory_tool.dart';
-
-class MockPathProviderPlatform extends Fake
-    with MockPlatformInterfaceMixin
-    implements PathProviderPlatform {
-  final Directory tempDir;
-  MockPathProviderPlatform(this.tempDir);
-
-  @override
-  Future<String?> getApplicationDocumentsPath() async {
-    return tempDir.path;
-  }
-}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -26,8 +13,12 @@ void main() {
 
   setUp(() async {
     testDir = await Directory.systemTemp.createTemp('memory_tool_test_');
-    PathProviderPlatform.instance = MockPathProviderPlatform(testDir);
-    storage = AiMemoryStorage();
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/path_provider'),
+      (call) async => testDir.path,
+    );
+    storage = AiMemoryStorage(baseDirectory: testDir);
   });
 
   tearDown(() async {

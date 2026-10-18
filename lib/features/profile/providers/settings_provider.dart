@@ -1,9 +1,11 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/services/background_worker.dart';
 import '../../../core/services/live_scheduler.dart';
 import '../../cloudisk/services/cloud_backup_manager.dart';
+import '../../timetable/models/course_model.dart';
 import '../../timetable/services/timetable_storage.dart';
 import '../../timetable/services/timetable_subscription_service.dart';
 import '../../homework/services/homework_storage.dart';
@@ -277,7 +279,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   Future<void> _runRescheduleLoop() async {
     do {
       _rescheduleRequested = false;
-      await _doRescheduleNotifications();
+      try {
+        await _doRescheduleNotifications();
+      } catch (e) {
+        debugPrint('⚠️ 重排通知发生未捕获异常: $e');
+      }
     } while (_rescheduleRequested);
   }
 
@@ -285,26 +291,52 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     // 开了实时/实况就静默课程+图书馆的传统定时通知（由实时卡接管），作业不受影响
     final liveOn = state.courseLiveEnabled || state.flymeLiveEnabled;
 
-    // 0. 先取消所有旧通知，防止重复或残留
-    await NotificationService().cancelAll();
-    // 1. 安排课程通知
-    final storage = TimetableStorage();
-    final hasTimetable = await storage.hasLocalTimetable();
+    // 预先准备课程与开学周一（#33, #34：在 cancelAll 之前安全解析并准备，避免解析异常导致整批排程中断）
+    List<CourseModel>? coursesToSchedule;
+    DateTime? firstWeekMonday;
 
-    if (!liveOn && hasTimetable) {
-      final courses = await storage.readCourseList();
-      final meta = await storage.readMetadata();
-      if (courses.isNotEmpty &&
-          meta != null &&
-          meta['firstWeekMonday'] != null) {
-        final firstWeekMonday =
-            DateTime.parse(meta['firstWeekMonday'] as String);
+    if (!liveOn) {
+      try {
+        final storage = TimetableStorage();
+        final hasTimetable = await storage.hasLocalTimetable();
+        if (hasTimetable) {
+          final courses = await storage.readCourseList();
+          if (courses.isNotEmpty) {
+            try {
+              firstWeekMonday = await storage.resolveFirstWeekMonday();
+              coursesToSchedule = courses;
+            } catch (e) {
+              debugPrint('⚠️ 解析开学周一失败: $e');
+            }
+          }
+        }
+      } catch (e) {
+        debugPrint('⚠️ 准备课程排程数据异常: $e');
+      }
+    }
+
+    // 0. 先取消所有旧通知，防止重复或残留
+    try {
+      await NotificationService().cancelAll();
+    } catch (e) {
+      debugPrint('⚠️ 取消旧通知失败: $e');
+    }
+
+    // 1. 安排课程通知
+    if (coursesToSchedule != null &&
+        coursesToSchedule.isNotEmpty &&
+        firstWeekMonday != null) {
+      try {
         await NotificationService().scheduleCourseReminders(
-          courses,
+          coursesToSchedule,
           firstWeekMonday,
           state.reminderMinutes,
         );
+      } catch (e) {
+        debugPrint('⚠️ 安排课程提醒失败: $e');
       }
+    } else if (!liveOn && state.reminderMinutes > 0) {
+      debugPrint('⚠️ 课程列表为空或开学周一不可用，跳过课程提醒排程');
     }
 
     // 1.1 安排考试通知（跟上课通知一起走，按 reminderMinutes 提醒）
@@ -318,26 +350,36 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
             state.reminderMinutes,
           );
         }
-      } catch (_) {}
+      } catch (e) {
+        debugPrint('⚠️ 安排考试提醒失败: $e');
+      }
     }
 
     // 2. 安排作业通知
-    final hwStorage = HomeworkStorage();
-    final homeworks = await hwStorage.readHomeworkList();
-    if (homeworks.isNotEmpty) {
-      await NotificationService().scheduleHomeworkReminders(
-        homeworks,
-        state.homeworkReminderHours,
-      );
+    try {
+      final hwStorage = HomeworkStorage();
+      final homeworks = await hwStorage.readHomeworkList();
+      if (homeworks.isNotEmpty) {
+        await NotificationService().scheduleHomeworkReminders(
+          homeworks,
+          state.homeworkReminderHours,
+        );
+      }
+    } catch (e) {
+      debugPrint('⚠️ 安排作业提醒失败: $e');
     }
 
     // 3. 安排图书馆预约通知（实时接管时同样静默）
-    final libReserves = await LibraryStorage.getCachedReserves();
-    if (!liveOn && libReserves.isNotEmpty) {
-      await NotificationService().scheduleLibraryReminders(
-        libReserves,
-        state.libraryReminderMinutes,
-      );
+    try {
+      final libReserves = await LibraryStorage.getCachedReserves();
+      if (!liveOn && libReserves.isNotEmpty) {
+        await NotificationService().scheduleLibraryReminders(
+          libReserves,
+          state.libraryReminderMinutes,
+        );
+      }
+    } catch (e) {
+      debugPrint('⚠️ 安排图书馆提醒失败: $e');
     }
 
     // 4. 同步后台周期任务注册状态

@@ -191,7 +191,7 @@ void main() {
     test('reschedule exposes precise period parameters', () {
       final tool = TimetableRuleTool.create(
           service: TimetableRuleService(storage: BaselineFakeStorage()));
-      final schema = tool.inputSchema!;
+      final schema = tool.inputSchema;
       final props = schema['properties'] as Map<String, dynamic>;
       for (final key in [
         'sourceStartPeriod',

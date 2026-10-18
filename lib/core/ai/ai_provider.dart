@@ -263,9 +263,13 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
 
   AppLocalizations _getL10n() {
     final locale = ref.read(localeProvider);
-    return lookupAppLocalizations(
-      locale ?? WidgetsBinding.instance.platformDispatcher.locale,
-    );
+    try {
+      return lookupAppLocalizations(
+        locale ?? WidgetsBinding.instance.platformDispatcher.locale,
+      );
+    } catch (_) {
+      return lookupAppLocalizations(const Locale('zh'));
+    }
   }
 
   String _getMimeType(String path) {
@@ -277,18 +281,23 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
     return 'image/jpeg';
   }
 
+  bool _isSending = false;
+
   /// 发送消息给 AI（支持附带本地图片并按 MiMo/OpenAI 多模态规范转为 Base64 Data URI）
   Future<void> sendMessage(String text, {String? imagePath}) async {
     final query = text.trim();
     if (query.isEmpty && (imagePath == null || imagePath.isEmpty)) return;
+    if (_isSending || state.isLoading) return;
+    _isSending = true;
 
-    if (state.isRoundLimitReached) {
-      state = state.copyWith(
-        status: AiAssistantStatus.error,
-        errorMessage: '本轮对话已达到上限（20个来回）。请开启新对话继续交流。',
-      );
-      return;
-    }
+    try {
+      if (state.isRoundLimitReached) {
+        state = state.copyWith(
+          status: AiAssistantStatus.error,
+          errorMessage: '本轮对话已达到上限（20个来回）。请开启新对话继续交流。',
+        );
+        return;
+      }
 
     final l10n = _getL10n();
 
@@ -354,9 +363,8 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
       errorMessage: null,
     );
 
-    try {
-      final toolRegistry = ref.read(mcpToolRegistryProvider);
-      String? lastUsedTool;
+    final toolRegistry = ref.read(mcpToolRegistryProvider);
+    String? lastUsedTool;
 
       final reply = await _service.chat(
         apiKey: state.effectiveApiKey,
@@ -401,6 +409,8 @@ class AiAssistantNotifier extends StateNotifier<AiAssistantState> {
         errorMessage: e.toString().replaceFirst('Exception: ', ''),
         currentToolStatus: null,
       );
+    } finally {
+      _isSending = false;
     }
   }
 }

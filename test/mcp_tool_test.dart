@@ -141,7 +141,7 @@ class FakeCampusCardService extends CampusCardService {
       );
 
   @override
-  Future<CampusCardInfo> fetchRechargeInfo({bool isRetry = false}) async {
+  Future<CampusCardInfo> fetchRechargeInfo({bool isRetry = false, bool forceRefresh = false}) async {
     return CampusCardInfo(
       name: '张三',
       idserial: '202440800001',
@@ -454,6 +454,7 @@ void main() {
         'buildingName': '东湖公寓1栋',
         'roomId': '101',
         'amount': 50,
+        'confirmed': true,
       });
       expect(rechargeRes.isError, isFalse);
       expect(rechargeRes.content.first.text, contains('电费充值成功'));

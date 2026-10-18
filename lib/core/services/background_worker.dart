@@ -49,12 +49,9 @@ void callbackDispatcher() {
             final has = await storage.hasLocalTimetable();
             if (has) {
               final courses = await storage.readCourseList();
-              final meta = await storage.readMetadata();
-              if (courses.isNotEmpty &&
-                  meta != null &&
-                  meta['firstWeekMonday'] != null) {
+              if (courses.isNotEmpty) {
                 final firstWeekMonday =
-                    DateTime.parse(meta['firstWeekMonday'] as String);
+                    await storage.resolveFirstWeekMonday();
                 await NotificationService().scheduleCourseReminders(
                     courses, firstWeekMonday, reminderMinutes);
               }

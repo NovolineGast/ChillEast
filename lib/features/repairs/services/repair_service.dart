@@ -504,9 +504,24 @@ class RepairService {
     ]);
     final form =
         formResult is List && formResult.isNotEmpty ? formResult.first : null;
-    final construct = form is Map
-        ? jsonDecode('${form['constructData'] ?? '{}'}')
-        : <String, dynamic>{};
+    Map<String, dynamic> construct = <String, dynamic>{};
+    if (form is Map) {
+      final rawConstruct = form['constructData'];
+      if (rawConstruct is Map<String, dynamic>) {
+        construct = rawConstruct;
+      } else if (rawConstruct is Map) {
+        construct = rawConstruct.cast<String, dynamic>();
+      } else if (rawConstruct is String && rawConstruct.trim().isNotEmpty) {
+        try {
+          final decoded = jsonDecode(rawConstruct);
+          if (decoded is Map<String, dynamic>) {
+            construct = decoded;
+          } else if (decoded is Map) {
+            construct = decoded.cast<String, dynamic>();
+          }
+        } catch (_) {}
+      }
+    }
     final detailType = detail is Map && detail['type'] is Map
         ? (detail['type'] as Map)['id']
         : '';

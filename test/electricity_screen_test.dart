@@ -51,7 +51,7 @@ class MockCampusCardService extends CampusCardService {
   MockCampusCardService();
 
   @override
-  Future<CampusCardInfo> fetchRechargeInfo({bool isRetry = false}) async {
+  Future<CampusCardInfo> fetchRechargeInfo({bool isRetry = false, bool forceRefresh = false}) async {
     return CampusCardInfo(
       name: '测试用户',
       idserial: '123456',

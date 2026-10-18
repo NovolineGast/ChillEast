@@ -107,5 +107,79 @@ void main() {
       // Valid on tomorrow
       expect(LibraryTimeUtils.isValidRange(tomorrow, '08:00', '12:00', now: now), isTrue);
     });
+
+    test('initialReserveDay recommends today when slots are available, tomorrow when after 22:00 or slots exhausted', () {
+      // 1. Daytime before 22:00 with available slots -> today
+      final daytime = LibraryTimeUtils.beijingDateTime(2026, 9, 2, 14, 0);
+      expect(LibraryTimeUtils.initialReserveDay(now: daytime), equals('2026-09-02'));
+
+      // 2. Evening before 22:00 but all today slots exhausted (e.g. 21:35, since last start slot is 21:30) -> tomorrow
+      final eveningNoSlots = LibraryTimeUtils.beijingDateTime(2026, 9, 2, 21, 35);
+      expect(LibraryTimeUtils.initialReserveDay(now: eveningNoSlots), equals('2026-09-03'));
+
+      // 3. At or after 22:00 -> tomorrow
+      final at22 = LibraryTimeUtils.beijingDateTime(2026, 9, 2, 22, 0);
+      expect(LibraryTimeUtils.initialReserveDay(now: at22), equals('2026-09-03'));
+
+      final after22 = LibraryTimeUtils.beijingDateTime(2026, 9, 2, 23, 15);
+      expect(LibraryTimeUtils.initialReserveDay(now: after22), equals('2026-09-03'));
+    });
+
+    test('defaultStartTime selects first available slot for today and 08:00 for future days', () {
+      final now = LibraryTimeUtils.beijingDateTime(2026, 9, 2, 10, 15);
+      const today = '2026-09-02';
+      const tomorrow = '2026-09-03';
+
+      // For today, next available slot after 10:15 is 10:30
+      expect(LibraryTimeUtils.defaultStartTime(today, now: now), equals('10:30'));
+
+      // For tomorrow, standard default is 08:00
+      expect(LibraryTimeUtils.defaultStartTime(tomorrow, now: now), equals('08:00'));
+
+      // When today has no available slots (e.g. 21:45) -> null
+      final lateNow = LibraryTimeUtils.beijingDateTime(2026, 9, 2, 21, 45);
+      expect(LibraryTimeUtils.defaultStartTime(today, now: lateNow), isNull);
+    });
+
+    test('defaultEndTime selects slot 2 hours later capped at closingHour', () {
+      // 08:00 + 2h -> 10:00
+      expect(LibraryTimeUtils.defaultEndTime('08:00'), equals('10:00'));
+      // 20:30 + 2h -> caps at 22:00
+      expect(LibraryTimeUtils.defaultEndTime('20:30'), equals('22:00'));
+      // 21:30 -> caps at 22:00
+      expect(LibraryTimeUtils.defaultEndTime('21:30'), equals('22:00'));
+      // 22:00 (closing hour, cannot be start time) -> null
+      expect(LibraryTimeUtils.defaultEndTime('22:00'), isNull);
+      // Invalid start time -> null
+      expect(LibraryTimeUtils.defaultEndTime('99:99'), isNull);
+    });
+
+    test('availableEndSlots returns all subsequent slots up to 22:00', () {
+      final endSlotsFrom21 = LibraryTimeUtils.availableEndSlots('21:00');
+      expect(endSlotsFrom21, equals(['21:30', '22:00']));
+
+      final endSlotsFromClosing = LibraryTimeUtils.availableEndSlots('22:00');
+      expect(endSlotsFromClosing, isEmpty);
+
+      final endSlotsInvalid = LibraryTimeUtils.availableEndSlots('invalid');
+      expect(endSlotsInvalid, isEmpty);
+    });
+
+    test('dateTimeAt parses valid dates and rejects invalid format/values', () {
+      final dt = LibraryTimeUtils.dateTimeAt('2026-09-02', '14:30');
+      expect(dt, isNotNull);
+      expect(dt!.year, equals(2026));
+      expect(dt.month, equals(9));
+      expect(dt.day, equals(2));
+      expect(dt.hour, equals(14));
+      expect(dt.minute, equals(30));
+
+      // Malformed inputs
+      expect(LibraryTimeUtils.dateTimeAt('2026-09', '14:30'), isNull);
+      expect(LibraryTimeUtils.dateTimeAt('2026-09-02', '14'), isNull);
+      expect(LibraryTimeUtils.dateTimeAt('bad-date', '14:30'), isNull);
+      // Calendar overflow (February 31)
+      expect(LibraryTimeUtils.dateTimeAt('2026-02-31', '12:00'), isNull);
+    });
   });
 }

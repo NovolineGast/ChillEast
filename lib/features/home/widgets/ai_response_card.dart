@@ -525,10 +525,12 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                     width: 1.0,
                   ),
                 ),
-                onPressed: () {
-                  final text = item['text'] as String;
-                  ref.read(aiAssistantProvider.notifier).sendMessage(text);
-                },
+                onPressed: ref.watch(aiAssistantProvider).isLoading
+                    ? null
+                    : () {
+                        final text = item['text'] as String;
+                        ref.read(aiAssistantProvider.notifier).sendMessage(text);
+                      },
               );
             }).toList(),
           ),
@@ -852,13 +854,15 @@ class AiQuickPromptsList extends ConsumerWidget {
                         width: 1.0,
                       ),
                     ),
-                    onPressed: () {
-                      final text = item['text'] as String;
-                      if (onPromptSelected != null) {
-                        onPromptSelected!(text);
-                      }
-                      ref.read(aiAssistantProvider.notifier).sendMessage(text);
-                    },
+                    onPressed: ref.watch(aiAssistantProvider).isLoading
+                        ? null
+                        : () {
+                            final text = item['text'] as String;
+                            if (onPromptSelected != null) {
+                              onPromptSelected!(text);
+                            }
+                            ref.read(aiAssistantProvider.notifier).sendMessage(text);
+                          },
                   ),
                 );
               }).toList(),

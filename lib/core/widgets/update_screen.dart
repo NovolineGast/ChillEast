@@ -108,9 +108,13 @@ class UpdateScreen extends StatelessWidget {
             child: Column(
               children: [
                 ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    UpdateService().startDownload(context, downloadUrl, version);
+                  onPressed: () async {
+                    final nav = Navigator.of(context);
+                    final route = ModalRoute.of(context);
+                    await UpdateService().startDownload(context, downloadUrl, version);
+                    if (route != null && nav.mounted) {
+                      nav.removeRoute(route);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Theme.of(context).primaryColor,

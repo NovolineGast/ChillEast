@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart' as dio_cookie;
 import '../constants/app_constants.dart';
@@ -15,14 +13,24 @@ class DioClient {
   
   DioClient._internal();
   
-  late final Dio _dio;
+  late Dio _dio;
   final Logger _logger = AppLogger.instance;
   bool _initialized = false;
+  Future<void>? _initFuture;
   
   /// 初始化 Dio
   Future<void> initialize() async {
     if (_initialized) return;
-    
+    _initFuture ??= _doInitialize();
+    try {
+      await _initFuture!;
+    } catch (e) {
+      _initFuture = null;
+      rethrow;
+    }
+  }
+
+  Future<void> _doInitialize() async {
     try {
       // 初始化 CookieManager
       await AppCookieManager().initialize();
@@ -144,6 +152,7 @@ class DioClient {
       _dio.close(force: true);
       await AppCookieManager().dispose();
       _initialized = false;
+      _initFuture = null;
       _logger.i('DioClient disposed');
     } catch (e) {
       _logger.e('Failed to dispose DioClient: $e');

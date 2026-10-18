@@ -1,7 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../ai/ai_provider.dart';
-import '../ai/ai_service.dart';
 import '../state/locale_provider.dart';
 import '../utils/secure_storage_helper.dart';
 import '../../features/cloudisk/services/cloud_backup_manager.dart';
@@ -281,13 +280,17 @@ class AppSettingsService {
       final raw = updates['language']?.toString().trim();
       if (raw != null && raw.isNotEmpty) {
         final code = _normalizeLanguageCode(raw);
-        if (ref != null) {
-          await ref.read(localeProvider.notifier).setLocaleByCode(code);
+        if (code != null) {
+          if (ref != null) {
+            await ref.read(localeProvider.notifier).setLocaleByCode(code);
+          } else {
+            await prefs.setString(LocaleNotifier.localeKey, code);
+          }
+          updatedEntries['language'] = code;
+          notices.add('应用语言已设置为: $code');
         } else {
-          await prefs.setString(LocaleNotifier.localeKey, code);
+          notices.add('不支持的语言代码: $raw');
         }
-        updatedEntries['language'] = code;
-        notices.add('应用语言已设置为: $code');
       }
     }
 
@@ -382,7 +385,7 @@ class AppSettingsService {
     return closest;
   }
 
-  String _normalizeLanguageCode(String input) {
+  String? _normalizeLanguageCode(String input) {
     final lower = input.trim().toLowerCase();
     switch (lower) {
       case 'system':
@@ -468,7 +471,11 @@ class AppSettingsService {
       case '江西话':
         return 'gan';
       default:
-        return input.trim();
+        final trimmed = input.trim();
+        if (LocaleNotifier.supportedLanguages.any((o) => o.code == trimmed)) {
+          return trimmed;
+        }
+        return null;
     }
   }
 }
