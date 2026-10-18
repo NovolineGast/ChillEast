@@ -115,9 +115,15 @@ class CloudBackupManager {
     return stale;
   }
 
+  static const String _dirtyStorageKey = 'cloud_backup_is_dirty';
+  int _sessionGeneration = 0;
+
   /// 本地数据有更改时调用（各存储落盘点）。去抖 10s 后同步一次。
   void markDirty() {
     _debounceTimer?.cancel();
+    SharedPreferences.getInstance().then((p) {
+      p.setBool(_dirtyStorageKey, true);
+    }).catchError((_) {});
     _debounceTimer = Timer(_debounce, () => syncNow());
   }
 
@@ -140,8 +146,6 @@ class CloudBackupManager {
         // 超星会话过期：portal/index 的 Chaoxing Cookie 已失效。
         // HttpLoginService.login 本就是 portal/login→login6→index 全链路，
         // 重登一次即可重新签发 .chaoxing.com 10 件套，无需额外“绑定”请求。
-        // （之前临时 Jar 剥 campus_user 走 /login 的方案是错的：
-        // 无 CAS ticket 时 /login 只回登录页，根本不会跳 login6。）
         _cloudisk.invalidateSession();
         if (await _refreshChaoxingSession()) {
           _cloudisk.invalidateSession();
@@ -170,6 +174,7 @@ class CloudBackupManager {
   ///（槽位/resid/开关），避免下个账号复用上个账号的云盘位置。
   /// 下次登录后开关保持默认关闭，由用户手动开启。
   Future<void> resetOnLogout() async {
+    _sessionGeneration++;
     _debounceTimer?.cancel();
     _debounceTimer = null;
     _running = false;
@@ -182,6 +187,7 @@ class CloudBackupManager {
       await prefs.remove(_activeSlotKey);
       await prefs.remove(_activeResidKey);
       await prefs.remove(_activeEncryptedIdKey);
+      await prefs.remove(_dirtyStorageKey);
     } catch (e) {
       _logger.w('☁️ Cloud backup logout reset failed: $e');
     }
@@ -192,6 +198,7 @@ class CloudBackupManager {
   Future<bool> _refreshChaoxingSession() async {
     if (_refreshingAuth) return false;
     _refreshingAuth = true;
+    final currentGen = _sessionGeneration;
     try {
       final snapshot = await SecureStorageHelper().readAuthSnapshot();
       final u = snapshot.username;
@@ -199,6 +206,14 @@ class CloudBackupManager {
       if (u == null || u.isEmpty || p == null || p.isEmpty) return false;
       _logger.i('☁️ Chaoxing session expired, silent re-login…');
       final result = await HttpLoginService().login(u, p);
+
+      // 校验世代与用户，若登出或换号则丢弃旧 Cookie，避免覆盖新会话
+      final latestSnapshot = await SecureStorageHelper().readAuthSnapshot();
+      if (_sessionGeneration != currentGen || latestSnapshot.username != u) {
+        _logger.w('☁️ Silent re-login aborted: session generation mismatch or logged out');
+        return false;
+      }
+
       await AppCookieManager().saveHttpLoginCookies(result.cookies);
       _logger.i('☁️ Silent re-login ok, cookies refreshed');
       return true;
@@ -210,8 +225,9 @@ class CloudBackupManager {
     }
   }
 
-  /// 应用启动并在静默登录后拉取云端最新备份并覆盖应用到本地。
-  /// 若未开启自动同步或无凭据或云端无备份，则静默返回 null。
+  /// 应用启动并在静默登录后拉取云端最新备份。
+  /// 若本地有未同步的离线修改（dirty），进行合并并把最新数据推上云端；
+  /// 若本地无离线修改，则拉取云端最新备份写回本地。
   Future<Map<String, dynamic>?> pullLatestOnStartup() async {
     if (_running) {
       return null;
@@ -222,14 +238,26 @@ class CloudBackupManager {
       if ((prefs.getBool(toggleKey) ?? false) == false) return null;
       if (!await SecureStorageHelper().hasCredentials()) return null;
 
+      final isDirty = prefs.getBool(_dirtyStorageKey) ?? false;
+
       try {
-        return await _pullAndApply(prefs);
+        final pulled = await _pullAndApply(prefs);
+        if (isDirty) {
+          // 本地存在离线修改：合并后将最新数据推至云端并清除 dirty 标记
+          _logger.i('☁️ Local offline edits detected, merging and syncing to cloud...');
+          await _doSync(prefs);
+        }
+        return pulled;
       } on CloudiskAuthException {
         _cloudisk.invalidateSession();
         if (await _refreshChaoxingSession()) {
           _cloudisk.invalidateSession();
           try {
-            return await _pullAndApply(prefs);
+            final pulled = await _pullAndApply(prefs);
+            if (isDirty) {
+              await _doSync(prefs);
+            }
+            return pulled;
           } on CloudiskAuthException {
             _cloudisk.invalidateSession();
             return null;
@@ -302,6 +330,7 @@ class CloudBackupManager {
 
   /// 下载云端最新备份并写回本地。若云端无备份返回 null。
   Future<Map<String, dynamic>?> _pullAndApply(SharedPreferences prefs) async {
+    final currentGen = _sessionGeneration;
     final session = await _cloudisk.ensureSession();
     final latest = await _findLatestBackup(session);
     if (latest == null) return null;
@@ -315,7 +344,14 @@ class CloudBackupManager {
     // 先校验再写回：坏文件不碰本地
     final backup =
         BackupExportService.parseBackupJson(utf8.decode(bytes));
+    if (_sessionGeneration != currentGen) {
+      _logger.w('☁️ Pull backup aborted: session generation changed');
+      return null;
+    }
     await BackupExportService.applyBackupData(backup);
+    if (_sessionGeneration != currentGen) {
+      return null;
+    }
     await prefs.setString(_activeSlotKey, latest['slot']!);
     await prefs.setString(_activeResidKey, latest['resid']!);
     await prefs.setString(_activeEncryptedIdKey, latest['encryptedId']!);
@@ -349,6 +385,7 @@ class CloudBackupManager {
   }
 
   Future<bool> _doSync(SharedPreferences prefs) async {
+      final currentGen = _sessionGeneration;
       final data = await BackupExportService.buildBackupData();
       final bytes = utf8.encode(const JsonEncoder().convert(data));
 
@@ -362,13 +399,23 @@ class CloudBackupManager {
       );
       final resid = uploaded['resid'].toString();
 
+      if (_sessionGeneration != currentGen) {
+        _logger.w('☁️ Sync backup aborted: session generation changed');
+        return false;
+      }
+
       // 收敛清理：删掉所有其它同前缀旧文件
       await _pruneOthers(session, keepResid: resid);
+
+      if (_sessionGeneration != currentGen) {
+        return false;
+      }
 
       await prefs.setString(_activeSlotKey, fixedSlot);
       await prefs.setString(_activeResidKey, resid);
       await prefs.setString(_activeEncryptedIdKey,
           uploaded['encryptedId']?.toString() ?? '');
+      await prefs.remove(_dirtyStorageKey);
       _logger.i('☁️ Cloud backup synced: $filename');
       return true;
   }

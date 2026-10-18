@@ -12,7 +12,6 @@ import '../utils/ics_parser.dart';
 import '../utils/date_calculator.dart';
 import '../utils/week_parser.dart';
 import '../utils/course_color_utils.dart';
-import '../../../core/widgets/triangle_painter.dart';
 import '../providers/timetable_status_provider.dart';
 import '../providers/reminder_trigger_provider.dart';
 import '../widgets/weekly_calendar_view.dart';
@@ -173,6 +172,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           await CourseColorUtils.init();
           CourseColorUtils.syncCourses(courses.map((c) => c.name));
 
+          if (!mounted) return;
           setState(() {
             _courses = courses;
             _hasLocalTimetable = true;
@@ -186,6 +186,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           // 如果在日程页且数据加载完成，直接跳转
           _scrollToToday();
         } else {
+          if (!mounted) return;
           setState(() {
             _hasLocalTimetable = false;
             _isLoading = false;
@@ -213,6 +214,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -500,6 +502,13 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
 
   @override
   Widget build(BuildContext context) {
+    // 监听全局课表状态刷新（云备份恢复/后台同步完成），立即重载本地课表
+    ref.listen(timetableStatusProvider, (_, __) {
+      if (mounted) {
+        _loadLocalTimetable();
+      }
+    });
+
     // 监听作业变化，同步刷新日程轴
     ref.listen(homeworkProvider, (_, __) {
       if (_courses.isNotEmpty && _firstWeekMonday != null) {
@@ -633,6 +642,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
     }
 
     if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_errorMessage != null) return _buildErrorState();
     if (!_hasLocalTimetable) {
       final autoSyncEnabled =
           ref.watch(settingsProvider).timetableAutoSyncEnabled;

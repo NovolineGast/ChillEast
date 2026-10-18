@@ -18,6 +18,7 @@ import '../../../core/state/auth_state.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../timetable/services/timetable_storage.dart';
 import '../../timetable/utils/ics_parser.dart';
+import '../../timetable/providers/timetable_status_provider.dart';
 import '../../timetable/models/course_model.dart';
 import '../../timetable/utils/date_calculator.dart';
 import '../../timetable/utils/week_parser.dart';
@@ -137,7 +138,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if (hasTimetable) {
         final icsContent = await storage.readTimetable();
-        final metadata = await storage.readMetadata();
 
         if (icsContent != null) {
           final allCourses = IcsParser.parse(icsContent);
@@ -151,13 +151,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           final dayOfWeek = targetDate.weekday; // 1=周一, 7=周日
 
           // 计算目标周次
-          int targetWeek = 0;
-          if (metadata != null && metadata['firstWeekMonday'] != null) {
-            final firstWeekMonday =
-                DateTime.parse(metadata['firstWeekMonday'] as String);
-            targetWeek = DateCalculator.getCurrentWeekNumber(
-                firstWeekMonday, targetDate);
-          }
+          final firstWeekMonday = await storage.resolveFirstWeekMonday();
+          final targetWeek = DateCalculator.getCurrentWeekNumber(
+              firstWeekMonday, targetDate);
 
           // 筛选课程
           final previewCourses = allCourses.where((course) {
@@ -195,20 +191,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           upcomingCourses
               .sort((a, b) => a.startPeriod.compareTo(b.startPeriod));
 
+          if (!mounted) return;
           setState(() {
             _todayCourses = upcomingCourses;
             _isShowingTomorrow = isAfter10PM;
             _previewDate =
                 DateTime(targetDate.year, targetDate.month, targetDate.day);
           });
+        } else {
+          if (mounted) {
+            setState(() {
+              _todayCourses = [];
+            });
+          }
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _todayCourses = [];
+          });
         }
       }
     } catch (e) {
       // 静默失败
     } finally {
-      setState(() {
-        _isLoadingTimetable = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingTimetable = false;
+        });
+      }
       _syncWidgetsDebounced();
     }
   }
@@ -224,6 +235,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
+
+    // 监听全局课表状态刷新（云备份恢复/后台同步完成），立即重载预览课程
+    ref.listen(timetableStatusProvider, (_, __) {
+      if (mounted) {
+        _loadPreviewCourses();
+      }
+    });
 
     // 作业后到时也同步一次小组件（与课表加载时的同步共用 30 秒节流）
     ref.listen(homeworkProvider, (previous, next) {

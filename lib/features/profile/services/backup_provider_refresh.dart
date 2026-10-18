@@ -7,6 +7,7 @@ import '../providers/appearance_provider.dart';
 import '../providers/settings_provider.dart';
 import '../../exam/providers/exam_provider.dart';
 import '../../timetable/utils/course_color_utils.dart';
+import '../../timetable/providers/timetable_status_provider.dart';
 import '../../workspace/providers/campus_card_cache_provider.dart';
 import '../../workspace/providers/electricity_cache_provider.dart';
 
@@ -54,6 +55,9 @@ class BackupProviderRefresh {
     } catch (_) {}
     try {
       await ref.read(campusCardCacheProvider.notifier).refresh();
+    } catch (_) {}
+    try {
+      await ref.read(timetableStatusProvider.notifier).refresh();
     } catch (_) {}
   }
 }
