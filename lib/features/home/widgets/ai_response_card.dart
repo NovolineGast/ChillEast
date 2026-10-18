@@ -26,6 +26,8 @@ class AiResponseCard extends ConsumerStatefulWidget {
 
 class _AiResponseCardState extends ConsumerState<AiResponseCard> {
   final ScrollController _scrollController = ScrollController();
+  GlobalKey _latestUserMessageKey = GlobalKey();
+  int _lastUserMessageCount = 0;
 
   @override
   void dispose() {
@@ -33,9 +35,18 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
     super.dispose();
   }
 
-  void _scrollToBottom() {
+  void _scrollToLatestUserMessage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
+      if (!mounted) return;
+      final targetContext = _latestUserMessageKey.currentContext;
+      if (targetContext != null && targetContext.mounted) {
+        Scrollable.ensureVisible(
+          targetContext,
+          alignment: 0.0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      } else if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 250),
@@ -50,11 +61,18 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final aiState = ref.watch(aiAssistantProvider);
 
-    // 当消息增加或正在加载时滚动到底部
+    final userMessageCount =
+        aiState.displayMessages.where((m) => m.role == 'user').length;
+    if (userMessageCount != _lastUserMessageCount) {
+      _lastUserMessageCount = userMessageCount;
+      _latestUserMessageKey = GlobalKey();
+    }
+
+    // 当消息增加或正在加载时滚动到最新用户消息（用户消息在顶部，AI回答紧接着在下方）
     ref.listen<AiAssistantState>(aiAssistantProvider, (prev, next) {
       if (next.displayMessages.length != prev?.displayMessages.length ||
           next.isLoading != prev?.isLoading) {
-        _scrollToBottom();
+        _scrollToLatestUserMessage();
       }
     });
 
@@ -116,7 +134,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
   );
 }
 
-  /// 卡片头部（显示轮次统计、记忆入口、新对话与配置）
+  /// 卡片头部（显示记忆入口、新对话与配置）
   Widget _buildCardHeader(
       BuildContext context, AiAssistantState aiState, bool isDark) {
     if (aiState.displayMessages.isEmpty) {
@@ -128,112 +146,82 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
         color: Colors.transparent,
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          // 左侧：轮次展示与记忆快捷入口
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: aiState.isRoundLimitReached
-                      ? Colors.orangeAccent.withOpacity(0.15)
-                      : (isDark
-                          ? Colors.white.withOpacity(0.08)
-                          : Colors.black.withOpacity(0.05)),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '${aiState.roundCount}/${AiAssistantState.maxConversationRounds} 轮',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: aiState.isRoundLimitReached
-                        ? Colors.orangeAccent
-                        : (isDark ? Colors.white60 : Colors.grey[600]),
+          // 记忆快捷入口
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                createSlideUpRoute(const AiMemoryScreen()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.psychology_outlined,
+                    size: 14,
+                    color: isDark ? Colors.white60 : Colors.grey[600],
                   ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    createSlideUpRoute(const AiMemoryScreen()),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.psychology_outlined,
-                        size: 14,
-                        color: isDark ? Colors.white60 : Colors.grey[600],
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        '记忆',
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: isDark ? Colors.white60 : Colors.grey[600],
-                        ),
-                      ),
-                    ],
+                  const SizedBox(width: 3),
+                  Text(
+                    '记忆',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: isDark ? Colors.white60 : Colors.grey[600],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-          // 右侧：开启新对话与配置
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              GestureDetector(
-                onTap: () {
-                  ref.read(aiAssistantProvider.notifier).clearSession();
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.refresh_rounded,
-                        size: 14,
-                        color: isDark ? Colors.white60 : Colors.grey[500],
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        context.l10n.newChat,
-                        style: TextStyle(
-                          fontSize: 11.5,
-                          color: isDark ? Colors.white60 : Colors.grey[500],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    createSlideHorizontalRoute(const AiSettingsScreen()),
-                  );
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(2),
-                  child: Icon(
-                    Icons.code_rounded,
-                    size: 16,
+          const SizedBox(width: 8),
+          // 开启新对话
+          GestureDetector(
+            onTap: () {
+              ref.read(aiAssistantProvider.notifier).clearSession();
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.refresh_rounded,
+                    size: 14,
                     color: isDark ? Colors.white60 : Colors.grey[500],
                   ),
-                ),
+                  const SizedBox(width: 3),
+                  Text(
+                    context.l10n.newChat,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: isDark ? Colors.white60 : Colors.grey[500],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          // 配置
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                createSlideHorizontalRoute(const AiSettingsScreen()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(2),
+              child: Icon(
+                Icons.code_rounded,
+                size: 16,
+                color: isDark ? Colors.white60 : Colors.grey[500],
+              ),
+            ),
           ),
         ],
       ),
@@ -258,6 +246,9 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
         (hasError ? 1 : 0) +
         (isLimitReached ? 1 : 0);
 
+    final latestUserMessageIndex =
+        aiState.displayMessages.lastIndexWhere((m) => m.role == 'user');
+
     return ListView.builder(
       controller: _scrollController,
       shrinkWrap: true,
@@ -266,7 +257,12 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
       itemBuilder: (context, index) {
         if (index < aiState.displayMessages.length) {
           final msg = aiState.displayMessages[index];
-          return _buildMessageItem(msg, isDark);
+          final isLatestUser = index == latestUserMessageIndex;
+          return _buildMessageItem(
+            msg,
+            isDark,
+            key: isLatestUser ? _latestUserMessageKey : null,
+          );
         }
         var nextIdx = index - aiState.displayMessages.length;
         if (aiState.isLoading) {
@@ -542,11 +538,12 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
   }
 
   /// 消息渲染（Agent 输出直接铺在卡片背景上，用户消息保持右侧对话气泡）
-  Widget _buildMessageItem(AiDisplayMessage msg, bool isDark) {
+  Widget _buildMessageItem(AiDisplayMessage msg, bool isDark, {Key? key}) {
     final isUser = msg.role == 'user';
 
     if (isUser) {
       return Padding(
+        key: key,
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.end,

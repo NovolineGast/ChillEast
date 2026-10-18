@@ -59,36 +59,33 @@ void main() {
       );
     }
 
-    testWidgets('renders test connection button and model fetch chip', (tester) async {
+    testWidgets('renders test connection button when not default config', (tester) async {
       await tester.pumpWidget(buildTestWidget(child: const AiSettingsScreen()));
       await tester.pumpAndSettle();
 
-      // Verify Test Connection button exists
-      expect(find.text('测试联通'), findsOneWidget);
-      expect(find.byIcon(Icons.wifi_tethering_rounded), findsOneWidget);
+      // Default config: test connection button is hidden
+      expect(find.text('测试连接'), findsNothing);
 
-      // Verify Model Fetch chip exists
-      expect(find.text('获取模型列表'), findsOneWidget);
-      expect(find.byIcon(Icons.format_list_bulleted_rounded), findsOneWidget);
+      // Enter a custom API Key so it is not default config
+      await tester.enterText(find.byType(TextField).at(2), 'custom_key');
+      await tester.pumpAndSettle();
+
+      // Verify Test Connection button exists
+      expect(find.text('测试连接'), findsOneWidget);
+      expect(find.byIcon(Icons.wifi_tethering_rounded), findsOneWidget);
     });
 
     testWidgets('tapping test connection without key shows warning snackbar', (tester) async {
       await tester.pumpWidget(buildTestWidget(child: const AiSettingsScreen()));
       await tester.pumpAndSettle();
 
-      final testBtn = find.text('测试联通');
+      // Enter custom apiUrl so it is not default config, but leave apiKey empty
+      await tester.enterText(find.byType(TextField).at(0), 'https://custom.api.com/v1');
+      await tester.pumpAndSettle();
+
+      final testBtn = find.text('测试连接');
+      expect(testBtn, findsOneWidget);
       await tester.tap(testBtn);
-      await tester.pumpAndSettle();
-
-      expect(find.text('请先配置 API Key'), findsOneWidget);
-    });
-
-    testWidgets('tapping fetch models without key shows warning snackbar', (tester) async {
-      await tester.pumpWidget(buildTestWidget(child: const AiSettingsScreen()));
-      await tester.pumpAndSettle();
-
-      final fetchChip = find.text('获取模型列表');
-      await tester.tap(fetchChip);
       await tester.pumpAndSettle();
 
       expect(find.text('请先配置 API Key'), findsOneWidget);

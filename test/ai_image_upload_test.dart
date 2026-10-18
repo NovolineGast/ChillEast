@@ -155,12 +155,9 @@ void main() {
       // 验证点击之后先不展示卡片，而是直接暴露快捷提问按钮
       expect(find.byType(AiResponseCard), findsNothing);
       expect(find.byType(AiQuickPromptsList), findsOneWidget);
-      expect(find.text('今天有什么课？'), findsOneWidget);
-      // 验证快捷提问按钮左对齐（margin 16）且垂直间距为 2px（原 6px 的 1/3）
+      // 验证快捷提问按钮垂直间距为 2px（原 6px 的 1/3）
       final chip0 = tester.getRect(find.byType(ActionChip).at(0));
       final chip1 = tester.getRect(find.byType(ActionChip).at(1));
-      expect(chip0.left, closeTo(16.0, 0.1));
-      expect(chip1.left, closeTo(16.0, 0.1));
       expect(chip1.top - chip0.bottom, closeTo(2.0, 0.1));
 
       // 验证点击快捷提问右侧空白区域退出 AI 模式

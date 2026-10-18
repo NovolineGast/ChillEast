@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ai/ai_provider.dart';
 import '../../../core/ai/ai_service.dart';
-import '../../../core/ai/providers/ai_memory_provider.dart';
 import '../../../core/utils/l10n_extension.dart';
 import '../../../core/utils/route_utils.dart';
 import 'ai_memory_screen.dart';
@@ -32,10 +31,30 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
     _apiUrlController = TextEditingController(text: aiState.resolvedApiUrl);
     _modelController = TextEditingController(text: aiState.resolvedModel);
     _apiKeyController = TextEditingController(text: aiState.apiKey ?? '');
+    _apiUrlController.addListener(_onFieldChanged);
+    _modelController.addListener(_onFieldChanged);
+    _apiKeyController.addListener(_onFieldChanged);
+  }
+
+  void _onFieldChanged() {
+    setState(() {});
+  }
+
+  bool get _isDefaultConfig {
+    final apiUrl = _apiUrlController.text.trim();
+    final model = _modelController.text.trim();
+    final apiKey = _apiKeyController.text.trim();
+    final isDefaultUrl = apiUrl.isEmpty || apiUrl == AiAssistantService.defaultApiUrl;
+    final isDefaultModel = model.isEmpty || model == AiAssistantService.defaultModel;
+    final isDefaultKey = apiKey.isEmpty;
+    return isDefaultUrl && isDefaultModel && isDefaultKey;
   }
 
   @override
   void dispose() {
+    _apiUrlController.removeListener(_onFieldChanged);
+    _modelController.removeListener(_onFieldChanged);
+    _apiKeyController.removeListener(_onFieldChanged);
     _apiUrlController.dispose();
     _modelController.dispose();
     _apiKeyController.dispose();
@@ -148,12 +167,7 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
     }
   }
 
-  Future<void> _fetchAndSelectModel({bool forceRefresh = false}) async {
-    if (!forceRefresh && _availableModels.isNotEmpty) {
-      _showModelSelectionSheet();
-      return;
-    }
-
+  Future<void> _downloadModels({bool openDropdownAfter = false}) async {
     final apiKey = _apiKeyController.text.trim();
     final aiState = ref.read(aiAssistantProvider);
     if (apiKey.isEmpty && !aiState.hasApiKey) {
@@ -179,10 +193,27 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
 
       setState(() {
         _availableModels = models;
+        if (models.isNotEmpty) {
+          _modelController.text = models.first;
+        }
       });
 
       if (mounted) {
-        _showModelSelectionSheet();
+        if (openDropdownAfter) {
+          _showModelSelectionSheet();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                models.isNotEmpty
+                    ? '获取成功，共 ${models.length} 个模型，已默认选择第 1 个'
+                    : context.l10n.aiNoModelsFound,
+              ),
+              backgroundColor: const Color(0xFF09C489),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
@@ -201,6 +232,14 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
           _isFetchingModels = false;
         });
       }
+    }
+  }
+
+  void _openModelDropdown() {
+    if (_availableModels.isEmpty) {
+      _downloadModels(openDropdownAfter: true);
+    } else {
+      _showModelSelectionSheet();
     }
   }
 
@@ -227,7 +266,7 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
           },
           onRefresh: () async {
             Navigator.pop(sheetContext);
-            await _fetchAndSelectModel(forceRefresh: true);
+            await _downloadModels(openDropdownAfter: true);
           },
         );
       },
@@ -383,40 +422,19 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
                           child: CircularProgressIndicator(strokeWidth: 2),
                         ),
                       )
-                    else
+                    else ...[
                       IconButton(
-                        icon: const Icon(Icons.format_list_bulleted_rounded, size: 20),
+                        icon: const Icon(Icons.download_rounded, size: 20),
                         tooltip: context.l10n.aiFetchModels,
-                        onPressed: _isFetchingModels ? null : () => _fetchAndSelectModel(),
+                        onPressed: _downloadModels,
                       ),
+                      IconButton(
+                        icon: const Icon(Icons.arrow_drop_down_rounded, size: 24),
+                        tooltip: context.l10n.aiSelectModel,
+                        onPressed: _openModelDropdown,
+                      ),
+                    ],
                   ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: ActionChip(
-                avatar: _isFetchingModels
-                    ? const SizedBox(
-                        width: 14,
-                        height: 14,
-                        child: CircularProgressIndicator(strokeWidth: 1.5),
-                      )
-                    : const Icon(Icons.download_rounded, size: 16),
-                label: Text(
-                  _availableModels.isNotEmpty
-                      ? '${context.l10n.aiSelectModel} (${_availableModels.length})'
-                      : context.l10n.aiFetchModels,
-                  style: const TextStyle(fontSize: 12),
-                ),
-                onPressed: _isFetchingModels ? null : () => _fetchAndSelectModel(),
-                backgroundColor: isDark
-                    ? Colors.white.withOpacity(0.08)
-                    : Colors.grey.withOpacity(0.1),
-                side: BorderSide.none,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
                 ),
               ),
             ),
@@ -502,67 +520,69 @@ class _AiSettingsScreenState extends ConsumerState<AiSettingsScreen> {
             ),
             const SizedBox(height: 20),
 
-            // Agent 长期记忆管理入口
-            Material(
-              color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(6),
-                side: BorderSide(
-                  color: isDark
-                      ? Colors.white.withOpacity(0.1)
-                      : Colors.grey.withOpacity(0.3),
+            // 记忆管理入口
+            InkWell(
+              borderRadius: BorderRadius.circular(6),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  createSlideUpRoute(const AiMemoryScreen()),
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '记忆管理',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : const Color(0xFF202124),
+                      ),
+                    ),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      color: isDark ? Colors.white54 : Colors.grey[400],
+                    ),
+                  ],
                 ),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.psychology_outlined, color: primaryColor),
-                title: const Text('Agent 记忆管理', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                subtitle: Text(
-                  '已沉淀 ${ref.watch(aiMemoryProvider).length} 条长期记忆（支持删除与管理）',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isDark ? Colors.white60 : Colors.grey[600],
-                  ),
-                ),
-                trailing: const Icon(Icons.chevron_right_rounded),
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    createSlideUpRoute(const AiMemoryScreen()),
-                  );
-                },
               ),
             ),
             const SizedBox(height: 32),
 
-            // 测试联通按钮
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton.icon(
-                onPressed: _isTestingConnection ? null : _testConnection,
-                icon: _isTestingConnection
-                    ? const SizedBox(
-                        width: 18,
-                        height: 18,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.wifi_tethering_rounded, size: 20),
-                label: Text(
-                  _isTestingConnection
-                      ? context.l10n.aiTestingConnection
-                      : context.l10n.aiTestConnection,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: primaryColor,
-                  side: const BorderSide(color: primaryColor, width: 1.2),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(6),
+            if (!_isDefaultConfig) ...[
+              // 测试连接按钮
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: OutlinedButton.icon(
+                  onPressed: _isTestingConnection ? null : _testConnection,
+                  icon: _isTestingConnection
+                      ? const SizedBox(
+                          width: 18,
+                          height: 18,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.wifi_tethering_rounded, size: 20),
+                  label: Text(
+                    _isTestingConnection
+                        ? context.l10n.aiTestingConnection
+                        : context.l10n.aiTestConnection,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: primaryColor,
+                    side: const BorderSide(color: primaryColor, width: 1.2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(6),
+                    ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
+            ],
 
             // 保存按钮
             SizedBox(
