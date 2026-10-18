@@ -162,34 +162,44 @@ class _FunctionsScreenState extends ConsumerState<FunctionsScreen> {
 
         if (isLargeScreen && _embeddedScreen != null) {
           final isDark = Theme.of(context).brightness == Brightness.dark;
-          return Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: listContent,
-              ),
-              VerticalDivider(
-                width: 1,
-                thickness: 0.5,
-                color: isDark
-                    ? Colors.white.withValues(alpha: 0.08)
-                    : const Color(0x1A000000),
-              ),
-              Expanded(
-                flex: 1,
-                child: EmbeddedDetailPane(
-                  key: ValueKey(
-                      _selectedFunctionId ?? _embeddedScreen.runtimeType),
-                  onClose: () {
-                    setState(() {
-                      _embeddedScreen = null;
-                      _selectedFunctionId = null;
-                    });
-                  },
-                  child: _embeddedScreen!,
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) {
+              if (didPop) return;
+              setState(() {
+                _embeddedScreen = null;
+                _selectedFunctionId = null;
+              });
+            },
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: listContent,
                 ),
-              ),
-            ],
+                VerticalDivider(
+                  width: 1,
+                  thickness: 0.5,
+                  color: isDark
+                      ? Colors.white.withValues(alpha: 0.08)
+                      : const Color(0x1A000000),
+                ),
+                Expanded(
+                  flex: 1,
+                  child: EmbeddedDetailPane(
+                    key: ValueKey(
+                        _selectedFunctionId ?? _embeddedScreen.runtimeType),
+                    onClose: () {
+                      setState(() {
+                        _embeddedScreen = null;
+                        _selectedFunctionId = null;
+                      });
+                    },
+                    child: _embeddedScreen!,
+                  ),
+                ),
+              ],
+            ),
           );
         }
 

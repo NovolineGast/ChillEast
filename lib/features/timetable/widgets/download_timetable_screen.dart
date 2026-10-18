@@ -115,7 +115,7 @@ class _DownloadTimetableScreenState extends ConsumerState<DownloadTimetableScree
                   ? (Theme.of(context).brightness == Brightness.dark ? Colors.grey[800] : Colors.grey[300]) 
                   : (Theme.of(context).brightness == Brightness.dark ? Colors.white70 : const Color(0xFF5F6368))
             ),
-            onPressed: _isLoading ? null : () => Navigator.pop(context),
+            onPressed: _isLoading ? null : () => Navigator.maybePop(context),
           ),
         ),
         body: SingleChildScrollView(

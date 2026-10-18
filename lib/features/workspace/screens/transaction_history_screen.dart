@@ -177,7 +177,7 @@ class _TransactionHistoryScreenState
             style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.maybePop(context),
         ),
       ),
       body: AnimatedSwitcher(

@@ -314,51 +314,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           if (isMultiColumn) {
             if (_embeddedScreen != null) {
               final isDark = Theme.of(context).brightness == Brightness.dark;
-              return Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const SizedBox(height: 8),
-                            for (final w in builtWidgets) ...[
-                              w,
-                              const SizedBox(height: 16),
+              return PopScope(
+                canPop: false,
+                onPopInvokedWithResult: (didPop, result) {
+                  if (didPop) return;
+                  setState(() {
+                    _embeddedScreen = null;
+                    _selectedActionId = null;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 8),
+                              for (final w in builtWidgets) ...[
+                                w,
+                                const SizedBox(height: 16),
+                              ],
+                              const SizedBox(height: 24),
                             ],
-                            const SizedBox(height: 24),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                    VerticalDivider(
-                      width: 16,
-                      thickness: 0.5,
-                      color: isDark
-                          ? Colors.white.withValues(alpha: 0.08)
-                          : const Color(0x1A000000),
-                    ),
-                    Expanded(
-                      child: EmbeddedDetailPane(
-                        key: ValueKey(
-                            _selectedActionId ?? _embeddedScreen.runtimeType),
-                        onClose: () {
-                          setState(() {
-                            _embeddedScreen = null;
-                            _selectedActionId = null;
-                          });
-                          ref.read(campusCardCacheProvider.notifier).refresh();
-                          ref.read(electricityCacheProvider.notifier).refresh();
-                          ref.read(leaveCacheProvider.notifier).refresh();
-                          ref.read(repairCacheProvider.notifier).refresh();
-                          ref.read(questionnaireCacheProvider.notifier).refresh();
-                        },
-                        child: _embeddedScreen!,
+                      VerticalDivider(
+                        width: 16,
+                        thickness: 0.5,
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : const Color(0x1A000000),
                       ),
-                    ),
-                  ],
+                      Expanded(
+                        child: EmbeddedDetailPane(
+                          key: ValueKey(
+                              _selectedActionId ?? _embeddedScreen.runtimeType),
+                          onClose: () {
+                            setState(() {
+                              _embeddedScreen = null;
+                              _selectedActionId = null;
+                            });
+                            ref.read(campusCardCacheProvider.notifier).refresh();
+                            ref.read(electricityCacheProvider.notifier).refresh();
+                            ref.read(leaveCacheProvider.notifier).refresh();
+                            ref.read(repairCacheProvider.notifier).refresh();
+                            ref.read(questionnaireCacheProvider.notifier).refresh();
+                          },
+                          child: _embeddedScreen!,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               );
             }

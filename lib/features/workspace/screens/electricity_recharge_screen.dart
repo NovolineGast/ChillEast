@@ -174,6 +174,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
         buildingName: card.selectedBuilding!.name,
         roomId: card.selectedRoom!.id,
         mertype: card.selectedRoom!.mertype,
+        slot: slot,
       );
       if (mounted) {
         setState(() {
@@ -737,7 +738,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
         title: Text(context.l10n.electricityRechargeTitle, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.maybePop(context),
         ),
       ),
       body: _isLoading 

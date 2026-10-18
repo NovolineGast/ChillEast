@@ -142,7 +142,7 @@ class _CampusCardRechargeScreenState extends ConsumerState<CampusCardRechargeScr
         title: Text(context.l10n.campusCardRecharge, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 18)),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.maybePop(context),
         ),
       ),
       body: _isLoading 

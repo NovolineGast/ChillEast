@@ -25,6 +25,7 @@ class _EmbeddedDetailPaneState extends State<EmbeddedDetailPane>
   late final AnimationController _animController;
   late final Animation<Offset> _slideAnimation;
   late final Animation<double> _fadeAnimation;
+  late final _EmbeddedPaneNavigatorObserver _navigatorObserver;
   bool _isExiting = false;
 
   @override
@@ -48,6 +49,10 @@ class _EmbeddedDetailPaneState extends State<EmbeddedDetailPane>
       reverseCurve: Curves.easeInCubic,
     );
 
+    _navigatorObserver = _EmbeddedPaneNavigatorObserver(
+      onPoppedToPlaceholder: _handleDirectPop,
+    );
+
     _animController.forward();
   }
 
@@ -67,6 +72,16 @@ class _EmbeddedDetailPaneState extends State<EmbeddedDetailPane>
     });
   }
 
+  void _handleDirectPop() {
+    if (_isExiting) return;
+    _isExiting = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        widget.onClose();
+      }
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return FadeTransition(
@@ -76,6 +91,7 @@ class _EmbeddedDetailPaneState extends State<EmbeddedDetailPane>
         child: ClipRect(
           child: Navigator(
             key: _navigatorKey,
+            observers: [_navigatorObserver],
             onGenerateInitialRoutes: (navigator, initialRoute) {
               return [
                 // 占位根路由，使嵌入的内容页面处于非 isFirst 状态，
@@ -89,7 +105,10 @@ class _EmbeddedDetailPaneState extends State<EmbeddedDetailPane>
                   pageBuilder: (nestedContext, animation, secondaryAnimation) => PopScope(
                     canPop: false,
                     onPopInvokedWithResult: (didPop, result) {
-                      if (didPop) return;
+                      if (didPop) {
+                        _handleDirectPop();
+                        return;
+                      }
                       _triggerClose();
                     },
                     child: widget.child,
@@ -103,4 +122,27 @@ class _EmbeddedDetailPaneState extends State<EmbeddedDetailPane>
     );
   }
 }
+
+class _EmbeddedPaneNavigatorObserver extends NavigatorObserver {
+  final VoidCallback onPoppedToPlaceholder;
+
+  _EmbeddedPaneNavigatorObserver({required this.onPoppedToPlaceholder});
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    if (previousRoute?.settings.name == '/__embedded_placeholder__') {
+      onPoppedToPlaceholder();
+    }
+  }
+
+  @override
+  void didRemove(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didRemove(route, previousRoute);
+    if (previousRoute?.settings.name == '/__embedded_placeholder__') {
+      onPoppedToPlaceholder();
+    }
+  }
+}
+
 

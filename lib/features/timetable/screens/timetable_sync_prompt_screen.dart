@@ -49,7 +49,7 @@ class TimetableSyncPromptScreen extends StatelessWidget {
             if (onSkip != null) {
               onSkip!();
             } else {
-              Navigator.pop(context);
+              Navigator.maybePop(context);
             }
           },
         ),
