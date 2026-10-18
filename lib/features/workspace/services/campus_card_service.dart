@@ -134,6 +134,21 @@ class CampusCardService {
     return null;
   }
 
+  /// 登出时清空会话缓存与持久化信息
+  Future<void> clearSession() async {
+    _cachedInfo = null;
+    _openid = null;
+    _cachedPaymentCode = null;
+    _paymentCodeFetchedAt = null;
+    _pendingRechargeInfoFuture = null;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(_cardInfoStorageKey);
+    } catch (e) {
+      _logger.w('Failed to clear campus card storage on logout: $e');
+    }
+  }
+
   // 付款码缓存：服务端 60s 刷新一次，这里 55s TTL，命中则秒开，
   // 后台再静默刷新（stale-while-revalidate）。
   Map<String, dynamic>? _cachedPaymentCode;

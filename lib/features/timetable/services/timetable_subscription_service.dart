@@ -160,15 +160,19 @@ class TimetableSubscriptionService {
     final url = buildSubscriptionUrl(uuid);
     _logger.i('Uploading timetable ICS to subscription URL: $url');
 
+    final headers = <String, dynamic>{
+      'Content-Type': 'text/calendar; charset=utf-8',
+    };
+    const apiKey = String.fromEnvironment('DEFAULT_AI_API_KEY', defaultValue: '');
+    if (apiKey.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $apiKey';
+    }
+
     try {
       final response = await _dio.put(
         url,
         data: content,
-        options: Options(
-          headers: {
-            'Content-Type': 'text/calendar; charset=utf-8',
-          },
-        ),
+        options: Options(headers: headers),
       );
 
       if (response.statusCode == 200) {
@@ -194,8 +198,17 @@ class TimetableSubscriptionService {
     final url = buildSubscriptionUrl(uuid.trim());
     _logger.i('Deleting timetable subscription from cloud: $url');
 
+    final headers = <String, dynamic>{};
+    const apiKey = String.fromEnvironment('DEFAULT_AI_API_KEY', defaultValue: '');
+    if (apiKey.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $apiKey';
+    }
+
     try {
-      final response = await _dio.delete(url);
+      final response = await _dio.delete(
+        url,
+        options: Options(headers: headers),
+      );
       if (response.statusCode == 200 || response.statusCode == 404) {
         _logger.i('Remote timetable subscription deleted successfully.');
         return true;
@@ -208,6 +221,18 @@ class TimetableSubscriptionService {
     } catch (e) {
       _logger.e('Error deleting remote timetable subscription: $e');
       return false;
+    }
+  }
+
+  /// 登出时清理本地日历订阅配置与 UUID
+  Future<void> clearSubscriptionOnLogout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(subscriptionEnabledKey);
+      await prefs.remove(subscriptionUuidKey);
+      _logger.d('🧹 Cleared timetable subscription on logout');
+    } catch (e) {
+      _logger.w('Failed to clear timetable subscription on logout: $e');
     }
   }
 }

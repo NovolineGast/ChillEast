@@ -577,6 +577,20 @@ class HomeWidgetService {
     }
   }
 
+  /// 退出登录时清除小组件的日程数据
+  Future<void> clearWidgets() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      await sp.remove(agendaJsonKey);
+      await sp.remove(updatedAtKey);
+      await _channel.invokeMethod('updateWidgets', {
+        'alarms': <int>[],
+      });
+    } catch (e) {
+      debugPrint('⚠️ Clear HomeWidget data failed: $e');
+    }
+  }
+
   /// 从 TimetableStorage / HomeworkStorage 计算当前应展示的日程及未来 7 天日程。
   Future<Map<String, dynamic>> buildAgendaData(AppLocalizations l10n) async {
     final now = DateTime.now();
