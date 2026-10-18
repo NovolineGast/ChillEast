@@ -159,14 +159,16 @@ class TimetableRule {
     String? id,
     required CourseModel course,
   }) {
+    final customCourse =
+        course.isCustom ? course : course.copyWith(isCustom: true);
     final ruleId = id ?? 'rule_custom_${DateTime.now().millisecondsSinceEpoch}';
     final weekdayNames = ['', '周一', '周二', '周三', '周四', '周五', '周六', '周日'];
-    final dayStr = (course.dayOfWeek >= 1 && course.dayOfWeek <= 7)
-        ? weekdayNames[course.dayOfWeek]
+    final dayStr = (customCourse.dayOfWeek >= 1 && customCourse.dayOfWeek <= 7)
+        ? weekdayNames[customCourse.dayOfWeek]
         : '';
-    final weeksStr = course.weeks.replaceAll('(周)', '周');
+    final weeksStr = customCourse.weeks.replaceAll('(周)', '周');
     final desc =
-        '加课：${course.name}（$dayStr${course.startPeriod}-${course.endPeriod}节 $weeksStr）';
+        '加课：${customCourse.name}（$dayStr${customCourse.startPeriod}-${customCourse.endPeriod}节 $weeksStr）';
 
     return TimetableRule(
       id: ruleId,
@@ -174,7 +176,7 @@ class TimetableRule {
       description: desc,
       createdAt: DateTime.now(),
       data: {
-        'course': course.toJson(),
+        'course': customCourse.toJson(),
       },
     );
   }
@@ -204,7 +206,8 @@ class TimetableRule {
     if (type != TimetableRuleType.customCourse) return null;
     final courseMap = data['course'];
     if (courseMap is Map<String, dynamic>) {
-      return CourseModel.fromJson(courseMap);
+      final parsed = CourseModel.fromJson(courseMap);
+      return parsed.isCustom ? parsed : parsed.copyWith(isCustom: true);
     }
     return null;
   }

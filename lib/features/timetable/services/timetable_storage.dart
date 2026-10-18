@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/atomic_storage_helper.dart';
 import '../../cloudisk/services/cloud_backup_manager.dart';
 import '../models/course_model.dart';
 import '../models/timetable_rule_model.dart';
@@ -41,7 +42,7 @@ class TimetableStorage {
   Future<void> saveTimetable(String icsContent) async {
     try {
       final file = await _getFile();
-      await file.writeAsString(icsContent);
+      await AtomicStorageHelper.atomicWriteString(file, icsContent);
       CloudBackupManager.instance.markDirty();
     } catch (e) {
       throw Exception('保存课表失败: $e');
@@ -67,6 +68,10 @@ class TimetableStorage {
       final file = await _getFile();
       if (await file.exists()) {
         await file.delete();
+      }
+      final tmp = File('${file.path}.tmp');
+      if (await tmp.exists()) {
+        await tmp.delete();
       }
     } catch (e) {
       // 忽略删除失败
@@ -101,7 +106,8 @@ class TimetableStorage {
         'savedAt': DateTime.now().toIso8601String(),
       };
 
-      await metaFile.writeAsString(jsonEncode(metadata));
+      await AtomicStorageHelper.atomicWriteString(
+          metaFile, jsonEncode(metadata));
       CloudBackupManager.instance.markDirty();
     } catch (e) {
       throw Exception('保存课表元数据失败: $e');
@@ -113,10 +119,10 @@ class TimetableStorage {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final metaFile = File('${directory.path}/$_metaFileName');
-
-      if (await metaFile.exists()) {
-        final content = await metaFile.readAsString();
-        return jsonDecode(content) as Map<String, dynamic>;
+      final decoded = await AtomicStorageHelper.readJsonWithRecovery(metaFile,
+          logTag: 'TimetableStorage.metadata');
+      if (decoded is Map) {
+        return Map<String, dynamic>.from(decoded);
       }
       return null;
     } catch (e) {
@@ -129,9 +135,12 @@ class TimetableStorage {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final metaFile = File('${directory.path}/$_metaFileName');
-
       if (await metaFile.exists()) {
         await metaFile.delete();
+      }
+      final tmp = File('${metaFile.path}.tmp');
+      if (await tmp.exists()) {
+        await tmp.delete();
       }
     } catch (e) {
       // 忽略删除失败
@@ -144,7 +153,7 @@ class TimetableStorage {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/$_courseListFileName');
       final jsonList = courses.map((c) => c.toJson()).toList();
-      await file.writeAsString(jsonEncode(jsonList));
+      await AtomicStorageHelper.atomicWriteString(file, jsonEncode(jsonList));
       CloudBackupManager.instance.markDirty();
     } catch (e) {
       throw Exception('保存课程列表失败: $e');
@@ -156,11 +165,12 @@ class TimetableStorage {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/$_courseListFileName');
-      if (await file.exists()) {
-        final content = await file.readAsString();
-        final List<dynamic> jsonList = jsonDecode(content);
-        return jsonList
-            .map((j) => CourseModel.fromJson(j as Map<String, dynamic>))
+      final decoded = await AtomicStorageHelper.readJsonWithRecovery(file,
+          logTag: 'TimetableStorage.courseList');
+      if (decoded is List) {
+        return decoded
+            .whereType<Map>()
+            .map((j) => CourseModel.fromJson(Map<String, dynamic>.from(j)))
             .toList();
       }
       return [];
@@ -177,6 +187,10 @@ class TimetableStorage {
       if (await file.exists()) {
         await file.delete();
       }
+      final tmp = File('${file.path}.tmp');
+      if (await tmp.exists()) {
+        await tmp.delete();
+      }
     } catch (e) {
       // 忽略
     }
@@ -188,7 +202,7 @@ class TimetableStorage {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/$_rawCourseListFileName');
       final jsonList = courses.map((c) => c.toJson()).toList();
-      await file.writeAsString(jsonEncode(jsonList));
+      await AtomicStorageHelper.atomicWriteString(file, jsonEncode(jsonList));
       CloudBackupManager.instance.markDirty();
     } catch (e) {
       throw Exception('保存原始课程列表失败: $e');
@@ -213,11 +227,13 @@ class TimetableStorage {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/$_rawCourseListFileName');
-      if (await file.exists()) {
-        final content = await file.readAsString();
-        final List<dynamic> jsonList = jsonDecode(content);
-        return jsonList
-            .map((j) => CourseModel.fromJson(j as Map<String, dynamic>))
+      final decoded = await AtomicStorageHelper.readJsonWithRecovery(file,
+          logTag: 'TimetableStorage.rawCourseList');
+      if (decoded is List) {
+        return decoded
+            .whereType<Map>()
+            .map((j) => CourseModel.fromJson(Map<String, dynamic>.from(j)))
+            .where((c) => !c.isCustom)
             .toList();
       }
       return [];
@@ -234,6 +250,10 @@ class TimetableStorage {
       if (await file.exists()) {
         await file.delete();
       }
+      final tmp = File('${file.path}.tmp');
+      if (await tmp.exists()) {
+        await tmp.delete();
+      }
     } catch (e) {
       // 忽略
     }
@@ -245,7 +265,7 @@ class TimetableStorage {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/$_rulesFileName');
       final jsonList = rules.map((r) => r.toJson()).toList();
-      await file.writeAsString(jsonEncode(jsonList));
+      await AtomicStorageHelper.atomicWriteString(file, jsonEncode(jsonList));
       CloudBackupManager.instance.markDirty();
     } catch (e) {
       throw Exception('保存课表规则失败: $e');
@@ -257,11 +277,12 @@ class TimetableStorage {
     try {
       final directory = await getApplicationDocumentsDirectory();
       final file = File('${directory.path}/$_rulesFileName');
-      if (await file.exists()) {
-        final content = await file.readAsString();
-        final List<dynamic> jsonList = jsonDecode(content);
-        return jsonList
-            .map((j) => TimetableRule.fromJson(j as Map<String, dynamic>))
+      final decoded = await AtomicStorageHelper.readJsonWithRecovery(file,
+          logTag: 'TimetableStorage.rules');
+      if (decoded is List) {
+        return decoded
+            .whereType<Map>()
+            .map((j) => TimetableRule.fromJson(Map<String, dynamic>.from(j)))
             .toList();
       }
       return [];
@@ -277,6 +298,10 @@ class TimetableStorage {
       final file = File('${directory.path}/$_rulesFileName');
       if (await file.exists()) {
         await file.delete();
+      }
+      final tmp = File('${file.path}.tmp');
+      if (await tmp.exists()) {
+        await tmp.delete();
       }
     } catch (e) {
       // 忽略

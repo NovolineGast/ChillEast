@@ -32,6 +32,8 @@ class CloudBackupManager {
 
   static const String filePrefix = 'chilleast-backup-';
   static const String fixedSlot = 'b';
+  static const String sidecarFileName = 'chilleast-sidecar-v2.json';
+  static const int defaultKeepCount = 3;
   static const String toggleKey = 'cloud_backup_auto_sync';
   static const String promptDecidedKey = 'cloud_backup_prompt_decided';
   static const String _activeSlotKey = 'cloud_backup_active_slot';
@@ -95,24 +97,220 @@ class CloudBackupManager {
     return best;
   }
 
-  /// 从目录条目中挑出需删除的 resid（同前缀且非本次上传）。
-  static List<Map<String, String>> pickStaleEntries(
+  /// 从目录条目中挑出 sidecar 伴随文件
+  static Map<String, String>? pickSidecarEntry(
     List<Map<String, dynamic>> entries,
-    String keepResid,
   ) {
-    final stale = <Map<String, String>>[];
     for (final e in entries) {
       final name = e['name']?.toString() ?? '';
-      if (parseFileName(name) == null) continue;
+      if (name == sidecarFileName) {
+        final resid = e['id']?.toString() ?? '';
+        final encryptedId = e['encryptedId']?.toString() ?? '';
+        if (resid.isNotEmpty && encryptedId.isNotEmpty) {
+          return {
+            'resid': resid,
+            'encryptedId': encryptedId,
+            'puid': e['puid']?.toString() ?? '',
+            'name': name,
+          };
+        }
+      }
+    }
+    return null;
+  }
+
+  /// 从目录条目中挑出需删除的 resid（同前缀且排除最新的 keepCount 份备份）。
+  /// 严格保留包含本次上传 [keepResid] 在内的最新 [keepCount] 份（默认 3 份），
+  /// 更早的陈旧快照加入待删除列表。
+  static List<Map<String, String>> pickStaleEntries(
+    List<Map<String, dynamic>> entries,
+    String keepResid, {
+    int keepCount = defaultKeepCount,
+  }) {
+    final valid = <({String resid, String encryptedId, String puid, String stamp})>[];
+    for (final e in entries) {
+      final name = e['name']?.toString() ?? '';
+      final parsed = parseFileName(name);
+      if (parsed == null) continue;
       final resid = e['id']?.toString() ?? '';
-      if (resid.isEmpty || resid == keepResid) continue;
-      stale.add({
-        'resid': resid,
-        'encryptedId': e['encryptedId']?.toString() ?? '',
-        'puid': e['puid']?.toString() ?? '',
-      });
+      final encryptedId = e['encryptedId']?.toString() ?? '';
+      if (resid.isEmpty || encryptedId.isEmpty) continue;
+      valid.add((
+        resid: resid,
+        encryptedId: encryptedId,
+        puid: e['puid']?.toString() ?? '',
+        stamp: parsed.stamp,
+      ));
+    }
+
+    // 依时间戳倒序排列（最新的在最前）
+    valid.sort((a, b) => b.stamp.compareTo(a.stamp));
+
+    final keptResids = <String>{};
+    if (keepResid.isNotEmpty && valid.any((v) => v.resid == keepResid)) {
+      keptResids.add(keepResid);
+    }
+
+    for (final item in valid) {
+      if (keptResids.length >= keepCount) break;
+      keptResids.add(item.resid);
+    }
+
+    final stale = <Map<String, String>>[];
+    for (final item in valid) {
+      if (!keptResids.contains(item.resid) && item.resid != keepResid) {
+        stale.add({
+          'resid': item.resid,
+          'encryptedId': item.encryptedId,
+          'puid': item.puid,
+        });
+      }
     }
     return stale;
+  }
+
+  /// 提取新版本特有的数据构建 sidecar 伴随文件数据结构
+  static Map<String, dynamic> buildSidecarData(
+      Map<String, dynamic> backupData) {
+    final settings = backupData['settings'] is Map
+        ? Map<String, dynamic>.from(backupData['settings'] as Map)
+        : <String, dynamic>{};
+    final appearance = settings['appearance'] is Map
+        ? Map<String, dynamic>.from(settings['appearance'] as Map)
+        : <String, dynamic>{};
+    final localData = backupData['localData'] is Map
+        ? Map<String, dynamic>.from(backupData['localData'] as Map)
+        : <String, dynamic>{};
+
+    final colors = settings['customCourseColors'];
+    final subscription = settings['timetableSubscription'];
+    final room2 = settings['electricityRoom2'];
+    final feedAutoSort = appearance['feedAutoSort'];
+    final exams = localData['examList'] ?? localData['manualExamList'];
+    final memories = localData['aiMemories'];
+
+    return {
+      'format': 'chilleast-sidecar',
+      'version': 2,
+      'updatedAt': DateTime.now().toIso8601String(),
+      'settings': {
+        if (colors != null) 'customCourseColors': colors,
+        if (subscription != null) 'timetableSubscription': subscription,
+        if (room2 != null) 'electricityRoom2': room2,
+        'appearance': {
+          if (feedAutoSort != null) 'feedAutoSort': feedAutoSort,
+        },
+      },
+      'localData': {
+        if (exams != null) 'examList': exams,
+        if (memories != null) 'aiMemories': memories,
+      },
+      // 顶层平铺别名兼容
+      if (colors != null) 'customCourseColors': colors,
+      if (subscription != null) 'timetableSubscription': subscription,
+      if (room2 != null) 'electricityRoom2': room2,
+      if (feedAutoSort != null) 'feedAutoSort': feedAutoSort,
+      if (exams != null) 'examList': exams,
+      if (memories != null) 'aiMemories': memories,
+    };
+  }
+
+  /// 将云端 sidecar 中的新版本字段合并到主备份快照中（防老版本覆盖丢失新字段）
+  static Map<String, dynamic> mergeSidecar(
+    Map<String, dynamic> backup,
+    Map<String, dynamic> sidecar,
+  ) {
+    final mergedBackup = Map<String, dynamic>.from(backup);
+    final settings = mergedBackup['settings'] is Map
+        ? Map<String, dynamic>.from(mergedBackup['settings'] as Map)
+        : <String, dynamic>{};
+    final localData = mergedBackup['localData'] is Map
+        ? Map<String, dynamic>.from(mergedBackup['localData'] as Map)
+        : <String, dynamic>{};
+
+    final sidecarSettings = sidecar['settings'] is Map
+        ? Map<String, dynamic>.from(sidecar['settings'] as Map)
+        : <String, dynamic>{};
+    final sidecarAppearance = sidecarSettings['appearance'] is Map
+        ? Map<String, dynamic>.from(sidecarSettings['appearance'] as Map)
+        : (sidecar['appearance'] is Map
+            ? Map<String, dynamic>.from(sidecar['appearance'] as Map)
+            : <String, dynamic>{});
+    final sidecarLocalData = sidecar['localData'] is Map
+        ? Map<String, dynamic>.from(sidecar['localData'] as Map)
+        : <String, dynamic>{};
+
+    // 1. customCourseColors: 若主快照缺失或为 null，从 sidecar 补齐
+    if (!settings.containsKey('customCourseColors') ||
+        settings['customCourseColors'] == null) {
+      final val = sidecarSettings['customCourseColors'] ??
+          sidecar['customCourseColors'];
+      if (val != null) {
+        settings['customCourseColors'] = val;
+      }
+    }
+
+    // 2. timetableSubscription: 若主快照缺失或为 null，从 sidecar 补齐
+    if (!settings.containsKey('timetableSubscription') ||
+        settings['timetableSubscription'] == null) {
+      final val = sidecarSettings['timetableSubscription'] ??
+          sidecar['timetableSubscription'];
+      if (val != null) {
+        settings['timetableSubscription'] = val;
+      }
+    }
+
+    // 3. electricityRoom2: 若主快照缺失或为 null，从 sidecar 补齐
+    if (!settings.containsKey('electricityRoom2') ||
+        settings['electricityRoom2'] == null) {
+      final val = sidecarSettings['electricityRoom2'] ??
+          sidecar['electricityRoom2'];
+      if (val != null) {
+        settings['electricityRoom2'] = val;
+      }
+    }
+
+    // 4. appearance.feedAutoSort: 若主快照缺失或为 null，从 sidecar 补齐
+    final appearance = settings['appearance'] is Map
+        ? Map<String, dynamic>.from(settings['appearance'] as Map)
+        : <String, dynamic>{};
+    if (!appearance.containsKey('feedAutoSort') ||
+        appearance['feedAutoSort'] == null) {
+      final val = sidecarAppearance['feedAutoSort'] ??
+          sidecar['feedAutoSort'];
+      if (val != null) {
+        appearance['feedAutoSort'] = val;
+        settings['appearance'] = appearance;
+      }
+    }
+
+    // 5. examList: 若主快照缺失或为 null，从 sidecar 补齐
+    if ((!localData.containsKey('examList') &&
+            !localData.containsKey('manualExamList')) ||
+        (localData['examList'] == null &&
+            localData['manualExamList'] == null)) {
+      final val = sidecarLocalData['examList'] ??
+          sidecar['examList'] ??
+          sidecarLocalData['manualExamList'] ??
+          sidecar['manualExamList'];
+      if (val != null) {
+        localData['examList'] = val;
+      }
+    }
+
+    // 6. aiMemories: 若主快照缺失或为 null，从 sidecar 补齐
+    if (!localData.containsKey('aiMemories') ||
+        localData['aiMemories'] == null) {
+      final val =
+          sidecarLocalData['aiMemories'] ?? sidecar['aiMemories'];
+      if (val != null) {
+        localData['aiMemories'] = val;
+      }
+    }
+
+    mergedBackup['settings'] = settings;
+    mergedBackup['localData'] = localData;
+    return mergedBackup;
   }
 
   static const String _dirtyStorageKey = 'cloud_backup_is_dirty';
@@ -332,7 +530,8 @@ class CloudBackupManager {
   Future<Map<String, dynamic>?> _pullAndApply(SharedPreferences prefs) async {
     final currentGen = _sessionGeneration;
     final session = await _cloudisk.ensureSession();
-    final latest = await _findLatestBackup(session);
+    final scan = await _findLatestBackupAndSidecar(session);
+    final latest = scan.latestBackup;
     if (latest == null) return null;
 
     final bytes = await _cloudisk.downloadBytes(
@@ -342,12 +541,39 @@ class CloudBackupManager {
       folderId: session.rootDirId,
     );
     // 先校验再写回：坏文件不碰本地
-    final backup =
+    var backup =
         BackupExportService.parseBackupJson(utf8.decode(bytes));
     if (_sessionGeneration != currentGen) {
       _logger.w('☁️ Pull backup aborted: session generation changed');
       return null;
     }
+
+    // 若云端存在 sidecar 伴随文件，拉取并合并补齐老版本可能缺失的新字段
+    final sidecarEntry = scan.sidecarEntry;
+    if (sidecarEntry != null) {
+      try {
+        final sidecarBytes = await _cloudisk.downloadBytes(
+          resid: sidecarEntry['resid']!,
+          encryptedId: sidecarEntry['encryptedId']!,
+          puid: sidecarEntry['puid']!.isNotEmpty
+              ? sidecarEntry['puid']!
+              : session.puid,
+          folderId: session.rootDirId,
+        );
+        final sidecarJson = jsonDecode(utf8.decode(sidecarBytes));
+        if (sidecarJson is Map<String, dynamic>) {
+          backup = mergeSidecar(backup, sidecarJson);
+          _logger.i('☁️ Merged sidecar companion into backup snapshot');
+        }
+      } catch (e) {
+        _logger.w('☁️ Pull sidecar failed: $e');
+      }
+    }
+
+    if (_sessionGeneration != currentGen) {
+      return null;
+    }
+
     await BackupExportService.applyBackupData(backup);
     if (_sessionGeneration != currentGen) {
       return null;
@@ -359,11 +585,13 @@ class CloudBackupManager {
     return backup;
   }
 
-  /// 翻页找云端最新的备份文件（最多 5 页）。
-  Future<Map<String, String>?> _findLatestBackup(
+  /// 翻页找云端最新的备份文件和 sidecar 伴随文件（最多 5 页）。
+  Future<({Map<String, String>? latestBackup, Map<String, String>? sidecarEntry})>
+      _findLatestBackupAndSidecar(
     CloudiskSession session,
   ) async {
     Map<String, String>? best;
+    Map<String, String>? sidecar;
     var page = 1;
     const size = 60;
     for (var i = 0; i < 5; i++) {
@@ -375,80 +603,143 @@ class CloudBackupManager {
               candidate['stamp']!.compareTo(best['stamp']!) > 0)) {
         best = candidate;
       }
+      sidecar ??= pickSidecarEntry(result.entries);
       if (result.entries.length >= result.totalCount ||
           result.entries.length < size) {
         break;
       }
       page++;
     }
-    return best;
+    return (latestBackup: best, sidecarEntry: sidecar);
   }
 
   Future<bool> _doSync(SharedPreferences prefs) async {
-      final currentGen = _sessionGeneration;
-      final data = await BackupExportService.buildBackupData();
-      final bytes = utf8.encode(const JsonEncoder().convert(data));
+    final currentGen = _sessionGeneration;
+    final data = await BackupExportService.buildBackupData();
+    final bytes = utf8.encode(const JsonEncoder().convert(data));
 
-      final session = await _cloudisk.ensureSession();
-      final filename = buildFileName(fixedSlot, DateTime.now());
+    // 上传前完整性回环反序列化预检，确保包含 format: 'chilleast-backup' 且结构合法
+    try {
+      final decoded = jsonDecode(utf8.decode(bytes));
+      if (decoded is! Map<String, dynamic> ||
+          decoded['format'] != BackupExportService.backupFormat) {
+        throw const FormatException('备份完整性校验失败：缺少合法 format 标识');
+      }
+    } catch (e) {
+      _logger.e('☁️ Cloud backup pre-upload integrity check failed: $e');
+      return false;
+    }
 
-      final uploaded = await _cloudisk.uploadJson(
+    final session = await _cloudisk.ensureSession();
+    final filename = buildFileName(fixedSlot, DateTime.now());
+
+    final uploaded = await _cloudisk.uploadJson(
+      folderId: session.rootDirId,
+      filename: filename,
+      bytes: bytes,
+    );
+    final resid = uploaded['resid'].toString();
+
+    if (_sessionGeneration != currentGen) {
+      _logger.w('☁️ Sync backup aborted: session generation changed');
+      return false;
+    }
+
+    // 上传 sidecar 伴随文件（与老版本 main 1.0.12 双向兼容）
+    String? sidecarResid;
+    try {
+      final sidecarData = buildSidecarData(data);
+      final sidecarBytes =
+          utf8.encode(const JsonEncoder().convert(sidecarData));
+      final sidecarUploaded = await _cloudisk.uploadJson(
         folderId: session.rootDirId,
-        filename: filename,
-        bytes: bytes,
+        filename: sidecarFileName,
+        bytes: sidecarBytes,
       );
-      final resid = uploaded['resid'].toString();
+      sidecarResid = sidecarUploaded['resid']?.toString();
+    } catch (e) {
+      _logger.w('☁️ Sidecar sync failed: $e');
+    }
 
-      if (_sessionGeneration != currentGen) {
-        _logger.w('☁️ Sync backup aborted: session generation changed');
-        return false;
-      }
+    if (_sessionGeneration != currentGen) {
+      return false;
+    }
 
-      // 收敛清理：删掉所有其它同前缀旧文件
-      await _pruneOthers(session, keepResid: resid);
+    // 收敛清理：滚动保留包含本次上传在内的最新 3 份快照，并清理旧 sidecar
+    await _pruneOthers(session,
+        keepResid: resid, keepSidecarResid: sidecarResid);
 
-      if (_sessionGeneration != currentGen) {
-        return false;
-      }
+    if (_sessionGeneration != currentGen) {
+      return false;
+    }
 
-      await prefs.setString(_activeSlotKey, fixedSlot);
-      await prefs.setString(_activeResidKey, resid);
-      await prefs.setString(_activeEncryptedIdKey,
-          uploaded['encryptedId']?.toString() ?? '');
-      await prefs.remove(_dirtyStorageKey);
-      _logger.i('☁️ Cloud backup synced: $filename');
-      return true;
+    await prefs.setString(_activeSlotKey, fixedSlot);
+    await prefs.setString(_activeResidKey, resid);
+    await prefs.setString(_activeEncryptedIdKey,
+        uploaded['encryptedId']?.toString() ?? '');
+    await prefs.remove(_dirtyStorageKey);
+    _logger.i('☁️ Cloud backup synced: $filename');
+    return true;
   }
 
   Future<void> _pruneOthers(
     CloudiskSession session, {
     required String keepResid,
+    String? keepSidecarResid,
+    int keepCount = defaultKeepCount,
   }) async {
+    final allEntries = <Map<String, dynamic>>[];
     var page = 1;
     const size = 60;
     // 最多翻 5 页，防异常大目录
     for (var i = 0; i < 5; i++) {
       final result =
           await _cloudisk.listRes(parentId: session.rootDirId, page: page);
-      final stale = pickStaleEntries(result.entries, keepResid);
-      for (final s in stale) {
-        if (s['encryptedId']!.isEmpty) continue;
-        try {
-          await _cloudisk.deleteRes(
-            resid: s['resid']!,
-            encryptedId: s['encryptedId']!,
-            puid: s['puid']!.isNotEmpty ? s['puid']! : session.puid,
-          );
-        } catch (e) {
-          // 单个删除失败不影响整体，下次同步继续收敛
-          _logger.w('☁️ Prune ${s['resid']} failed: $e');
-        }
-      }
+      allEntries.addAll(result.entries);
       if (result.entries.length >= result.totalCount ||
           result.entries.length < size) {
         break;
       }
       page++;
+    }
+
+    final stale = pickStaleEntries(allEntries, keepResid, keepCount: keepCount);
+    for (final s in stale) {
+      if (s['encryptedId']!.isEmpty) continue;
+      try {
+        await _cloudisk.deleteRes(
+          resid: s['resid']!,
+          encryptedId: s['encryptedId']!,
+          puid: s['puid']!.isNotEmpty ? s['puid']! : session.puid,
+        );
+      } catch (e) {
+        // 单个删除失败不影响整体，下次同步继续收敛
+        _logger.w('☁️ Prune backup ${s['resid']} failed: $e');
+      }
+    }
+
+    // 清理旧的 sidecar 伴随文件
+    if (keepSidecarResid != null) {
+      for (final e in allEntries) {
+        final name = e['name']?.toString() ?? '';
+        if (name == sidecarFileName) {
+          final resid = e['id']?.toString() ?? '';
+          final encryptedId = e['encryptedId']?.toString() ?? '';
+          if (resid.isNotEmpty &&
+              encryptedId.isNotEmpty &&
+              resid != keepSidecarResid) {
+            try {
+              await _cloudisk.deleteRes(
+                resid: resid,
+                encryptedId: encryptedId,
+                puid: e['puid']?.toString() ?? session.puid,
+              );
+            } catch (e) {
+              _logger.w('☁️ Prune old sidecar $resid failed: $e');
+            }
+          }
+        }
+      }
     }
   }
 }

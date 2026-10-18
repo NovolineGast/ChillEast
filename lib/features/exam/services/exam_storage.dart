@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import '../../../core/utils/atomic_storage_helper.dart';
 import '../../cloudisk/services/cloud_backup_manager.dart';
 import '../models/exam_schedule_model.dart';
 
@@ -53,7 +54,7 @@ class ExamStorage {
       final validList = filterUpcomingAndToday(exams);
       final file = await _getFile();
       final jsonList = validList.map((e) => e.toJson()).toList();
-      await file.writeAsString(jsonEncode(jsonList));
+      await AtomicStorageHelper.atomicWriteString(file, jsonEncode(jsonList));
       CloudBackupManager.instance.markDirty();
     } catch (_) {
       // 忽略写入失败
@@ -64,11 +65,12 @@ class ExamStorage {
   Future<List<ExamScheduleModel>> readExamList() async {
     try {
       final file = await _getFile();
-      if (await file.exists()) {
-        final content = await file.readAsString();
-        final List<dynamic> jsonList = jsonDecode(content);
-        final list = jsonList
-            .map((j) => ExamScheduleModel.fromJson(j as Map<String, dynamic>))
+      final decoded = await AtomicStorageHelper.readJsonWithRecovery(file,
+          logTag: 'ExamStorage');
+      if (decoded is List) {
+        final list = decoded
+            .whereType<Map>()
+            .map((j) => ExamScheduleModel.fromJson(Map<String, dynamic>.from(j)))
             .toList();
         final validList = filterUpcomingAndToday(list);
         if (validList.length != list.length) {
@@ -86,7 +88,8 @@ class ExamStorage {
   Future<void> saveExpiredExamIds(Set<String> ids) async {
     try {
       final file = await _getExpiredIdsFile();
-      await file.writeAsString(jsonEncode(ids.toList()));
+      await AtomicStorageHelper.atomicWriteString(
+          file, jsonEncode(ids.toList()));
     } catch (_) {
       // 忽略
     }
@@ -96,10 +99,10 @@ class ExamStorage {
   Future<Set<String>> readExpiredExamIds() async {
     try {
       final file = await _getExpiredIdsFile();
-      if (await file.exists()) {
-        final content = await file.readAsString();
-        final List<dynamic> list = jsonDecode(content);
-        return list.map((e) => e.toString()).toSet();
+      final decoded = await AtomicStorageHelper.readJsonWithRecovery(file,
+          logTag: 'ExamStorage.expired');
+      if (decoded is List) {
+        return decoded.map((e) => e.toString()).toSet();
       }
       return {};
     } catch (_) {
@@ -111,13 +114,9 @@ class ExamStorage {
   Future<void> deleteExamList() async {
     try {
       final file = await _getFile();
-      if (await file.exists()) {
-        await file.delete();
-      }
+      await AtomicStorageHelper.deleteWithBackups(file);
       final expiredFile = await _getExpiredIdsFile();
-      if (await expiredFile.exists()) {
-        await expiredFile.delete();
-      }
+      await AtomicStorageHelper.deleteWithBackups(expiredFile);
     } catch (_) {
       // 忽略
     }

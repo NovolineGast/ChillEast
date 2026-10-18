@@ -509,6 +509,13 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       }
     });
 
+    // 监听静默同步进程（完成时重新拉取最新课表，确保退出转圈状态）
+    ref.listen(timetableSyncInProgressProvider, (previous, next) {
+      if (previous == true && next == false && mounted) {
+        _loadLocalTimetable();
+      }
+    });
+
     // 监听作业变化，同步刷新日程轴
     ref.listen(homeworkProvider, (_, __) {
       if (_courses.isNotEmpty && _firstWeekMonday != null) {
@@ -646,7 +653,11 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
     if (!_hasLocalTimetable) {
       final autoSyncEnabled =
           ref.watch(settingsProvider).timetableAutoSyncEnabled;
-      return EmptyTimetableState(autoSyncEnabled: autoSyncEnabled);
+      final isSyncing = ref.watch(timetableSyncInProgressProvider);
+      return EmptyTimetableState(
+        autoSyncEnabled: autoSyncEnabled,
+        isSyncing: isSyncing,
+      );
     }
 
     // 如果没有课程但是有元数据（已同步过），则继续渲染（为了展示作业）

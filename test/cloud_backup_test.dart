@@ -57,17 +57,35 @@ void main() {
   });
 
   group('CloudBackupManager.pickStaleEntries', () {
-    List<Map<String, dynamic>> entries() => [
+    List<Map<String, dynamic>> fiveBackups() => [
           {
-            'id': 'new-resid',
-            'name': 'chilleast-backup-b-20260926-093015.json',
-            'encryptedId': 'enc-new',
+            'id': 'resid-1',
+            'name': 'chilleast-backup-b-20260928-120000.json',
+            'encryptedId': 'enc-1',
             'puid': '1',
           },
           {
-            'id': 'old-resid',
-            'name': 'chilleast-backup-a-20260925-220000.json',
-            'encryptedId': 'enc-old',
+            'id': 'resid-2',
+            'name': 'chilleast-backup-b-20260927-120000.json',
+            'encryptedId': 'enc-2',
+            'puid': '1',
+          },
+          {
+            'id': 'resid-3',
+            'name': 'chilleast-backup-b-20260926-120000.json',
+            'encryptedId': 'enc-3',
+            'puid': '1',
+          },
+          {
+            'id': 'resid-4',
+            'name': 'chilleast-backup-a-20260925-120000.json',
+            'encryptedId': 'enc-4',
+            'puid': '1',
+          },
+          {
+            'id': 'resid-5',
+            'name': 'chilleast-backup-a-20260924-120000.json',
+            'encryptedId': 'enc-5',
             'puid': '1',
           },
           {
@@ -78,19 +96,141 @@ void main() {
           },
         ];
 
-    test('keeps the fresh upload, flags other backup files', () {
+    test('retains strictly 3 latest backups by default, flags older snapshots', () {
       final stale =
-          CloudBackupManager.pickStaleEntries(entries(), 'new-resid');
-      expect(stale.map((e) => e['resid']), ['old-resid']);
+          CloudBackupManager.pickStaleEntries(fiveBackups(), 'resid-1');
+      // Latest 3 (resid-1, resid-2, resid-3) are kept. Older 2 are stale.
+      expect(stale.map((e) => e['resid']), ['resid-4', 'resid-5']);
+    });
+
+    test('guarantees keepResid is kept within the 3 retained snapshots', () {
+      // Even if keepResid is resid-4 (chronologically 4th), it must be preserved
+      final stale =
+          CloudBackupManager.pickStaleEntries(fiveBackups(), 'resid-4');
+      // Kept: resid-4 (forced), resid-1, resid-2 (total 3)
+      // Stale: resid-3, resid-5
+      expect(stale.map((e) => e['resid']), containsAll(['resid-3', 'resid-5']));
+      expect(stale.map((e) => e['resid']), isNot(contains('resid-4')));
+    });
+
+    test('keeps all entries when count <= 3', () {
+      final entries = fiveBackups().take(2).toList();
+      final stale = CloudBackupManager.pickStaleEntries(entries, 'resid-1');
+      expect(stale, isEmpty);
     });
 
     test('ignores non-backup files', () {
       final stale =
-          CloudBackupManager.pickStaleEntries(entries(), 'missing-resid');
-      // 新文件 resid 对不上时，旧备份照样被标记（收敛清理）
-      expect(stale.map((e) => e['resid']),
-          containsAll(['new-resid', 'old-resid']));
+          CloudBackupManager.pickStaleEntries(fiveBackups(), 'resid-1');
       expect(stale.map((e) => e['resid']), isNot(contains('other')));
+    });
+
+    test('supports custom keepCount override', () {
+      final stale = CloudBackupManager.pickStaleEntries(
+        fiveBackups(),
+        'resid-1',
+        keepCount: 1,
+      );
+      expect(stale.map((e) => e['resid']),
+          ['resid-2', 'resid-3', 'resid-4', 'resid-5']);
+    });
+  });
+
+  group('Sidecar and Companion sync', () {
+    test('pickSidecarEntry identifies chilleast-sidecar-v2.json', () {
+      final entries = [
+        {
+          'id': 'sc-1',
+          'name': 'chilleast-sidecar-v2.json',
+          'encryptedId': 'enc-sc',
+          'puid': '1',
+        },
+        {
+          'id': 'b-1',
+          'name': 'chilleast-backup-b-20260926-093015.json',
+          'encryptedId': 'enc-b',
+          'puid': '1',
+        },
+      ];
+      final sc = CloudBackupManager.pickSidecarEntry(entries);
+      expect(sc, isNotNull);
+      expect(sc!['resid'], 'sc-1');
+      expect(sc['name'], 'chilleast-sidecar-v2.json');
+    });
+
+    test('buildSidecarData extracts version-specific fields', () {
+      final backup = {
+        'format': 'chilleast-backup',
+        'settings': {
+          'customCourseColors': {'c1': 0xFF00FF},
+          'timetableSubscription': {'enabled': true, 'uuid': 'sub-uuid'},
+          'electricityRoom2': {'room': '102'},
+          'appearance': {
+            'feedAutoSort': true,
+          },
+        },
+        'localData': {
+          'examList': [
+            {'id': 'ex-1', 'title': '期末考'}
+          ],
+          'aiMemories': [
+            {'id': 'mem-1', 'content': '寝室601'}
+          ],
+        },
+      };
+
+      final sidecar = CloudBackupManager.buildSidecarData(backup);
+      expect(sidecar['format'], 'chilleast-sidecar');
+      expect(sidecar['customCourseColors'], {'c1': 0xFF00FF});
+      expect(sidecar['timetableSubscription']['uuid'], 'sub-uuid');
+      expect(sidecar['electricityRoom2'], {'room': '102'});
+      expect(sidecar['feedAutoSort'], isTrue);
+      expect((sidecar['examList'] as List).first['id'], 'ex-1');
+      expect((sidecar['aiMemories'] as List).first['id'], 'mem-1');
+    });
+
+    test('mergeSidecar complements missing fields from sidecar into old main backup', () {
+      // 老版本 main 1.0.12 生成的主快照（缺失新字段）
+      final oldBackup = {
+        'format': 'chilleast-backup',
+        'version': 1,
+        'settings': {
+          'languageCode': 'zh',
+          'courseReminderMinutes': 15,
+          'appearance': {'homeItems': []},
+        },
+        'localData': {
+          'timetableIcs': 'BEGIN:VCALENDAR...',
+          'courses': [],
+        },
+      };
+
+      final sidecar = {
+        'format': 'chilleast-sidecar',
+        'version': 2,
+        'customCourseColors': {'c1': 0x123456},
+        'timetableSubscription': {'enabled': true, 'uuid': 'uuid-123'},
+        'electricityRoom2': {'room': '305'},
+        'feedAutoSort': true,
+        'examList': [
+          {'id': 'ex-99', 'title': '高等数学'}
+        ],
+        'aiMemories': [
+          {'id': 'mem-99', 'content': '自习室三楼'}
+        ],
+      };
+
+      final merged = CloudBackupManager.mergeSidecar(oldBackup, sidecar);
+      final settings = merged['settings'] as Map<String, dynamic>;
+      final localData = merged['localData'] as Map<String, dynamic>;
+
+      expect(settings['languageCode'], 'zh');
+      expect(settings['customCourseColors'], {'c1': 0x123456});
+      expect(settings['timetableSubscription']['uuid'], 'uuid-123');
+      expect(settings['electricityRoom2'], {'room': '305'});
+      expect(settings['appearance']['feedAutoSort'], isTrue);
+      expect((localData['examList'] as List).first['id'], 'ex-99');
+      expect((localData['aiMemories'] as List).first['id'], 'mem-99');
     });
   });
 

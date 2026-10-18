@@ -349,7 +349,9 @@ class TimetableRuleService {
       List<CourseModel> courses, TimetableRule rule) {
     final custom = rule.customCourse;
     if (custom != null) {
-      return [...courses, custom];
+      final customWithFlag =
+          custom.isCustom ? custom : custom.copyWith(isCustom: true);
+      return [...courses, customWithFlag];
     }
     return courses;
   }
@@ -390,44 +392,71 @@ class TimetableRuleService {
   /// 数据不变式：
   /// - raw_courses.json 是教务原始数据（不可变基准），仅在两种情况下写入：
   ///   1) 从教务同步全新课表时（见 YdjwxtService.syncTimetable）；
-  ///   2) 历史版本升级的一次性迁移（本地无 raw 文件但有旧 courses.json 时）。
+  ///   2) 历史版本升级的一次性迁移（本地无 raw 文件但有旧 courses.json 且纯净无自定义课程时）。
+  /// - 严禁将包含自定义课程的 courses.json 当作 raw 写入！
+  /// - 在读取或使用 raw_courses.json 时，增加防御自愈：过滤掉任何 isCustom == true 的课程，确保 raw 基准层绝对不被自定义加课规则污染。
+  /// - clearAllRules 或重新应用规则时，必须始终以纯净的 raw 为输入进行计算。
   /// - 已存在的 raw 基准绝不被覆盖，避免把已应用规则的数据写回基准导致规则“没生效”或叠加错乱。
   /// - ICS 是 lossy 的派生产物（会拆散非连续周、重造 id），绝不用它作为规则计算的基准。
   Future<List<CourseModel>> applyRulesAndRegenerate() async {
     try {
       _logger.i('Applying timetable rules and regenerating ICS...');
-      // 1. 读取原始课程（不可变基准优先）
+      // 1. 读取原始课程（不可变基准优先，增加防御自愈过滤）
       final hasRaw = await _storage.hasRawCourseList();
-      List<CourseModel> rawCourses = await _storage.readRawCourseList();
+      List<CourseModel> rawCourses = (await _storage.readRawCourseList())
+          .where((c) => !c.isCustom)
+          .toList();
+
       if (rawCourses.isEmpty) {
-        // 一次性迁移：历史版本没有 raw 文件，用旧 courses.json 作为基准并固化一次
+        // 一次性迁移：历史版本没有 raw 文件。
+        // 严禁将包含自定义课程的 courses.json 当作 raw 写入！
         final legacyCourses = await _storage.readCourseList();
-        if (legacyCourses.isNotEmpty) {
-          rawCourses = legacyCourses;
-          if (!hasRaw) {
+        final sanitizedLegacy =
+            legacyCourses.where((c) => !c.isCustom).toList();
+        final existingRules = await _storage.readRules();
+        final hasCustomCoursesInLegacy =
+            legacyCourses.any((c) => c.isCustom);
+
+        if (sanitizedLegacy.isNotEmpty) {
+          rawCourses = sanitizedLegacy;
+          // 仅当原始 courses.json 纯净无自定义课程、且本地完全没有 rules 时，才允许一次性固化为 raw
+          if (!hasRaw && !hasCustomCoursesInLegacy && existingRules.isEmpty) {
             await _storage.saveRawCourseList(rawCourses);
             _logger.i(
-                'Migrated legacy courses.json to raw baseline (${rawCourses.length} courses)');
+                'Migrated pure legacy courses.json to raw baseline (${rawCourses.length} courses)');
+          } else if (hasCustomCoursesInLegacy) {
+            _logger.w(
+                '⚠️ Legacy courses.json contains custom courses; refusing to persist as raw baseline.');
           }
         }
       }
+
       if (rawCourses.isEmpty) {
-        // 最后兜底：从已有 ICS 日历文件解析（仅展示恢复，不作为精确基准时也需固化，避免反复走 ICS 回退）
+        // 最后兜底：从已有 ICS 日历文件解析
         final icsContent = await _storage.readTimetable();
         if (icsContent != null && icsContent.isNotEmpty) {
-          rawCourses = IcsParser.parse(icsContent);
-          if (rawCourses.isNotEmpty && !hasRaw) {
-            await _storage.saveRawCourseList(rawCourses);
+          final parsed = IcsParser.parse(icsContent)
+              .where((c) => !c.isCustom)
+              .toList();
+          if (parsed.isNotEmpty) {
+            rawCourses = parsed;
+            final existingRules = await _storage.readRules();
+            if (!hasRaw && existingRules.isEmpty) {
+              await _storage.saveRawCourseList(rawCourses);
+            }
           }
         }
       }
+
+      // 确保 rawCourses 绝对无任何自定义课程污染
+      rawCourses = rawCourses.where((c) => !c.isCustom).toList();
 
       // 2. 读取规则
       final rules = await _storage.readRules();
       _logger.i(
           'Applying ${rules.length} rules to ${rawCourses.length} raw courses...');
 
-      // 3. 应用规则
+      // 3. 应用规则 (始终以纯净的 raw 为基准输入进行计算)
       final modifiedCourses = applyRules(rawCourses, rules);
 
       // 4. 读取开学周一（元数据 > 手动设置 > 猜测）

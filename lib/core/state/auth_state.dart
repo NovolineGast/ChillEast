@@ -181,7 +181,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await checkAuthStatus();
       } catch (e, stack) {
         _logger.e('💥 Unhandled error in checkAuthStatus: $e\n$stack');
-        state = const AuthState.initial().copyWith(isInitialized: true);
+        if (mounted) {
+          state = const AuthState.initial().copyWith(isInitialized: true);
+        }
       } finally {
         _splashTimeoutTimer?.cancel();
         _splashTimeoutTimer = null;
@@ -216,6 +218,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           _logger.w('⚠️ Clear SSO cookies on unauthenticated failed: $e');
         }
         _logger.i('👋 No credentials found, stay unauthenticated');
+        if (!mounted) return;
         state = const AuthState.initial().copyWith(isInitialized: true);
         FlutterNativeSplash.remove();
         return;
@@ -282,7 +285,9 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
     } catch (e) {
       _logger.e('Error during checkAuthStatus: $e');
-      state = const AuthState.initial().copyWith(isInitialized: true);
+      if (mounted) {
+        state = const AuthState.initial().copyWith(isInitialized: true);
+      }
     } finally {
       FlutterNativeSplash.remove();
     }
@@ -311,7 +316,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     }
     unawaited(_refreshUserInfo());
     unawaited(_ref.read(campusCardServiceProvider).authenticate());
-    unawaited(_syncTimetableSilently());
+    unawaited(_pullTimetableSilently());
   }
 
   /// 静默拉取云端最新备份并应用到本地
@@ -381,6 +386,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         await storage.deleteCourseList();
         await storage.deleteRawCourseList();
         await storage.deleteRules();
+        await _ref.read(timetableStatusProvider.notifier).refresh();
       } catch (e) {
         _logger.w('⚠️ delete timetable data failed: $e');
       }
@@ -567,7 +573,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
 
   /// 登录后自动同步课表（本地有课表也会全量同步，保证最新）。
   /// 仅受设置里的自动同步开关控制，关闭则直接跳过。
-  Future<void> _syncTimetableSilently() async {
+  Future<void> _pullTimetableSilently() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final autoSync =
@@ -577,6 +583,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
         return;
       }
 
+      _ref.read(timetableSyncInProgressProvider.notifier).state = true;
       _logger.i('📅 Starting background timetable sync...');
 
       await TimetableService().downloadAndSaveTimetable(
@@ -591,16 +598,17 @@ class AuthNotifier extends StateNotifier<AuthState> {
         _logger.w('⚠️ Reschedule after timetable sync failed: $e');
       }
 
-      // 同步后刷新全局课表状态，通知课表页与首页重载最新数据
+      _logger.i('✅ Background timetable sync success');
+    } catch (e) {
+      _logger.w('⚠️ Background timetable sync failed: $e');
+    } finally {
+      _ref.read(timetableSyncInProgressProvider.notifier).state = false;
+      // 无论后台同步成功或失败完成，均显式调用 refresh 广播课表状态变更，退出转圈
       try {
         await _ref.read(timetableStatusProvider.notifier).refresh();
       } catch (e) {
         _logger.w('⚠️ Refresh timetableStatusProvider failed: $e');
       }
-
-      _logger.i('✅ Background timetable sync success');
-    } catch (e) {
-      _logger.w('⚠️ Background timetable sync failed: $e');
     }
   }
 }

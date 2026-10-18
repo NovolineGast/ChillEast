@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import '../../utils/atomic_storage_helper.dart';
 import '../../../features/cloudisk/services/cloud_backup_manager.dart';
 import '../models/ai_memory_item.dart';
 
@@ -20,17 +21,13 @@ class AiMemoryStorage {
   Future<List<AiMemoryItem>> readMemories() async {
     try {
       final file = await _getFile();
-      if (!await file.exists()) {
-        return [];
-      }
-      final content = await file.readAsString();
-      if (content.trim().isEmpty) {
-        return [];
-      }
-      final decoded = jsonDecode(content);
+      final decoded = await AtomicStorageHelper.readJsonWithRecovery(file,
+          logTag: 'AiMemoryStorage');
       if (decoded is List) {
         return decoded
-            .map((e) => AiMemoryItem.fromJson(Map<String, dynamic>.from(e as Map)))
+            .whereType<Map>()
+            .map((e) =>
+                AiMemoryItem.fromJson(Map<String, dynamic>.from(e)))
             .toList();
       }
       return [];
@@ -58,7 +55,7 @@ class AiMemoryStorage {
     try {
       final file = await _getFile();
       final jsonList = memories.map((e) => e.toJson()).toList();
-      await file.writeAsString(jsonEncode(jsonList));
+      await AtomicStorageHelper.atomicWriteString(file, jsonEncode(jsonList));
       CloudBackupManager.instance.markDirty();
     } catch (_) {}
   }

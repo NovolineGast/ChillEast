@@ -8,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/ai/ai_service.dart';
 import '../../../core/services/home_widget_service.dart';
+import '../../../core/utils/atomic_storage_helper.dart';
 import '../../../core/utils/secure_storage_helper.dart';
 import '../models/appearance_state.dart';
 import '../providers/appearance_provider.dart';
@@ -569,11 +570,8 @@ class BackupExportService {
     if (v == null) return;
     final dir = await getApplicationDocumentsDirectory();
     final file = File('${dir.path}/$fileName');
-    if (v is String) {
-      await file.writeAsString(v);
-    } else {
-      await file.writeAsString(jsonEncode(v));
-    }
+    final content = v is String ? v : jsonEncode(v);
+    await AtomicStorageHelper.atomicWriteString(file, content);
   }
 
   static dynamic _decodeJson(String? raw) {
@@ -597,13 +595,16 @@ class BackupExportService {
   }
 
   static Future<dynamic> _readDocFileJson(String fileName) async {
-    final text = await _readDocFileText(fileName);
-    if (text == null || text.isEmpty) return null;
     try {
-      return jsonDecode(text);
+      final dir = await getApplicationDocumentsDirectory();
+      final file = File('${dir.path}/$fileName');
+      final decoded = await AtomicStorageHelper.readJsonWithRecovery(file,
+          logTag: 'BackupExportService');
+      if (decoded != null) return decoded;
+      // 容错：若非 JSON 格式文本文件则回退原样返回文本
+      return await _readDocFileText(fileName);
     } catch (_) {
-      // 非 JSON 文件原样返回文本，避免备份失败
-      return text;
+      return null;
     }
   }
 
@@ -677,7 +678,8 @@ class BackupExportService {
 
     // 3. 保留本地爬取作业 + 合并后的手动作业
     final finalHomework = [...mergedManual, ...localScraped];
-    await file.writeAsString(jsonEncode(finalHomework));
+    await AtomicStorageHelper.atomicWriteString(
+        file, jsonEncode(finalHomework));
   }
 
   /// 仅读取本地手动考试（isManual == true 且未过期），排除在线爬取的考试
@@ -786,6 +788,6 @@ class BackupExportService {
       }
     }).toList();
 
-    await file.writeAsString(jsonEncode(finalExams));
+    await AtomicStorageHelper.atomicWriteString(file, jsonEncode(finalExams));
   }
 }

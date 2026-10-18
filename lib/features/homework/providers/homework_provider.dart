@@ -57,8 +57,8 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
   /// 无感刷新
   Future<void> _silentRefresh(String studentId) async {
     try {
-      final manual = await _collectManualUnion();
       final scraped = await _ref.read(homeworkServiceProvider).fetchHomeworkList(studentId);
+      final manual = await _collectManualUnion();
       
       final merged = [...manual, ...scraped];
       await _ref.read(homeworkStorageProvider).saveHomeworkList(merged);
@@ -72,18 +72,18 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
   /// 手动刷新 (显示 loading)
   Future<void> refresh(String studentId) async {
     try {
-      final manual = await _collectManualUnion();
-      
-      state = const AsyncValue.loading();
+      state = const AsyncValue<List<HomeworkModel>>.loading().copyWithPrevious(state);
       final scraped = await _ref.read(homeworkServiceProvider).fetchHomeworkList(studentId);
       
+      final manual = await _collectManualUnion();
       final merged = [...manual, ...scraped];
       await _ref.read(homeworkStorageProvider).saveHomeworkList(merged);
       state = AsyncValue.data(merged);
       _scheduleReminders(merged);
     } catch (e, st) {
       _logger.e('❌ Refresh homework failed: $e');
-      state = AsyncValue.error(e, st);
+      final prev = state.valueOrNull != null ? AsyncValue.data(state.valueOrNull!) : state;
+      state = AsyncValue<List<HomeworkModel>>.error(e, st).copyWithPrevious(prev);
     }
   }
 

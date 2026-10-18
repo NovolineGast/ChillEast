@@ -105,12 +105,12 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
         await AppCookieManager().syncMultiDomainCookiesFromWebView();
       } catch (_) {}
 
-      final manual = await _collectManualUnion();
       final storage = _ref.read(examStorageProvider);
       final scraped = await _ref
           .read(examServiceProvider)
           .fetchExams();
 
+      final manual = await _collectManualUnion();
       // 强行同步超星云端数据，仅保留用户手动创建的考试，旧的超星缓存不合入
       final merged = [...manual, ...scraped];
       merged.sort((a, b) => a.time.compareTo(b.time));
@@ -126,17 +126,17 @@ class ExamNotifier extends StateNotifier<AsyncValue<List<ExamScheduleModel>>> {
   /// 手动刷新（显示 loading 状态）
   Future<void> refresh() async {
     try {
+      state = const AsyncLoading<List<ExamScheduleModel>>().copyWithPrevious(state);
       try {
         await AppCookieManager().syncMultiDomainCookiesFromWebView();
       } catch (_) {}
 
-      final manual = await _collectManualUnion();
-      state = const AsyncLoading<List<ExamScheduleModel>>().copyWithPrevious(state);
       final storage = _ref.read(examStorageProvider);
       final scraped = await _ref
           .read(examServiceProvider)
           .fetchExams();
 
+      final manual = await _collectManualUnion();
       final merged = [...manual, ...scraped];
       merged.sort((a, b) => a.time.compareTo(b.time));
 
