@@ -25,6 +25,7 @@ import '../../homework/providers/homework_provider.dart';
 import '../../homework/models/homework_model.dart';
 import '../../exam/providers/exam_provider.dart';
 import '../../exam/models/exam_schedule_model.dart';
+import '../../exam/services/exam_storage.dart';
 import '../../exam/screens/exam_screen.dart';
 import '../../../core/utils/location_helper.dart';
 import 'package:intl/intl.dart';
@@ -243,14 +244,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
 
       final reserves =
-          ref.watch(cachedLibraryReserveProvider).value ?? [];
+          ref.watch(cachedLibraryReserveProvider).valueOrNull ?? [];
       final hasLibraryP0 =
           FeedSorter.checkLibraryP0(reserves: reserves);
 
-      final leaves = ref.watch(leaveCacheProvider).value ?? [];
+      final leaves = ref.watch(leaveCacheProvider).valueOrNull ?? [];
       final hasLeaveP1 = FeedSorter.checkLeaveP1(leaves: leaves);
 
-      final exams = ref.watch(examProvider).value ?? [];
+      final exams = ref.watch(examProvider).valueOrNull ?? [];
       final hasAgendaP2 = FeedSorter.checkAgendaP2(
         courses: _todayCourses,
         exams: exams,
@@ -258,7 +259,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
 
       final homeworks =
-          ref.watch(homeworkProvider).value ?? [];
+          ref.watch(homeworkProvider).valueOrNull ?? [];
       final hasHomeworkP3 =
           FeedSorter.checkHomeworkP3(homeworks: homeworks);
 
@@ -906,7 +907,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildLibrarySeatCard(BuildContext context) {
     final cachedReservesAsync = ref.watch(cachedLibraryReserveProvider);
-    final reserves = cachedReservesAsync.value ?? [];
+    final reserves = cachedReservesAsync.valueOrNull ?? [];
     if (reserves.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -1313,7 +1314,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       data: (list) {
         final items = list
             .where((e) =>
-                e.isCurrentSemester() &&
+                !ExamStorage.isManualExamExpired(e) &&
+                (e.isCurrentSemester() || e.isManual) &&
                 e.time.year == _previewDate.year &&
                 e.time.month == _previewDate.month &&
                 e.time.day == _previewDate.day)
@@ -1374,12 +1376,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               for (int i = 0; i < dayExams.length; i++) ...[
-                if (i > 0) const SizedBox(height: 12),
+                if (i > 0) const SizedBox(height: 4),
                 _buildExamTask(dayExams[i]),
               ],
               for (int i = 0; i < _todayCourses.length; i++) ...[
                 if (i > 0 || dayExams.isNotEmpty)
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 4),
                 _buildCourseItem(_todayCourses[i]),
               ],
             ],
@@ -1388,10 +1390,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 考试卡片（红色底 + 考试时间，严格显示第一个出现的时间）
+  /// 考试卡片（红色底 + 考试时间与地点，严格显示第一个出现的时间）
   Widget _buildExamTask(ExamScheduleModel item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final timeStr = DateFormat('HH:mm').format(item.time);
+    final location = item.location?.trim() ?? '';
+    final timeLocation = location.isNotEmpty ? '$timeStr @ $location' : timeStr;
+
+    final title = item.title.trim();
+    final course = item.courseName.trim();
+    final displayTitle = course.isNotEmpty
+        ? (title.isNotEmpty && title != course ? '$course · $title' : course)
+        : title;
+
+    final showStatus = item.status.isNotEmpty &&
+        item.status != '待考' &&
+        item.status != context.l10n.examStatusPending;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -1435,7 +1449,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          item.title,
+                          displayTitle,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -1446,7 +1460,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (item.status.isNotEmpty) ...[
+                      if (showStatus) ...[
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
@@ -1469,7 +1483,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${context.l10n.examTimePrefix} $timeStr',
+                    timeLocation,
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark
@@ -1516,13 +1530,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               fontSize: 15,
               fontWeight: FontWeight.bold,
               height: 1.2,
-              shadows: [
-                Shadow(
-                  color: Colors.black45,
-                  offset: Offset(0, 1),
-                  blurRadius: 2,
-                ),
-              ],
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -1537,13 +1544,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               color: Colors.white,
               fontSize: 12,
               height: 1.2,
-              shadows: [
-                Shadow(
-                  color: Colors.black45,
-                  offset: Offset(0, 1),
-                  blurRadius: 2,
-                ),
-              ],
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -1777,7 +1777,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildPendingQuestionnaires(BuildContext context) {
     final cachedAsync = ref.watch(questionnaireCacheProvider);
-    final pending = (cachedAsync.value ?? [])
+    final pending = (cachedAsync.valueOrNull ?? [])
         .where((q) => !q.isSubmitted && !q.isExpired)
         .toList();
     if (pending.isEmpty) return const SizedBox.shrink();
@@ -1882,7 +1882,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildOngoingLeaves(BuildContext context) {
     final cachedAsync = ref.watch(leaveCacheProvider);
-    final leaves = (cachedAsync.value ?? []).where(_shouldDisplayLeave).toList()
+    final leaves = (cachedAsync.valueOrNull ?? []).where(_shouldDisplayLeave).toList()
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
     if (leaves.isEmpty) return const SizedBox.shrink();
 
@@ -1943,7 +1943,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildOngoingRepairs(BuildContext context) {
     final cachedAsync = ref.watch(repairCacheProvider);
-    final ongoing = cachedAsync.value ?? [];
+    final ongoing = cachedAsync.valueOrNull ?? [];
     if (ongoing.isEmpty) return const SizedBox.shrink();
 
     final display = ongoing.take(3).toList();
@@ -2077,9 +2077,162 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  String _formatElectricityBalance(String rawBalance) {
+    final val = double.tryParse(rawBalance);
+    if (val != null) {
+      return val.toStringAsFixed(2);
+    }
+    return rawBalance;
+  }
+
+  Widget _buildMergedElectricityCard({
+    required BuildContext context,
+    required List<int> roomSlots,
+    required DormitoryElectricityState eleState,
+    required bool isDark,
+    bool isSelected = false,
+  }) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.08)
+            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isSelected
+              ? theme.colorScheme.primary
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : const Color(0xFFE0E0E0)),
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(top: 2),
+                child: Icon(
+                  Icons.bolt_outlined,
+                  size: 22,
+                  color: Color(0xFFFF9800),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (int idx = 0; idx < roomSlots.length; idx++) ...[
+                      if (idx > 0) const SizedBox(height: 12),
+                      () {
+                        final slot = roomSlots[idx];
+                        final room = eleState.rooms[slot]!;
+                        final roomDisplayName =
+                            room.roomName.isNotEmpty ? room.roomName : room.roomId;
+                        final eleTitle = room.areaName.isNotEmpty
+                            ? room.areaName
+                            : context.l10n.dormitoryElectricity;
+                        final String eleSubtitle;
+                        if (room.buildingName.isNotEmpty) {
+                          eleSubtitle = room.buildingName.endsWith(roomDisplayName)
+                              ? room.buildingName
+                              : '${room.buildingName} $roomDisplayName';
+                        } else {
+                          eleSubtitle = roomDisplayName;
+                        }
+
+                        final balanceInfo = (slot < eleState.balances.length)
+                            ? eleState.balances[slot]
+                            : null;
+                        final balanceText = balanceInfo != null
+                            ? '¥${_formatElectricityBalance(balanceInfo.balance)}'
+                            : (eleState.isLoading ? '...' : '¥--');
+
+                        final double? eleBal = balanceInfo != null
+                            ? double.tryParse(balanceInfo.balance)
+                            : null;
+                        final bool isLowBalance = eleBal != null && eleBal <= 10.0;
+                        final Color eleBalanceColor = isLowBalance
+                            ? const Color(0xFFE53935)
+                            : (isDark ? Colors.white : const Color(0xFF202124));
+
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(4),
+                          onTap: () => _openElectricity(context, initialSlot: slot),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        eleTitle,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                          color: isDark
+                                              ? Colors.white
+                                              : const Color(0xFF222222),
+                                        ),
+                                      ),
+                                      if (eleSubtitle.isNotEmpty) ...[
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          eleSubtitle,
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 13,
+                                            color: isDark
+                                                ? Colors.white60
+                                                : Colors.black54,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  balanceText,
+                                  style: TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                    color: eleBalanceColor,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }(),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildBalanceSection(BuildContext context) {
     final cachedCardAsync = ref.watch(campusCardCacheProvider);
-    final cardInfo = cachedCardAsync.value;
+    final cardInfo = cachedCardAsync.valueOrNull;
 
     final eleState = ref.watch(electricityCacheProvider);
     final hasAnyRoom = eleState.rooms.any((r) => r != null);
@@ -2094,11 +2247,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final List<Widget> cards = [];
 
-    // 1. 宿舍电费卡片（电费放在校园卡上面；若无保存的房间则不显示，保存两个则显示两个）
+    // 1. 宿舍电费卡片（若保存了两个宿舍，合并为一个卡片，且只有一个电的 icon）
+    final validRoomSlots = <int>[];
     for (int i = 0; i < eleState.rooms.length; i++) {
-      final room = eleState.rooms[i];
-      if (room == null) continue;
+      if (eleState.rooms[i] != null) {
+        validRoomSlots.add(i);
+      }
+    }
 
+    if (validRoomSlots.length > 1) {
+      final isEleSelected = validRoomSlots.any(
+        (slot) => _selectedActionId == 'ele_recharge_$slot',
+      );
+      cards.add(
+        _buildMergedElectricityCard(
+          context: context,
+          roomSlots: validRoomSlots,
+          eleState: eleState,
+          isDark: isDark,
+          isSelected: isEleSelected,
+        ),
+      );
+    } else if (validRoomSlots.length == 1) {
+      final i = validRoomSlots.first;
+      final room = eleState.rooms[i]!;
       final roomDisplayName =
           room.roomName.isNotEmpty ? room.roomName : room.roomId;
       final eleTitle =
@@ -2114,7 +2286,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       final balanceInfo = (i < eleState.balances.length) ? eleState.balances[i] : null;
       final balanceText = balanceInfo != null
-          ? '¥${balanceInfo.balance}'
+          ? '¥${_formatElectricityBalance(balanceInfo.balance)}'
           : (eleState.isLoading ? '...' : '¥--');
 
       final double? eleBal = balanceInfo != null ? double.tryParse(balanceInfo.balance) : null;

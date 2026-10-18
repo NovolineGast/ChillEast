@@ -114,7 +114,7 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
       remarks: remarks,
     );
 
-    final current = state.value ?? [];
+    final current = state.valueOrNull ?? [];
     final updated = [newItem, ...current];
     await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     state = AsyncValue.data(updated);
@@ -123,7 +123,7 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
 
   /// 删除作业
   Future<void> deleteHomework(String id) async {
-    final current = state.value ?? [];
+    final current = state.valueOrNull ?? [];
     final updated = current.where((e) => e.id != id).toList();
     await _ref.read(homeworkStorageProvider).saveHomeworkList(updated);
     state = AsyncValue.data(updated);
@@ -133,7 +133,7 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
 
   /// 切换完成状态
   Future<void> toggleStatus(String id) async {
-    final current = state.value ?? [];
+    final current = state.valueOrNull ?? [];
     final updated = current.map((e) {
       if (e.id == id) {
         final newStatus = e.status == HomeworkStatus.completed 
@@ -150,7 +150,7 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
 
   /// 存档/撤销存档
   Future<void> setArchived(String id, bool archived) async {
-    final current = state.value ?? [];
+    final current = state.valueOrNull ?? [];
     final updated = current.map((e) {
       if (e.id == id) {
         return e.copyWith(status: archived ? HomeworkStatus.archived : HomeworkStatus.pending);
@@ -185,7 +185,7 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
   /// 避免 Agent 添加后被 refresh/_silentRefresh 用旧 state 覆盖丢失。
   Future<List<HomeworkModel>> _collectManualUnion() async {
     final fromState =
-        (state.value ?? []).where((e) => e.isManual).toList();
+        (state.valueOrNull ?? []).where((e) => e.isManual).toList();
     List<HomeworkModel> fromStorage = [];
     try {
       fromStorage = (await _ref
@@ -207,7 +207,7 @@ class HomeworkNotifier extends StateNotifier<AsyncValue<List<HomeworkModel>>> {
     } catch (e) {
       _logger.w('⚠️ reschedule after homework change failed: $e');
       // 降级：至少重调度当前作业列表
-      _scheduleReminders(state.value ?? []);
+      _scheduleReminders(state.valueOrNull ?? []);
     }
   }
 
