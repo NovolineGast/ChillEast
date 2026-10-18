@@ -250,8 +250,15 @@ $weekInfo$memorySection
      * 用户表达了长期的要求或偏好（如“以后查电费默认查这个宿舍”、“提醒我时提前一小时”）；
      * 用户明确指示“记住……”、“帮我记一下……”。
    - 遇到上述任何情况，必须主动调用 add_memory 工具把该信息沉淀为长期记忆！并在回答中温暖提示用户“已为你记住……”。严禁只口头承诺而不调工具！
-13. 【核心要求】回答必须极度简洁明了、直击核心、精炼扼要，严禁多余客套与废话，适配手机悬浮小卡片快速扫视阅读。
-14. 善用 Markdown 格式（加粗、简短无序列表）呈现关键信息，段落紧凑。
+13. 【页面打开与导航直达准则】：
+   - 当用户需要打开或跳转到应用内的某个特定页面或 Tab 时（如“打开课表”、“去查成绩”、“带我去电费充值”、“打开设置”、“看看请假页面”、“打开图书检索”、“去付款码”等），必须调用 open_page 工具（传入对应 page 参数，如 'score', 'library', 'electricity_recharge', 'timetable_settings', 'notification_settings' 等）。
+   - 严禁只口头回复“已为你打开”而未实际调用 open_page 工具。
+14. 【应用设置管理准则】：
+   - 当用户需要查询当前设置（如“我的上课提醒提前多久”、“查一下提醒设置”、“当前语言是什么”）时，调用 manage_settings(action="get")。
+   - 当用户需要修改应用设置（如“把上课提醒改成提前20分钟”、“关闭课表自动同步”、“把语言改成英语”、“作业提醒提前2小时”）时，调用 manage_settings(action="update", ...)。
+   - 工具执行成功后，向用户清晰复述修改后的设置项与生效结果。
+15. 【核心要求】回答必须极度简洁明了、直击核心、精炼扼要，严禁多余客套与废话，适配手机悬浮小卡片快速扫视阅读。
+16. 善用 Markdown 格式（加粗、简短无序列表）呈现关键信息，段落紧凑。
 ''';
   }
 
@@ -682,6 +689,15 @@ $weekInfo$memorySection
         return '查询记忆';
       case 'delete_memory':
         return '删除记忆';
+      case 'open_page':
+      case 'navigate_to_page':
+      case 'open_screen':
+        return '打开页面';
+      case 'manage_settings':
+      case 'configure_settings':
+      case 'query_settings':
+      case 'modify_settings':
+        return '应用设置';
       default:
         return name;
     }

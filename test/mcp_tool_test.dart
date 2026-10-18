@@ -228,6 +228,7 @@ class FakeElectricityService implements ElectricityService {
     required String buildingName,
     required String roomId,
     required String mertype,
+    int? slot,
   }) async =>
       ElectricityBalanceInfo(balance: '35.80', detail: '可用电量 62.8 度');
 

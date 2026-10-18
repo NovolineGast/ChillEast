@@ -17,6 +17,9 @@ import '../tools/transaction_tool.dart';
 import '../tools/repair_tool.dart';
 import '../tools/exam_tool.dart';
 import '../tools/memory_tool.dart';
+import '../tools/open_page_tool.dart';
+import '../tools/settings_tool.dart';
+import '../../services/app_settings_service.dart';
 import '../../ai/providers/ai_memory_provider.dart';
 import '../../../features/workspace/services/electricity_service.dart';
 import '../../../features/workspace/services/campus_card_service.dart';
@@ -183,6 +186,17 @@ final mcpToolRegistryProvider = Provider<McpToolRegistry>((ref) {
 
   // 29. 记忆删除 (delete_memory)
   registry.register(MemoryDeleteTool.create(storage: memoryStorage, onChanged: reloadMemories));
+
+  // 30. 打开具体页面与切换 Tab (同时注册 navigate_to_page 与 open_screen 别名)
+  registry.register(OpenPageTool.create());
+  registry.register(OpenPageTool.create(toolName: 'navigate_to_page'));
+  registry.register(OpenPageTool.create(toolName: 'open_screen'));
+
+  // 31. 应用设置查询与修改 (同时注册 configure_settings 与 query_settings 别名)
+  final settingsService = AppSettingsService(ref);
+  registry.register(SettingsTool.create(service: settingsService));
+  registry.register(SettingsTool.create(service: settingsService, toolName: 'configure_settings'));
+  registry.register(SettingsTool.create(service: settingsService, toolName: 'query_settings'));
 
   return registry;
 });

@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../cloudisk/screens/cloud_sync_prompt_screen.dart';
 import '../../../core/utils/route_utils.dart';
 import '../../../core/services/update_service.dart';
+import '../../../core/services/app_navigator.dart';
 import '../../../core/services/home_widget_service.dart';
 import '../../../core/services/hitokoto_service.dart';
 import '../../../core/state/auth_state.dart';
@@ -97,6 +98,8 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   @override
   void initState() {
     super.initState();
+    AppNavigator.onSwitchTab = switchToTab;
+    AppNavigator.onCloseAiMode = _exitAiMode;
     WidgetsBinding.instance.addObserver(this);
     _initHitokoto();
     _tabController = TabController(length: 5, vsync: this);
@@ -348,6 +351,12 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
 
   @override
   void dispose() {
+    if (AppNavigator.onSwitchTab == switchToTab) {
+      AppNavigator.onSwitchTab = null;
+    }
+    if (AppNavigator.onCloseAiMode == _exitAiMode) {
+      AppNavigator.onCloseAiMode = null;
+    }
     WidgetsBinding.instance.removeObserver(this);
     _tabController.dispose();
     _aiAnimController.dispose();

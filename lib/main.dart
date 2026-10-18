@@ -10,6 +10,7 @@ import 'features/home/screens/main_scaffold.dart';
 import 'features/auth/screens/login_screen.dart';
 import 'core/state/auth_state.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/app_navigator.dart';
 import 'core/services/background_worker.dart';
 import 'core/services/live_scheduler.dart';
 import 'core/services/update_service.dart';
@@ -103,6 +104,7 @@ class LiveHunauApp extends ConsumerWidget {
     final locale = ref.watch(localeProvider);
 
     return MaterialApp(
+      navigatorKey: AppNavigator.navigatorKey,
       title: 'ChillEast',
       onGenerateTitle: (context) => context.l10n.appTitle,
       debugShowCheckedModeBanner: false,
