@@ -65,7 +65,6 @@ void main() {
     // Verify detail dialog is shown
     expect(find.text('教师:'), findsOneWidget);
     expect(find.text('张老师'), findsOneWidget);
-    expect(find.text('课程颜色:'), findsOneWidget);
     expect(find.text('修改颜色'), findsOneWidget);
 
     // Tap "修改颜色" to open Material UI color picker
@@ -74,9 +73,6 @@ void main() {
 
     // Verify color picker dialog is opened
     expect(find.text('选择课程颜色'), findsOneWidget);
-
-    // Verify material color notice is shown
-    expect(find.text('仅支持从高对比度 Material UI 色板中选取'), findsOneWidget);
 
     // Pick an visible color swatch (e.g. Red 600 or Red 700)
     final targetItem = CourseColorUtils.materialColorItems.firstWhere(

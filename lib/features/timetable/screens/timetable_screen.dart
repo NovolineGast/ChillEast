@@ -22,6 +22,7 @@ import '../../homework/providers/homework_provider.dart';
 import '../../homework/models/homework_model.dart';
 import '../../exam/providers/exam_provider.dart';
 import '../../exam/models/exam_schedule_model.dart';
+import '../../exam/services/exam_storage.dart';
 import '../../workspace/screens/webview_detail_screen.dart';
 import '../../../core/state/auth_state.dart';
 import '../../profile/providers/settings_provider.dart';
@@ -279,6 +280,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           orElse: () => <ExamScheduleModel>[],
         );
     for (final e in examList) {
+      if (ExamStorage.isManualExamExpired(e)) continue;
       if (!e.isCurrentSemester(firstWeekMonday: _firstWeekMonday)) continue;
       final dayKey = DateTime(e.time.year, e.time.month, e.time.day);
       if (!grouped.containsKey(dayKey)) {
@@ -352,6 +354,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       final courseCount = _agendaTimeline[i].value.length;
       final examCount = examList
           .where((e) =>
+              !ExamStorage.isManualExamExpired(e) &&
               e.isCurrentSemester(firstWeekMonday: _firstWeekMonday) &&
               e.time.year == date.year &&
               e.time.month == date.month &&
@@ -835,13 +838,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
               color: Colors.white,
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              shadows: [
-                Shadow(
-                  color: Colors.black45,
-                  offset: Offset(0, 1),
-                  blurRadius: 2,
-                ),
-              ],
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -854,13 +850,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
             style: const TextStyle(
               color: Colors.white,
               fontSize: 12,
-              shadows: [
-                Shadow(
-                  color: Colors.black45,
-                  offset: Offset(0, 1),
-                  blurRadius: 2,
-                ),
-              ],
             ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
@@ -902,6 +891,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       data: (list) {
         final dayExams = list
             .where((e) =>
+                !ExamStorage.isManualExamExpired(e) &&
                 e.isCurrentSemester(firstWeekMonday: _firstWeekMonday) &&
                 e.time.year == date.year &&
                 e.time.month == date.month &&
@@ -920,6 +910,18 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
   Widget _buildExamAgendaTask(ExamScheduleModel item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final timeStr = DateFormat('HH:mm').format(item.time);
+    final location = item.location?.trim() ?? '';
+    final timeLocation = location.isNotEmpty ? '$timeStr @ $location' : timeStr;
+
+    final title = item.title.trim();
+    final course = item.courseName.trim();
+    final displayTitle = course.isNotEmpty
+        ? (title.isNotEmpty && title != course ? '$course · $title' : course)
+        : title;
+
+    final showStatus = item.status.isNotEmpty &&
+        item.status != '待考' &&
+        item.status != context.l10n.examStatusPending;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -939,12 +941,12 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       child: Container(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 4),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF382326) : const Color(0xFFFFEBEE),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: const Color(0xFFE53935).withOpacity(isDark ? 0.3 : 0.2),
+            color: const Color(0xFFE53935).withValues(alpha: isDark ? 0.3 : 0.2),
             width: 1,
           ),
         ),
@@ -952,7 +954,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           children: [
             const Icon(
               Icons.quiz_outlined,
-              size: 18,
+              size: 22,
               color: Color(0xFFE53935),
             ),
             const SizedBox(width: 12),
@@ -964,10 +966,11 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          item.title,
+                          displayTitle,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
+                            height: 1.2,
                             color: isDark
                                 ? Colors.white
                                 : const Color(0xFF2D3436),
@@ -976,13 +979,13 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (item.status.isNotEmpty) ...[
+                      if (showStatus) ...[
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE53935).withOpacity(0.12),
+                            color: const Color(0xFFE53935).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -997,9 +1000,9 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
                       ],
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
-                    '${context.l10n.examTimePrefix} $timeStr',
+                    timeLocation,
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark

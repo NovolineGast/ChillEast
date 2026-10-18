@@ -333,13 +333,6 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
                     fontSize: 10,
                     fontWeight: FontWeight.bold,
                     height: 1.1,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black45,
-                        offset: Offset(0, 1),
-                        blurRadius: 2,
-                      ),
-                    ],
                   ),
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
@@ -352,13 +345,6 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
                       color: Colors.white,
                       fontSize: 9,
                       height: 1.1,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black45,
-                          offset: Offset(0, 1),
-                          blurRadius: 2,
-                        ),
-                      ],
                     ),
                     maxLines: 3, // 支持 3 行显示
                     overflow: TextOverflow.ellipsis,
@@ -541,17 +527,24 @@ class _SingleCourseDetailDialogState extends State<_SingleCourseDetailDialog> {
             '${DateCalculator.getSectionTime(widget.course.startPeriod)['start']!.format(context)}-'
             '${DateCalculator.getSectionTime(widget.course.endPeriod)['end']!.format(context)}',
           ),
-          _buildColorRow(
-            context: context,
-            courseName: widget.course.name,
-            onChanged: () {
-              setState(() {});
-              widget.onColorChanged();
-            },
-          ),
         ],
       ),
       actions: [
+        TextButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (pickerContext) => _MaterialColorPickerDialog(
+                courseName: widget.course.name,
+                onColorChanged: () {
+                  setState(() {});
+                  widget.onColorChanged();
+                },
+              ),
+            );
+          },
+          child: Text(context.l10n.changeColor),
+        ),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(context.l10n.close),
@@ -668,17 +661,24 @@ class _ConflictingCoursesDialogState extends State<_ConflictingCoursesDialog> {
             '${DateCalculator.getSectionTime(current.startPeriod)['start']!.format(context)}-'
             '${DateCalculator.getSectionTime(current.endPeriod)['end']!.format(context)}',
           ),
-          _buildColorRow(
-            context: context,
-            courseName: current.name,
-            onChanged: () {
-              setState(() {});
-              widget.onColorChanged();
-            },
-          ),
         ],
       ),
       actions: [
+        TextButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (pickerContext) => _MaterialColorPickerDialog(
+                courseName: current.name,
+                onColorChanged: () {
+                  setState(() {});
+                  widget.onColorChanged();
+                },
+              ),
+            );
+          },
+          child: Text(context.l10n.changeColor),
+        ),
         TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(context.l10n.close),
@@ -707,81 +707,6 @@ class _ConflictingCoursesDialogState extends State<_ConflictingCoursesDialog> {
       ),
     );
   }
-}
-
-Widget _buildColorRow({
-  required BuildContext context,
-  required String courseName,
-  required VoidCallback onChanged,
-}) {
-  final currentColor = CourseColorUtils.getColorForCourse(courseName);
-  return Padding(
-    padding: const EdgeInsets.symmetric(vertical: 4),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: 60,
-          child: Text(
-            '${context.l10n.courseColor}:',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        InkWell(
-          borderRadius: BorderRadius.circular(14),
-          onTap: () {
-            showDialog(
-              context: context,
-              builder: (pickerContext) => _MaterialColorPickerDialog(
-                courseName: courseName,
-                onColorChanged: onChanged,
-              ),
-            );
-          },
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: currentColor,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 3,
-                  offset: const Offset(0, 1),
-                ),
-              ],
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(
-                  Icons.palette_outlined,
-                  size: 14,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  context.l10n.changeColor,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    shadows: [
-                      Shadow(
-                        color: Colors.black45,
-                        offset: Offset(0, 1),
-                        blurRadius: 2,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    ),
-  );
 }
 
 /// 基于 https://materialui.co/colors 规范的课程颜色选择弹窗
@@ -822,19 +747,12 @@ class _MaterialColorPickerDialog extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  context.l10n.materialColorNotice,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Theme.of(context).hintColor,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Center(
+                Align(
+                  alignment: Alignment.centerLeft,
                   child: Wrap(
                     spacing: 12,
                     runSpacing: 12,
-                    alignment: WrapAlignment.center,
+                    alignment: WrapAlignment.start,
                     children: CourseColorUtils.materialColorItems.map((item) {
                       final isCurrent =
                           item.color.toARGB32() == currentColor.toARGB32();
@@ -878,39 +796,12 @@ class _MaterialColorPickerDialog extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: item.color,
                               shape: BoxShape.circle,
-                              border: Border.all(
-                                color: isCurrent
-                                    ? Colors.white
-                                    : Colors.black.withValues(alpha: 0.15),
-                                width: isCurrent ? 3 : 1,
-                              ),
-                              boxShadow: [
-                                if (isCurrent)
-                                  BoxShadow(
-                                    color: item.color.withValues(alpha: 0.6),
-                                    blurRadius: 8,
-                                    spreadRadius: 2,
-                                  )
-                                else
-                                  BoxShadow(
-                                    color: Colors.black.withValues(alpha: 0.12),
-                                    blurRadius: 3,
-                                    offset: const Offset(0, 1),
-                                  ),
-                              ],
                             ),
                             child: isCurrent
                                 ? const Icon(
                                     Icons.check,
                                     size: 24,
                                     color: Colors.white,
-                                    shadows: [
-                                      Shadow(
-                                        color: Colors.black45,
-                                        offset: Offset(0, 1),
-                                        blurRadius: 2,
-                                      ),
-                                    ],
                                   )
                                 : (occupyingCourse != null
                                     ? Center(
@@ -920,13 +811,6 @@ class _MaterialColorPickerDialog extends StatelessWidget {
                                           decoration: BoxDecoration(
                                             color: Colors.white.withValues(alpha: 0.85),
                                             shape: BoxShape.circle,
-                                            boxShadow: const [
-                                              BoxShadow(
-                                                color: Colors.black38,
-                                                blurRadius: 2,
-                                                offset: Offset(0, 1),
-                                              ),
-                                            ],
                                           ),
                                         ),
                                       )
