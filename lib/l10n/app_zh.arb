@@ -1718,26 +1718,26 @@
   "@aiNoModelsFound": {
     "description": "未找到模型提示"
   },
-  "aiTestConnection": "测试联通",
+  "aiTestConnection": "测试连接",
   "@aiTestConnection": {
-    "description": "Agent设置测试联通按钮"
+    "description": "Agent设置测试连接按钮"
   },
-  "aiTestingConnection": "正在测试联通…",
+  "aiTestingConnection": "正在测试连接…",
   "@aiTestingConnection": {
-    "description": "测试联通中状态"
+    "description": "测试连接中状态"
   },
-  "aiTestSuccess": "联通成功 (耗时 {ms}ms)",
+  "aiTestSuccess": "连接成功 (耗时 {ms}ms)",
   "@aiTestSuccess": {
-    "description": "联通成功提示",
+    "description": "连接成功提示",
     "placeholders": {
       "ms": {
         "type": "int"
       }
     }
   },
-  "aiTestFailed": "联通失败: {error}",
+  "aiTestFailed": "连接失败: {error}",
   "@aiTestFailed": {
-    "description": "联通失败提示",
+    "description": "连接失败提示",
     "placeholders": {
       "error": {
         "type": "String"
@@ -1756,5 +1756,29 @@
         "type": "String"
       }
     }
-  }
+  },
+  "timetableSubscription": "课表订阅",
+  "timetableSubscriptionSubtitle": "在线日历订阅与云端自动同步",
+  "timetableSubscriptionAutoUpload": "开启课表订阅",
+  "timetableSubscriptionAutoUploadDesc": "开启后，从教务系统同步或调整课表后，将自动把调停后的课表上传云端供订阅；关闭后云端课表一并删除",
+  "timetableSubscriptionUrl": "日历订阅链接",
+  "copySubscriptionUrl": "复制链接",
+  "subscriptionUrlCopied": "订阅链接已复制到剪切板",
+  "openInCalendar": "在日历中订阅",
+  "openInCalendarFailed": "无法调起系统日历，请手动复制链接订阅",
+  "syncToCloudNow": "立即同步到云端",
+  "syncSuccess": "云端同步成功",
+  "syncFailed": "云端同步失败: {error}",
+  "@syncFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "resetSubscriptionUrl": "重置链接",
+  "resetSubscriptionConfirmTitle": "重置订阅链接",
+  "resetSubscriptionConfirmMessage": "重置后旧的订阅链接将立即失效，云端旧课表将被删除，您需要在订阅的设备中重新添加新链接。是否继续？",
+  "subscriptionTutorialTitle": "第三方日历订阅指南",
+  "subscriptionTutorialContent": "• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，粘贴链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，粘贴链接并保存。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并保存。\n\n• 提示：\n订阅链接包含调停后的全部课程，若有调课或教务更新，订阅源会自动保持最新。"
 }

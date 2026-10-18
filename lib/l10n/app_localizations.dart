@@ -5565,28 +5565,28 @@ abstract class AppLocalizations {
   /// **'未找到匹配的模型'**
   String get aiNoModelsFound;
 
-  /// Agent设置测试联通按钮
+  /// Agent设置测试连接按钮
   ///
   /// In zh, this message translates to:
-  /// **'测试联通'**
+  /// **'测试连接'**
   String get aiTestConnection;
 
-  /// 测试联通中状态
+  /// 测试连接中状态
   ///
   /// In zh, this message translates to:
-  /// **'正在测试联通…'**
+  /// **'正在测试连接…'**
   String get aiTestingConnection;
 
-  /// 联通成功提示
+  /// 连接成功提示
   ///
   /// In zh, this message translates to:
-  /// **'联通成功 (耗时 {ms}ms)'**
+  /// **'连接成功 (耗时 {ms}ms)'**
   String aiTestSuccess(int ms);
 
-  /// 联通失败提示
+  /// 连接失败提示
   ///
   /// In zh, this message translates to:
-  /// **'联通失败: {error}'**
+  /// **'连接失败: {error}'**
   String aiTestFailed(String error);
 
   /// 缺少API Key提示
@@ -5600,6 +5600,108 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'已选择模型: {model}'**
   String aiModelSelected(String model);
+
+  /// No description provided for @timetableSubscription.
+  ///
+  /// In zh, this message translates to:
+  /// **'课表订阅'**
+  String get timetableSubscription;
+
+  /// No description provided for @timetableSubscriptionSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'在线日历订阅与云端自动同步'**
+  String get timetableSubscriptionSubtitle;
+
+  /// No description provided for @timetableSubscriptionAutoUpload.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启课表订阅'**
+  String get timetableSubscriptionAutoUpload;
+
+  /// No description provided for @timetableSubscriptionAutoUploadDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启后，从教务系统同步或调整课表后，将自动把调停后的课表上传云端供订阅；关闭后云端课表一并删除'**
+  String get timetableSubscriptionAutoUploadDesc;
+
+  /// No description provided for @timetableSubscriptionUrl.
+  ///
+  /// In zh, this message translates to:
+  /// **'日历订阅链接'**
+  String get timetableSubscriptionUrl;
+
+  /// No description provided for @copySubscriptionUrl.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制链接'**
+  String get copySubscriptionUrl;
+
+  /// No description provided for @subscriptionUrlCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'订阅链接已复制到剪切板'**
+  String get subscriptionUrlCopied;
+
+  /// No description provided for @openInCalendar.
+  ///
+  /// In zh, this message translates to:
+  /// **'在日历中订阅'**
+  String get openInCalendar;
+
+  /// No description provided for @openInCalendarFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法调起系统日历，请手动复制链接订阅'**
+  String get openInCalendarFailed;
+
+  /// No description provided for @syncToCloudNow.
+  ///
+  /// In zh, this message translates to:
+  /// **'立即同步到云端'**
+  String get syncToCloudNow;
+
+  /// No description provided for @syncSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'云端同步成功'**
+  String get syncSuccess;
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'云端同步失败: {error}'**
+  String syncFailed(String error);
+
+  /// No description provided for @resetSubscriptionUrl.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置链接'**
+  String get resetSubscriptionUrl;
+
+  /// No description provided for @resetSubscriptionConfirmTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置订阅链接'**
+  String get resetSubscriptionConfirmTitle;
+
+  /// No description provided for @resetSubscriptionConfirmMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置后旧的订阅链接将立即失效，云端旧课表将被删除，您需要在订阅的设备中重新添加新链接。是否继续？'**
+  String get resetSubscriptionConfirmMessage;
+
+  /// No description provided for @subscriptionTutorialTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'第三方日历订阅指南'**
+  String get subscriptionTutorialTitle;
+
+  /// No description provided for @subscriptionTutorialContent.
+  ///
+  /// In zh, this message translates to:
+  /// **'• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，粘贴链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，粘贴链接并保存。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并保存。\n\n• 提示：\n订阅链接包含调停后的全部课程，若有调课或教务更新，订阅源会自动保持最新。'**
+  String get subscriptionTutorialContent;
 }
 
 class _AppLocalizationsDelegate

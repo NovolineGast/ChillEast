@@ -3014,4 +3014,63 @@ class AppLocalizationsEn extends AppLocalizations {
   String aiModelSelected(String model) {
     return 'Selected model: $model';
   }
+
+  @override
+  String get timetableSubscription => 'Timetable Subscription';
+
+  @override
+  String get timetableSubscriptionSubtitle =>
+      'Online calendar subscription & cloud auto-sync';
+
+  @override
+  String get timetableSubscriptionAutoUpload => 'Enable Timetable Subscription';
+
+  @override
+  String get timetableSubscriptionAutoUploadDesc =>
+      'When enabled, your adjusted timetable is automatically uploaded to the cloud for third-party calendar subscriptions whenever updated; when disabled, the cloud file will be deleted.';
+
+  @override
+  String get timetableSubscriptionUrl => 'Calendar Subscription URL';
+
+  @override
+  String get copySubscriptionUrl => 'Copy Link';
+
+  @override
+  String get subscriptionUrlCopied => 'Subscription URL copied to clipboard';
+
+  @override
+  String get openInCalendar => 'Subscribe in Calendar';
+
+  @override
+  String get openInCalendarFailed =>
+      'Unable to open system calendar. Please copy the link manually.';
+
+  @override
+  String get syncToCloudNow => 'Sync to Cloud Now';
+
+  @override
+  String get syncSuccess => 'Cloud sync succeeded';
+
+  @override
+  String syncFailed(String error) {
+    return 'Cloud sync failed: $error';
+  }
+
+  @override
+  String get resetSubscriptionUrl => 'Reset Link';
+
+  @override
+  String get resetSubscriptionConfirmTitle => 'Reset Subscription Link?';
+
+  @override
+  String get resetSubscriptionConfirmMessage =>
+      'The current subscription link will immediately become invalid, and the remote file will be replaced. You will need to re-subscribe on all devices. Continue?';
+
+  @override
+  String get subscriptionTutorialTitle =>
+      'How to Subscribe in External Calendars';
+
+  @override
+  String get subscriptionTutorialContent =>
+      '• Apple Calendar (iPhone / iPad / Mac):\nTap \'Subscribe in Calendar\' above, or in Calendar app choose \'Add Subscribed Calendar\' and paste the link.\n\n• Google Calendar:\nOn the web, click \'+\' next to \'Other calendars\', choose \'From URL\', and paste the link.\n\n• Microsoft Outlook:\nSelect \'Add Calendar\' -> \'Subscribe from web\', enter the link and save.';
 }

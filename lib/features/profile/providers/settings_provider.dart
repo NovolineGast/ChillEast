@@ -5,6 +5,7 @@ import '../../../core/services/background_worker.dart';
 import '../../../core/services/live_scheduler.dart';
 import '../../cloudisk/services/cloud_backup_manager.dart';
 import '../../timetable/services/timetable_storage.dart';
+import '../../timetable/services/timetable_subscription_service.dart';
 import '../../homework/services/homework_storage.dart';
 import '../../library/services/library_storage.dart';
 import '../../exam/services/exam_storage.dart';
@@ -17,6 +18,8 @@ class SettingsState {
   final bool flymeLiveEnabled; // Flyme 12+ 实况通知开关（与 courseLiveEnabled 互斥）
   final bool timetableAutoSyncEnabled; // 登录后自动同步课表总开关（默认开）
   final bool cloudBackupAutoSyncEnabled; // 本地更改后自动同步备份到云盘（默认关）
+  final bool timetableSubscriptionEnabled; // 课表云端订阅自动上传开关（默认关）
+  final String? timetableSubscriptionUuid; // 课表云端订阅 UUID（无则 null）
   final String? manualFirstWeekMondayIso; // 手动指定的本学期第一周周一（ISO 日期，无则 null）
 
   SettingsState({
@@ -27,6 +30,8 @@ class SettingsState {
     this.flymeLiveEnabled = false,
     this.timetableAutoSyncEnabled = true,
     this.cloudBackupAutoSyncEnabled = false,
+    this.timetableSubscriptionEnabled = false,
+    this.timetableSubscriptionUuid,
     this.manualFirstWeekMondayIso,
   });
 
@@ -38,6 +43,8 @@ class SettingsState {
     bool? flymeLiveEnabled,
     bool? timetableAutoSyncEnabled,
     bool? cloudBackupAutoSyncEnabled,
+    bool? timetableSubscriptionEnabled,
+    String? timetableSubscriptionUuid,
     String? manualFirstWeekMondayIso,
   }) {
     return SettingsState(
@@ -52,6 +59,10 @@ class SettingsState {
           timetableAutoSyncEnabled ?? this.timetableAutoSyncEnabled,
       cloudBackupAutoSyncEnabled:
           cloudBackupAutoSyncEnabled ?? this.cloudBackupAutoSyncEnabled,
+      timetableSubscriptionEnabled:
+          timetableSubscriptionEnabled ?? this.timetableSubscriptionEnabled,
+      timetableSubscriptionUuid:
+          timetableSubscriptionUuid ?? this.timetableSubscriptionUuid,
       manualFirstWeekMondayIso:
           manualFirstWeekMondayIso ?? this.manualFirstWeekMondayIso,
     );
@@ -104,6 +115,11 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final autoSyncEnabled = prefs.getBool(timetableAutoSyncKey) ?? true;
     final cloudBackupEnabled =
         prefs.getBool(cloudBackupAutoSyncKey) ?? false;
+    final subEnabled =
+        prefs.getBool(TimetableSubscriptionService.subscriptionEnabledKey) ??
+            false;
+    final subUuid =
+        prefs.getString(TimetableSubscriptionService.subscriptionUuidKey);
     final storage = TimetableStorage();
     final manualMonday = await storage.readManualFirstWeekMonday();
     // 用户已在加载期间修改设置时，不能用旧快照覆盖新 state。
@@ -116,6 +132,8 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       flymeLiveEnabled: flymeEnabled,
       timetableAutoSyncEnabled: autoSyncEnabled,
       cloudBackupAutoSyncEnabled: cloudBackupEnabled,
+      timetableSubscriptionEnabled: subEnabled,
+      timetableSubscriptionUuid: subUuid,
       manualFirstWeekMondayIso: manualMonday?.toIso8601String(),
     );
 
@@ -340,5 +358,24 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
         DateTime.now().millisecondsSinceEpoch,
       );
     } catch (_) {}
+  }
+
+  Future<void> setTimetableSubscriptionEnabled(bool enabled) async {
+    _settingsRevision++;
+    final service = TimetableSubscriptionService();
+    await service.setEnabled(enabled);
+    final uuid = await service.getUuid();
+    state = state.copyWith(
+      timetableSubscriptionEnabled: enabled,
+      timetableSubscriptionUuid: uuid,
+    );
+  }
+
+  Future<String> resetTimetableSubscriptionUuid() async {
+    _settingsRevision++;
+    final service = TimetableSubscriptionService();
+    final newUuid = await service.resetUuid();
+    state = state.copyWith(timetableSubscriptionUuid: newUuid);
+    return newUuid;
   }
 }

@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:logger/logger.dart';
 import '../models/course_model.dart';
 import '../models/timetable_rule_model.dart';
 import '../services/timetable_storage.dart';
+import '../services/timetable_subscription_service.dart';
 import '../utils/ics_generator.dart';
 import '../utils/ics_parser.dart';
 import '../utils/week_parser.dart';
@@ -436,6 +438,14 @@ class TimetableRuleService {
           IcsGenerator.generate(modifiedCourses, firstWeekMonday);
       await _storage.saveTimetable(icsContent);
       await _storage.saveCourseList(modifiedCourses);
+
+      // 若开启了课表云端订阅，自动将调停后的最新课表同步至云端
+      try {
+        final subService = TimetableSubscriptionService(storage: _storage);
+        if (await subService.isEnabled()) {
+          unawaited(subService.uploadTimetable(icsContent: icsContent));
+        }
+      } catch (_) {}
 
       _logger.i(
           'Timetable regenerated with ${modifiedCourses.length} courses (rules count: ${rules.length})');

@@ -72,6 +72,10 @@ class BackupExportService {
         'flymeLiveEnabled': prefs.getBool('flyme_live_enabled') ?? false,
         'timetableAutoSyncEnabled':
             prefs.getBool('timetable_auto_sync_enabled') ?? true,
+        'timetableSubscription': {
+          'enabled': prefs.getBool('timetable_subscription_enabled') ?? false,
+          'uuid': prefs.getString('timetable_subscription_uuid'),
+        },
         'manualFirstWeekMonday':
             prefs.getString('timetable_first_week_monday_manual'),
         'appearance': {
@@ -323,6 +327,21 @@ class BackupExportService {
       final v = settings['electricityRoom2'];
       if (v != null) {
         await prefs.setString('saved_electricity_room_2', jsonEncode(v));
+      }
+    }
+
+    // —— 课表云端订阅 ——
+    if (settings.containsKey('timetableSubscription')) {
+      final sub = settings['timetableSubscription'];
+      if (sub is Map) {
+        if (sub.containsKey('enabled') && sub['enabled'] is bool) {
+          await prefs.setBool(
+              'timetable_subscription_enabled', sub['enabled'] as bool);
+        }
+        if (sub.containsKey('uuid') && sub['uuid'] != null) {
+          await prefs.setString(
+              'timetable_subscription_uuid', sub['uuid'].toString());
+        }
       }
     }
 

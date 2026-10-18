@@ -2924,19 +2924,19 @@ class AppLocalizationsJa extends AppLocalizations {
   String get aiNoModelsFound => '未找到匹配的模型';
 
   @override
-  String get aiTestConnection => '测试联通';
+  String get aiTestConnection => '测试连接';
 
   @override
-  String get aiTestingConnection => '正在测试联通…';
+  String get aiTestingConnection => '正在测试连接…';
 
   @override
   String aiTestSuccess(int ms) {
-    return '联通成功 (耗时 ${ms}ms)';
+    return '连接成功 (耗时 ${ms}ms)';
   }
 
   @override
   String aiTestFailed(String error) {
-    return '联通失败: $error';
+    return '连接失败: $error';
   }
 
   @override
@@ -2946,4 +2946,60 @@ class AppLocalizationsJa extends AppLocalizations {
   String aiModelSelected(String model) {
     return '已选择模型: $model';
   }
+
+  @override
+  String get timetableSubscription => '课表订阅';
+
+  @override
+  String get timetableSubscriptionSubtitle => '在线日历订阅与云端自动同步';
+
+  @override
+  String get timetableSubscriptionAutoUpload => '开启课表订阅';
+
+  @override
+  String get timetableSubscriptionAutoUploadDesc =>
+      '开启后，从教务系统同步或调整课表后，将自动把调停后的课表上传云端供订阅；关闭后云端课表一并删除';
+
+  @override
+  String get timetableSubscriptionUrl => '日历订阅链接';
+
+  @override
+  String get copySubscriptionUrl => '复制链接';
+
+  @override
+  String get subscriptionUrlCopied => '订阅链接已复制到剪切板';
+
+  @override
+  String get openInCalendar => '在日历中订阅';
+
+  @override
+  String get openInCalendarFailed => '无法调起系统日历，请手动复制链接订阅';
+
+  @override
+  String get syncToCloudNow => '立即同步到云端';
+
+  @override
+  String get syncSuccess => '云端同步成功';
+
+  @override
+  String syncFailed(String error) {
+    return '云端同步失败: $error';
+  }
+
+  @override
+  String get resetSubscriptionUrl => '重置链接';
+
+  @override
+  String get resetSubscriptionConfirmTitle => '重置订阅链接';
+
+  @override
+  String get resetSubscriptionConfirmMessage =>
+      '重置后旧的订阅链接将立即失效，云端旧课表将被删除，您需要在订阅的设备中重新添加新链接。是否继续？';
+
+  @override
+  String get subscriptionTutorialTitle => '第三方日历订阅指南';
+
+  @override
+  String get subscriptionTutorialContent =>
+      '• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，粘贴链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，粘贴链接并保存。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并保存。\n\n• 提示：\n订阅链接包含调停后的全部课程，若有调课或教务更新，订阅源会自动保持最新。';
 }

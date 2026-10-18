@@ -8,6 +8,7 @@ import '../models/course_model.dart';
 import '../parsers/ydjwxt_json_parser.dart';
 import '../services/timetable_storage.dart';
 import '../services/timetable_rule_service.dart';
+import '../services/timetable_subscription_service.dart';
 import '../utils/ics_generator.dart';
 
 class YdjwxtService {
@@ -109,6 +110,17 @@ class YdjwxtService {
         semester: AppConstants.defaultSemester,
         firstWeekMonday: calculatedFirstWeekMonday,
       );
+
+      // 5. 课表云端订阅自动同步（若开启）：将调停后的 ICS 自动上传到 Cloudflare R2
+      try {
+        final subService = TimetableSubscriptionService(storage: storage);
+        if (await subService.isEnabled()) {
+          onProgress('正在同步课表订阅至云端...');
+          await subService.uploadTimetable(icsContent: icsContent);
+        }
+      } catch (e) {
+        _logger.w('⚠️ Uploading timetable subscription failed: $e');
+      }
 
       onProgress('同步成功！已更新 ${finalCourses.length} 门课程');
       _logger.i('🎉 YDJWXT Sync Completed successfully (applied ${rules.length} local rules).');
