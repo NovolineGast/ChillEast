@@ -56,7 +56,7 @@ class _CampusCardRechargeScreenState extends ConsumerState<CampusCardRechargeScr
     }
   }
 
-  Future<void> _loadInfo({bool isSilent = false}) async {
+  Future<void> _loadInfo({bool isSilent = false, bool forceRefresh = false}) async {
     if (!mounted) return;
     if (_info == null) {
       setState(() {
@@ -71,7 +71,7 @@ class _CampusCardRechargeScreenState extends ConsumerState<CampusCardRechargeScr
 
     try {
       final service = ref.read(campusCardServiceProvider);
-      final info = await service.fetchRechargeInfo();
+      final info = await service.fetchRechargeInfo(forceRefresh: forceRefresh);
       if (mounted) {
         setState(() {
           _info = info;
@@ -120,6 +120,8 @@ class _CampusCardRechargeScreenState extends ConsumerState<CampusCardRechargeScr
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
       builder: (context) => CampusCardPaymentSheet(
         amount: amountText,
         merchantName: context.l10n.campusCardRecharge,
@@ -155,7 +157,7 @@ class _CampusCardRechargeScreenState extends ConsumerState<CampusCardRechargeScr
                   Text(_error!),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: _loadInfo, 
+                    onPressed: () => _loadInfo(forceRefresh: true), 
                     style: ElevatedButton.styleFrom(backgroundColor: primaryColor),
                     child: Text(context.l10n.retry, style: const TextStyle(color: Colors.white)),
                   ),
@@ -191,7 +193,7 @@ class _CampusCardRechargeScreenState extends ConsumerState<CampusCardRechargeScr
                               ),
                             ),
                             InkWell(
-                              onTap: _isRefreshing ? null : () => _loadInfo(isSilent: true),
+                              onTap: _isRefreshing ? null : () => _loadInfo(isSilent: true, forceRefresh: true),
                               borderRadius: BorderRadius.circular(12),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),

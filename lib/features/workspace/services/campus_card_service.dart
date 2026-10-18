@@ -426,11 +426,11 @@ class CampusCardService {
   Future<CampusCardInfo>? _pendingRechargeInfoFuture;
 
   /// 获取校园卡充值页信息（对齐付款码页面的实时余额刷新方式）
-  Future<CampusCardInfo> fetchRechargeInfo({bool isRetry = false}) async {
-    if (_pendingRechargeInfoFuture != null && !isRetry) {
+  Future<CampusCardInfo> fetchRechargeInfo({bool isRetry = false, bool forceRefresh = false}) async {
+    if (_pendingRechargeInfoFuture != null && !isRetry && !forceRefresh) {
       return _pendingRechargeInfoFuture!;
     }
-    final future = _fetchRechargeInfoInternal(isRetry: isRetry);
+    final future = _fetchRechargeInfoInternal(isRetry: isRetry, forceRefresh: forceRefresh);
     _pendingRechargeInfoFuture = future;
     try {
       return await future;
@@ -439,10 +439,10 @@ class CampusCardService {
     }
   }
 
-  Future<CampusCardInfo> _fetchRechargeInfoInternal({bool isRetry = false}) async {
+  Future<CampusCardInfo> _fetchRechargeInfoInternal({bool isRetry = false, bool forceRefresh = false}) async {
     // 优先通过付款码页面 (openVirtualcard) 获取最新实时余额
     try {
-      await fetchPaymentCode(isRetry: isRetry);
+      await fetchPaymentCode(isRetry: isRetry, forceRefresh: forceRefresh);
       if (_cachedInfo != null) {
         return _cachedInfo!;
       }

@@ -458,6 +458,8 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
       builder: (context) => CampusCardPaymentSheet(
         amount: amountText,
         merchantName: context.l10n.payElectricityWithRoom(roomDesc),

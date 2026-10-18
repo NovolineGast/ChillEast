@@ -2,6 +2,15 @@ import '../../../features/workspace/models/electricity_model.dart';
 import '../../../features/workspace/services/electricity_service.dart';
 import '../models/mcp_tool.dart';
 
+class ElectricityRoomAmbiguousException implements Exception {
+  final List<ElectricityRoom> candidates;
+  final String query;
+  ElectricityRoomAmbiguousException(this.candidates, this.query);
+
+  @override
+  String toString() => '模糊匹配到候选房间: ${candidates.map((c) => c.name).join(", ")}';
+}
+
 /// MCP Tool: 电费充值与查询 (recharge_electricity)
 class ElectricityTool {
   static const String toolName = 'recharge_electricity';
@@ -29,42 +38,48 @@ class ElectricityTool {
       resolvedName = saved.roomName;
     }
 
-    try {
-      final rooms = await service.getRooms(areaName, buildingName);
-      if (rooms.isNotEmpty) {
-        // 1. 精确匹配 ID
-        var matched = rooms.where((r) => r.id == inputRoomId).firstOrNull;
-        // 2. 若无，匹配名称或模糊匹配（比如用户传入了 "302"）
-        matched ??= rooms.where((r) => r.name == inputRoomId || r.name.contains(inputRoomId)).firstOrNull;
-        // 3. 匹配 inputRoomName
-        if (matched == null && inputRoomName != null && inputRoomName.isNotEmpty) {
-          matched = rooms.where((r) => r.name == inputRoomName || r.name.contains(inputRoomName)).firstOrNull;
-        }
+    final rooms = await service.getRooms(areaName, buildingName);
+    if (rooms.isNotEmpty) {
+      // 1. 精确匹配 ID
+      var matched = rooms.where((r) => r.id == inputRoomId).firstOrNull;
+      // 2. 精确匹配名称
+      matched ??= rooms.where((r) => r.name == inputRoomId).firstOrNull;
+      if (matched == null && inputRoomName != null && inputRoomName.isNotEmpty) {
+        matched = rooms.where((r) => r.name == inputRoomName).firstOrNull;
+      }
 
-        if (matched != null) {
-          resolvedId = matched.id;
-          resolvedName = matched.name;
-          resolvedMertype = matched.mertype;
-
-          // 如果持久化记录中的名称是空或哈希，自动自愈更新
-          if (saved != null &&
-              saved.roomId == matched.id &&
-              (saved.roomName.isEmpty ||
-                  saved.roomName == saved.roomId ||
-                  RegExp(r'^[A-Fa-f0-9]{32}$').hasMatch(saved.roomName))) {
-            await service.saveSavedRoom(
-              SavedElectricityRoom(
-                areaName: areaName,
-                buildingName: buildingName,
-                roomId: matched.id,
-                roomName: matched.name,
-                mertype: matched.mertype,
-              ),
-            );
-          }
+      // 3. 若无精确匹配，检查是否存在包含该关键词的候选房间
+      if (matched == null) {
+        final query = (inputRoomName != null && inputRoomName.isNotEmpty) ? inputRoomName : inputRoomId;
+        final candidates = rooms.where((r) => r.name.contains(query) || r.id.contains(query)).toList();
+        if (candidates.isNotEmpty) {
+          throw ElectricityRoomAmbiguousException(candidates, query);
         }
       }
-    } catch (_) {}
+
+      if (matched != null) {
+        resolvedId = matched.id;
+        resolvedName = matched.name;
+        resolvedMertype = matched.mertype;
+
+        // 如果持久化记录中的名称是空或哈希，自动自愈更新
+        if (saved != null &&
+            saved.roomId == matched.id &&
+            (saved.roomName.isEmpty ||
+                saved.roomName == saved.roomId ||
+                RegExp(r'^[A-Fa-f0-9]{32}$').hasMatch(saved.roomName))) {
+          await service.saveSavedRoom(
+            SavedElectricityRoom(
+              areaName: areaName,
+              buildingName: buildingName,
+              roomId: matched.id,
+              roomName: matched.name,
+              mertype: matched.mertype,
+            ),
+          );
+        }
+      }
+    }
 
     if (resolvedName.isEmpty || RegExp(r'^[A-Fa-f0-9]{32}$').hasMatch(resolvedName)) {
       resolvedName = (inputRoomName != null && inputRoomName.isNotEmpty) ? inputRoomName : inputRoomId;
@@ -118,8 +133,15 @@ class ElectricityTool {
           },
           'amount': {
             'type': 'number',
-            'description': '充值金额（单位：元，如 10, 20, 50, 100）。执行充值 action=recharge 时必填。',
+            'description': '充值金额（单位：元，必须是 1~500 之间的整数，如 10, 20, 50, 100）。执行充值 action=recharge 时必填。',
             'minimum': 1,
+            'maximum': 500,
+          },
+          'confirmed': {
+            'type': 'boolean',
+            'description':
+                '是否已获得用户明确确认。首次调用必须为 false：工具只返回待确认的宿舍与金额，不会扣款；向用户复述并征得明确同意后，再次调用并传 true 才会真正从校园卡扣款。',
+            'default': false,
           },
         },
       },
@@ -136,6 +158,7 @@ class ElectricityTool {
         final mertype = arguments['mertype'] as String? ?? 'yk';
         final amountNum = arguments['amount'] as num?;
         final roomIndex = arguments['roomIndex'] as int?;
+        final confirmed = arguments['confirmed'] == true;
 
         try {
           switch (action) {
@@ -335,7 +358,6 @@ class ElectricityTool {
               });
 
             case 'recharge':
-            default:
               var targetArea = areaName;
               var targetBuilding = buildingName;
               var targetRoomId = roomId;
@@ -401,8 +423,8 @@ class ElectricityTool {
                   targetRoomId == null || targetRoomId.trim().isEmpty) {
                 return McpToolResult.error('执行电费充值需要提供 areaName、buildingName 和 roomId，或先在电费充值页面选择宿舍');
               }
-              if (amountNum == null || amountNum <= 0) {
-                return McpToolResult.error('充值金额必须大于 0 元');
+              if (amountNum == null || amountNum < 1 || amountNum > 500 || amountNum != amountNum.roundToDouble()) {
+                return McpToolResult.error('充值金额必须为 1 到 500 元之间的整数');
               }
 
               // 解析友好房间名与真实ID
@@ -424,6 +446,23 @@ class ElectricityTool {
                   : (targetRoomId.isNotEmpty && !RegExp(r'^[A-Fa-f0-9]{32}$').hasMatch(targetRoomId) ? targetRoomId : '所选宿舍');
               final locationStr = '$targetArea - $targetBuilding - $displayRoomName';
 
+              if (!confirmed) {
+                return McpToolResult.json({
+                  'status': 'confirmation_required',
+                  'need_user_confirmation': true,
+                  'message': '准备向 $locationStr 充值 ${amountNum.toInt()} 元。此操作将从校园卡中扣款，请向用户复述并确认是否继续充值。',
+                  'recharge_details': {
+                    'location': locationStr,
+                    'areaName': targetArea,
+                    'buildingName': targetBuilding,
+                    'roomName': displayRoomName,
+                    'roomId': targetRoomId,
+                    'amount': amountNum.toInt(),
+                    'unit': '元',
+                  },
+                });
+              }
+
               final success = await service.recharge(
                 areaName: targetArea,
                 buildingName: targetBuilding,
@@ -443,7 +482,18 @@ class ElectricityTool {
                 'amount': amountNum,
                 'unit': '元',
               });
+
+            default:
+              return McpToolResult.error('未知或不支持的操作类型: $action');
           }
+        } on ElectricityRoomAmbiguousException catch (e) {
+          final candidateLines = e.candidates.take(5).map((c) => '- ${c.name} (ID: ${c.id})').join('\n');
+          return McpToolResult.json({
+            'status': 'ambiguous_room',
+            'need_user_choice': true,
+            'message': '未找到精确匹配为 "${e.query}" 的房间，检索到以下候选房间，请向用户询问并明确具体房间名称或房间ID：\n$candidateLines',
+            'candidates': e.candidates.take(5).map((c) => {'id': c.id, 'name': c.name, 'mertype': c.mertype}).toList(),
+          });
         } catch (e) {
           return McpToolResult.error('电费操作失败 ($action): $e');
         }
