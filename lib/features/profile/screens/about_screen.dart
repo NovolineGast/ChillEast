@@ -35,15 +35,25 @@ class AboutScreen extends StatelessWidget {
                 height: 80,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
-                  image: const DecorationImage(
-                    image: AssetImage('assets/images/logo.png'),
+                  border: Border.all(
+                    color: isDark
+                        ? Colors.white.withValues(alpha: 0.12)
+                        : Colors.black.withValues(alpha: 0.08),
+                    width: 1,
+                  ),
+                  image: DecorationImage(
+                    image: AssetImage(
+                      isDark
+                          ? 'assets/images/logo_dark.png'
+                          : 'assets/images/logo.png',
+                    ),
                     fit: BoxFit.cover,
                   ),
                   boxShadow: [
                     if (!isDark)
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.05),
-                        blurRadius: 10,
+                        color: Colors.black.withValues(alpha: 0.06),
+                        blurRadius: 12,
                         offset: const Offset(0, 4),
                       ),
                   ],
