@@ -134,7 +134,11 @@ class AboutScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildAboutItem(BuildContext context, {required String title, required VoidCallback onTap}) {
+  Widget _buildAboutItem(
+    BuildContext context, {
+    required String title,
+    required VoidCallback onTap,
+  }) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
     
     return InkWell(
@@ -150,7 +154,7 @@ class AboutScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
-                color: isDark ? Colors.white.withOpacity(0.9) : const Color(0xFF202124),
+                color: isDark ? Colors.white.withValues(alpha: 0.9) : const Color(0xFF202124),
               ),
             ),
           ],
