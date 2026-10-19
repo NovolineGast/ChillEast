@@ -55,9 +55,12 @@ class _LibraryQuickReserveScreenState
 
   void _initTime() {
     final now = DateTime.now();
-    _selectedDay = LibraryTimeUtils.availableReserveDays(now: now).first;
+    _selectedDay = LibraryTimeUtils.initialReserveDay(now: now);
     final defaultStart =
-        LibraryTimeUtils.defaultStartTime(_selectedDay, now: now) ?? '08:00';
+        LibraryTimeUtils.defaultStartTime(_selectedDay, now: now) ??
+        (LibraryTimeUtils.availableStartSlots(_selectedDay, now: now).isNotEmpty
+            ? LibraryTimeUtils.availableStartSlots(_selectedDay, now: now).first
+            : '08:00');
     final defaultEnd =
         LibraryTimeUtils.defaultEndTime(defaultStart) ?? '10:00';
     _startTime = defaultStart;
@@ -73,7 +76,29 @@ class _LibraryQuickReserveScreenState
       final startEndData = await service.fetchLiveStartEndTime();
       if (startEndData['ymd'] != null &&
           startEndData['ymd'].toString().isNotEmpty) {
-        _selectedDay = startEndData['ymd'].toString();
+        final serverYmd = startEndData['ymd'].toString();
+        final now = DateTime.now();
+        final effectiveDay =
+            LibraryTimeUtils.resolveEffectiveDay(serverYmd, now: now);
+        final dayChanged = effectiveDay != _selectedDay;
+        _selectedDay = effectiveDay;
+        if (dayChanged ||
+            !LibraryTimeUtils.isValidRange(
+                _selectedDay, _startTime, _endTime,
+                now: now)) {
+          final defaultStart =
+              LibraryTimeUtils.defaultStartTime(_selectedDay, now: now) ??
+                  (LibraryTimeUtils.availableStartSlots(_selectedDay, now: now)
+                          .isNotEmpty
+                      ? LibraryTimeUtils.availableStartSlots(_selectedDay,
+                              now: now)
+                          .first
+                      : '08:00');
+          final defaultEnd =
+              LibraryTimeUtils.defaultEndTime(defaultStart) ?? '10:00';
+          _startTime = defaultStart;
+          _endTime = defaultEnd;
+        }
       }
 
       // 2. 获取一级分类

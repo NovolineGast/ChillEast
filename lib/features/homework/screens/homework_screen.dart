@@ -445,7 +445,7 @@ class _HomeworkScreenState extends ConsumerState<HomeworkScreen> with SingleTick
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(isArchiving ? context.l10n.movedToArchive : context.l10n.movedOutOfArchive), duration: const Duration(seconds: 2)));
           } else {
             // 右滑：删除
-            final oldList = ref.read(homeworkProvider).value ?? [];
+            final oldList = ref.read(homeworkProvider).valueOrNull ?? [];
             ref.read(homeworkProvider.notifier).deleteHomework(item.id);
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

@@ -4,14 +4,22 @@ import '../../../core/utils/l10n_extension.dart';
 /// 课表空状态组件
 class EmptyTimetableState extends StatelessWidget {
   /// 自动同步是否开启。
-  /// 开启时显示“正在同步”转圈；关闭时提示点右上角刷新按钮手动同步。
   final bool autoSyncEnabled;
 
-  const EmptyTimetableState({super.key, this.autoSyncEnabled = true});
+  /// 是否正在后台执行自动同步。仅在自动同步开启且真正同步中时显示“正在同步”及转圈；
+  /// 同步完成后或关闭时退出转圈，显示暂无课表并提示点刷新按钮手动同步。
+  final bool isSyncing;
+
+  const EmptyTimetableState({
+    super.key,
+    this.autoSyncEnabled = true,
+    this.isSyncing = false,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final showLoading = autoSyncEnabled && isSyncing;
 
     return Center(
       child: Padding(
@@ -26,16 +34,18 @@ class EmptyTimetableState extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                autoSyncEnabled
+                showLoading
                     ? Icons.calendar_today_outlined
-                    : Icons.cloud_off_outlined,
+                    : (autoSyncEnabled
+                        ? Icons.calendar_today_outlined
+                        : Icons.cloud_off_outlined),
                 size: 64,
                 color: theme.primaryColor,
               ),
             ),
             const SizedBox(height: 32),
             Text(
-              autoSyncEnabled
+              showLoading
                   ? context.l10n.timetableSyncing
                   : context.l10n.noLocalTimetable,
               textAlign: TextAlign.center,
@@ -47,7 +57,7 @@ class EmptyTimetableState extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              autoSyncEnabled
+              showLoading
                   ? context.l10n.timetableSyncingDesc
                   : context.l10n.tapRefreshButtonToSync,
               textAlign: TextAlign.center,
@@ -57,7 +67,7 @@ class EmptyTimetableState extends StatelessWidget {
                 height: 1.5,
               ),
             ),
-            if (autoSyncEnabled) ...[
+            if (showLoading) ...[
               const SizedBox(height: 32),
               const SizedBox(
                 width: 24,

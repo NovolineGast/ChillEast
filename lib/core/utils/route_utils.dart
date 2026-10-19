@@ -24,3 +24,27 @@ Route<T> createSlideUpRoute<T>(Widget page) {
     opaque: true,
   );
 }
+
+/// 创建一个从右侧滑入、向右侧滑出的淡入淡出路由（左滑淡入，右滑淡出）
+Route<T> createSlideHorizontalRoute<T>(Widget page) {
+  return PageRouteBuilder<T>(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      const begin = Offset(0.08, 0.0); // 从右向左滑入
+      const end = Offset.zero;
+      const curve = Curves.easeOutCubic;
+
+      final tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+
+      return FadeTransition(
+        opacity: animation,
+        child: SlideTransition(
+          position: animation.drive(tween),
+          child: child,
+        ),
+      );
+    },
+    barrierColor: null,
+    opaque: true,
+  );
+}

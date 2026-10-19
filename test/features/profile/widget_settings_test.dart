@@ -51,10 +51,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      expect(find.text('小组件设置'), findsOneWidget);
+      expect(find.text('小组件'), findsOneWidget);
       expect(find.byIcon(Icons.widgets_outlined), findsOneWidget);
 
-      await tester.tap(find.text('小组件设置'));
+      await tester.tap(find.text('小组件'));
       await tester.pumpAndSettle();
 
       expect(find.byType(ButtonReorderScreen), findsOneWidget);

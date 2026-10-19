@@ -8,19 +8,19 @@
   "@settings": {
     "description": "设置页面标题"
   },
-  "agentSettings": "Agent 设置",
+  "agentSettings": "Agent",
   "@agentSettings": {
     "description": "Agent 设置项"
   },
-  "appearanceSettings": "外观设置",
+  "appearanceSettings": "外观",
   "@appearanceSettings": {
     "description": "外观设置项"
   },
-  "notificationSettings": "通知设置",
+  "notificationSettings": "通知",
   "@notificationSettings": {
     "description": "通知设置项"
   },
-  "language": "语言设置",
+  "language": "语言",
   "@language": {
     "description": "语言设置项"
   },
@@ -164,6 +164,29 @@
   "funcCsBus": "长沙实时公交",
   "funcCampusBusRoute": "校内公交线路",
   "funcDormitory": "我的宿舍",
+  "funcExamSchedule": "考试安排",
+  "examSchedule": "考试安排",
+  "addExam": "添加考试",
+  "examTitle": "考试名称",
+  "inputExamTitleHint": "输入考试名称（如期末考试）",
+  "examCourse": "所属课程",
+  "inputExamCourseHint": "输入课程名称（可选）",
+  "examTime": "考试时间",
+  "selectExamTimeHint": "选择考试日期和时间",
+  "examLocation": "考场地点",
+  "inputExamLocationHint": "输入考场或教室（可选）",
+  "examRemarks": "备注",
+  "inputExamRemarksHint": "输入备注或准备事项（可选）",
+  "noCurrentSemesterExams": "本学期暂无考试安排",
+  "manualExamTag": "手动添加",
+  "delete": "删除",
+  "deleteExamConfirm": "确定要删除此考试吗？",
+  "examDeleted": "已删除考试",
+  "examAdded": "已成功添加考试",
+  "examStatusPending": "待考",
+  "examStatusEnded": "已结束",
+  "examDetails": "考试详情",
+  "openInChaoXing": "在学习通中查看",
   "dormitoryBuilding": "宿舍楼",
   "dormitoryUnit": "单元",
   "dormitoryFloor": "楼层",
@@ -189,10 +212,12 @@
   "groupMiniApps": "小程序",
   "feedButtonsSetting": "信息流排序与隐藏",
   "feedButtonsTitle": "信息流设置",
+  "feedAutoSort": "自动排序",
+  "feedAutoSortSubtitle": "开启后忽视手动排序和显隐，按智能规则动态排序",
   "visibleFunctions": "显示中的功能",
   "hiddenFunctions": "已隐藏的功能 (拖动到此隐藏)",
   "dragToReorderTip": "长按拖动图标，移入不同区域可显示或隐藏功能",
-  "widgetSettings": "小组件设置",
+  "widgetSettings": "小组件",
   "widgetQuickTitle": "快捷功能（选择 4 个）",
   "widgetQuickHint": "小组件的快捷入口独立于首页，可单独配置",
   "widgetHowToAdd": "回到手机桌面，长按空白处添加「今日日程」「快捷功能」「日程 + 快捷」小组件",
@@ -407,6 +432,7 @@
   "copy": "复制",
   "aiThinking": "正在思考中...",
   "noticeDetail": "通知详情",
+  "selectNoticeHint": "选择左侧通知查看详情",
   "noticeNotFound": "未找到详情数据",
   "noTitle": "无标题",
   "senderSystem": "系统",
@@ -447,9 +473,10 @@
   "adjustTimetable": "调整课表",
   "backToToday": "回到今天",
   "refreshTimetable": "刷新课表",
-  "timetableSettings": "课表设置",
+  "timetableSettings": "课表",
   "notSet": "未设置",
   "timetableAutoSync": "自动同步课表",
+  "timetableShowEndTime": "周视图中显示下课时间",
   "disableAutoSyncTitle": "关闭自动同步？",
   "disableAutoSyncMessage": "关闭后将删除本地课表（调课、停课等规则会保留），如需查看课表，可点击课表页右上角刷新按钮手动同步。",
   "localTimetableDeleted": "本地课表已删除",
@@ -514,6 +541,18 @@
   "weeksLabel": "周次",
   "periodsLabel": "节次",
   "timeLabel": "时间",
+  "courseColor": "课程颜色",
+  "changeColor": "修改颜色",
+  "selectCourseColor": "选择课程颜色",
+  "colorSwappedNotice": "已与「{course}」互换课程颜色",
+  "@colorSwappedNotice": {
+    "placeholders": {
+      "course": {
+        "type": "String"
+      }
+    }
+  },
+  "materialColorNotice": "仅支持从高对比度 Material UI 色板中选取",
   "close": "关闭",
   "unknown": "未知",
   "reschedule": "调课",
@@ -1658,11 +1697,143 @@
   "ehallSessionExpired": "办事大厅登录态已过期，请重新登录",
   "ehallExternalJumpPrompt": "即将跳转至外部服务",
   "ehallOpenNativeLeave": "在请假小程序中办理",
-  "examSchedule": "考试日程",
   "examTimePrefix": "考试时间",
   "clearWebViewCache": "清理缓存",
   "clearWebViewCacheSubtitle": "清理 InAppWebView 磁盘缓存与网页离线数据",
   "clearWebViewCacheSuccess": "已清理缓存",
   "clearWebViewCacheConfirmTitle": "确认清理缓存？",
-  "clearWebViewCacheConfirmMessage": "将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。"
+  "clearWebViewCacheConfirmMessage": "将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。",
+  "aiFetchModels": "获取模型列表",
+  "@aiFetchModels": {
+    "description": "Agent设置获取模型列表按钮"
+  },
+  "aiSelectModel": "选择模型",
+  "@aiSelectModel": {
+    "description": "Agent设置选择模型标题"
+  },
+  "aiSearchModelHint": "搜索模型名称…",
+  "@aiSearchModelHint": {
+    "description": "搜索模型提示词"
+  },
+  "aiNoModelsFound": "未找到匹配的模型",
+  "@aiNoModelsFound": {
+    "description": "未找到模型提示"
+  },
+  "aiTestConnection": "测试连接",
+  "@aiTestConnection": {
+    "description": "Agent设置测试连接按钮"
+  },
+  "aiTestingConnection": "正在测试连接…",
+  "@aiTestingConnection": {
+    "description": "测试连接中状态"
+  },
+  "aiTestSuccess": "连接成功 (耗时 {ms}ms)",
+  "@aiTestSuccess": {
+    "description": "连接成功提示",
+    "placeholders": {
+      "ms": {
+        "type": "int"
+      }
+    }
+  },
+  "aiTestFailed": "连接失败: {error}",
+  "@aiTestFailed": {
+    "description": "连接失败提示",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "aiApiKeyRequired": "请先配置 API Key",
+  "@aiApiKeyRequired": {
+    "description": "缺少API Key提示"
+  },
+  "aiModelSelected": "已选择模型: {model}",
+  "@aiModelSelected": {
+    "description": "模型选择成功提示",
+    "placeholders": {
+      "model": {
+        "type": "String"
+      }
+    }
+  },
+  "timetableSubscription": "课表订阅",
+  "timetableSubscriptionSubtitle": "在线日历订阅与云端自动同步",
+  "timetableSubscriptionAutoUpload": "开启课表订阅",
+  "timetableSubscriptionAutoUploadDesc": "开启后，从教务系统同步或调整课表后，将自动把调停后的课表上传云端供订阅；关闭后云端课表一并删除",
+  "timetableSubscriptionUrl": "日历订阅链接",
+  "copySubscriptionUrl": "复制链接",
+  "subscriptionUrlCopied": "订阅链接已复制到剪切板",
+  "openInCalendar": "在日历中订阅",
+  "openInCalendarFailed": "无法调起系统日历，请手动复制链接订阅",
+  "syncToCloudNow": "立即同步到云端",
+  "syncSuccess": "云端同步成功",
+  "syncFailed": "云端同步失败: {error}",
+  "@syncFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "resetSubscriptionUrl": "重置链接",
+  "resetSubscriptionConfirmTitle": "重置订阅链接",
+  "resetSubscriptionConfirmMessage": "重置后旧的订阅链接将立即失效，云端旧课表将被删除，您需要在订阅的设备中重新添加新链接。是否继续？",
+  "subscriptionTutorialTitle": "第三方日历订阅指南",
+  "subscriptionTutorialContent": "• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，粘贴链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，粘贴链接并保存。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并保存。\n\n• 提示：\n订阅链接包含调停后的全部课程，若有调课或教务更新，订阅源会自动保持最新。",
+  "onboardingWelcomeTitle": "欢迎使用 ChillEast",
+  "onboardingWelcomeSubtitle": "专为湖南农业大学学子打造的现代化校园生活助手",
+  "onboardingSkip": "跳过",
+  "onboardingNext": "下一步",
+  "onboardingStart": "开始使用",
+  "onboardingGoToLogin": "去登录",
+  "onboardingGuideTitle": "迎新导览与功能介绍",
+  "onboardingGuideSubtitle": "快速了解 ChillEast 的核心功能与使用技巧",
+  "onboardingSlide1Tag": "课表与日程",
+  "onboardingSlide1Title": "智能课表 · 桌面实况",
+  "onboardingSlide1Desc": "全自动同步教务课表，智能对齐调停补变动。配合桌面实况与小组件，随时随地查看精彩日程。",
+  "onboardingSlide2Tag": "学业助手",
+  "onboardingSlide2Title": "作业同步 · 智能预警",
+  "onboardingSlide2Desc": "无缝同步超星学习通作业，倒计时清晰直观。支持自定义截止前提醒，告别拖延与作业遗漏。",
+  "onboardingSlide3Tag": "校园服务",
+  "onboardingSlide3Title": "校园生活 · 一站通办",
+  "onboardingSlide3Desc": "图书馆选座到期提醒、一卡通账单余额明细、宿舍电费余量预警，日常校园事务一手掌握。",
+  "onboardingSlide4Tag": "多端同步",
+  "onboardingSlide4Title": "日历订阅 · 云端备份",
+  "onboardingSlide4Desc": "一键生成 Webcal 日历订阅，无缝连接手机、手表与电脑；云端自动加密备份，多设备漫游换机无忧。",
+  "postLoginSetupStep": "第 {current} / {total} 步",
+  "@postLoginSetupStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "postLoginSetupSkip": "跳过",
+  "postLoginSetupEnable": "开启",
+  "courseReminderPromptMessage": "在课程开始前通知提醒上课教室。",
+  "postLoginSetupNext": "开启",
+  "postLoginSetupFinish": "开启",
+  "postLoginSetupFinishWithoutEnable": "跳过",
+  "timetableAutoSyncPromptTitle": "课表自动同步",
+  "timetableAutoSyncPromptMessage": "自动拉取教务系统，时刻获取最新课表。",
+  "timetableAutoSyncPromptBadge": "推荐开启",
+  "homeworkReminderPromptTitle": "作业截止提醒",
+  "homeworkReminderPromptMessage": "作业截止前通知提醒，避免错过作业提交。",
+  "homeworkReminderPromptBadge": "提前预警",
+  "libraryReminderPromptTitle": "图书馆座位提醒",
+  "libraryReminderPromptMessage": "预约时段开始前发送通知，防止错过预约",
+  "libraryReminderPromptBadge": "提前提醒",
+  "timetableSubscriptionPromptTitle": "课表日历订阅",
+  "timetableSubscriptionPromptMessage": "生成 Webcal 订阅，一键导入系统日历与 Google Calendar。",
+  "timetableSubscriptionPromptBadge": "全平台日程同步",
+  "useLiveActivityPrompt": "使用实时活动",
+  "startGuide": "开始引导",
+  "postLoginDoneTitle": "大功告成！",
+  "postLoginDoneMessage": "欢迎使用「自在东湖」。",
+  "postLoginDoneButton": "完成"
 }

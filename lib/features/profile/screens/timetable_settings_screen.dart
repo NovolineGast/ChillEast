@@ -8,6 +8,7 @@ import '../../../core/widgets/brand_switch.dart';
 import '../../timetable/services/timetable_service.dart';
 import '../../timetable/services/timetable_storage.dart';
 import '../providers/settings_provider.dart';
+import 'timetable_subscription_screen.dart';
 
 /// 课表设置页：自动同步开关 + 手动指定本学期第一周周一。
 class TimetableSettingsScreen extends ConsumerWidget {
@@ -19,6 +20,8 @@ class TimetableSettingsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final autoSyncEnabled =
         ref.watch(settingsProvider).timetableAutoSyncEnabled;
+    final showEndTime =
+        ref.watch(settingsProvider.select((s) => s.timetableShowEndTime));
     final manualIso =
         ref.watch(settingsProvider.select((s) => s.manualFirstWeekMondayIso));
     final manualMonday =
@@ -51,6 +54,51 @@ class TimetableSettingsScreen extends ConsumerWidget {
             title: l10n.timetableAutoSync,
             value: autoSyncEnabled,
             onChanged: (v) => _onAutoSyncToggle(context, ref, v),
+          ),
+          _buildSwitchItem(
+            context,
+            icon: Icons.schedule_rounded,
+            title: l10n.timetableShowEndTime,
+            value: showEndTime,
+            onChanged: (v) => ref
+                .read(settingsProvider.notifier)
+                .setTimetableShowEndTime(v),
+          ),
+          InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => const TimetableSubscriptionScreen(),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              child: Row(
+                children: [
+                  const Icon(Icons.rss_feed_rounded,
+                      size: 24, color: Color(0xFF5F6368)),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Text(
+                      l10n.timetableSubscription,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: isDark
+                            ? Colors.white
+                            : const Color(0xFF202124),
+                      ),
+                    ),
+                  ),
+                  const Icon(
+                    Icons.chevron_right_rounded,
+                    size: 20,
+                    color: Color(0xFF9E9E9E),
+                  ),
+                ],
+              ),
+            ),
           ),
           Opacity(
             opacity: mondayEnabled ? 1.0 : 0.5,

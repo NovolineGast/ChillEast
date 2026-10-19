@@ -7,7 +7,9 @@ import '../providers/library_provider.dart';
 import 'library_book_detail_screen.dart';
 
 class LibraryBookSearchScreen extends ConsumerStatefulWidget {
-  const LibraryBookSearchScreen({super.key});
+  final String? initialKeyword;
+
+  const LibraryBookSearchScreen({super.key, this.initialKeyword});
 
   @override
   ConsumerState<LibraryBookSearchScreen> createState() =>
@@ -18,6 +20,18 @@ class _LibraryBookSearchScreenState
     extends ConsumerState<LibraryBookSearchScreen> {
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    final kw = widget.initialKeyword?.trim();
+    if (kw != null && kw.isNotEmpty) {
+      _searchController.text = kw;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onSearch();
+      });
+    }
+  }
 
   @override
   void dispose() {

@@ -58,7 +58,7 @@ class CachedLibraryReserveNotifier
 
   /// 设置/新增预约（如刚预约成功时）
   Future<void> addOrUpdateReserve(LibraryReserveModel reserve) async {
-    final currentList = state.value ?? [];
+    final currentList = state.valueOrNull ?? [];
     final updatedList = [
       reserve,
       ...currentList.where((r) => r.id != reserve.id),
@@ -72,7 +72,7 @@ class CachedLibraryReserveNotifier
   Future<bool> cancelReservation(int reserveId) async {
     final success = await _service.cancelReservation(reserveId);
     if (success) {
-      final currentList = state.value ?? [];
+      final currentList = state.valueOrNull ?? [];
       final updatedList = currentList.where((r) => r.id != reserveId).toList();
       state = AsyncValue.data(updatedList);
       if (updatedList.isNotEmpty) {
@@ -89,7 +89,7 @@ class CachedLibraryReserveNotifier
 
   /// 本地删除（无需网络，用于幽灵清理或过期清理）
   Future<void> removeLocalReserve(int reserveId) async {
-    final currentList = state.value ?? [];
+    final currentList = state.valueOrNull ?? [];
     final updatedList = currentList.where((r) => r.id != reserveId).toList();
     state = AsyncValue.data(updatedList);
     if (updatedList.isNotEmpty) {

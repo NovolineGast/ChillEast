@@ -31,7 +31,9 @@ class CloudBackupManager {
   CloudBackupManager._internal();
 
   static const String filePrefix = 'chilleast-backup-';
+  static const String modernFilePrefix = 'chilleast-modern-';
   static const String fixedSlot = 'b';
+  static const int defaultKeepCount = 3;
   static const String toggleKey = 'cloud_backup_auto_sync';
   static const String promptDecidedKey = 'cloud_backup_prompt_decided';
   static const String _activeSlotKey = 'cloud_backup_active_slot';
@@ -47,7 +49,25 @@ class CloudBackupManager {
   bool _requeued = false;
   bool _refreshingAuth = false;
 
-  /// 文件名：slot 为 a/b（新备份固定使用 'b'）。
+  /// 现代轨文件名（严格去除无意义槽位字母 b，直接携带时间戳）。
+  static String buildModernFileName([DateTime? time]) {
+    final t = time ?? DateTime.now();
+    String two(int v) => v.toString().padLeft(2, '0');
+    final stamp = '${t.year}${two(t.month)}${two(t.day)}-'
+        '${two(t.hour)}${two(t.minute)}${two(t.second)}';
+    return '$modernFilePrefix$stamp.json';
+  }
+
+  /// 解析现代轨备份文件名 → (stamp)，不匹配返回 null。
+  static ({String stamp})? parseModernFileName(String name) {
+    final m = RegExp(
+      '^${RegExp.escape(modernFilePrefix)}(\\d{8}-\\d{6})\\.json\$',
+    ).firstMatch(name);
+    if (m == null) return null;
+    return (stamp: m.group(1)!);
+  }
+
+  /// 兼容轨文件名：维持老版 main 规范（slot 为 a/b，新备份固定使用 'b'）。
   static String buildFileName([String slot = fixedSlot, DateTime? time]) {
     final t = time ?? DateTime.now();
     String two(int v) => v.toString().padLeft(2, '0');
@@ -56,7 +76,7 @@ class CloudBackupManager {
     return '$filePrefix$slot-$stamp.json';
   }
 
-  /// 解析备份文件名 → (slot, stamp)，不匹配返回 null。
+  /// 解析兼容轨备份文件名 → (slot, stamp)，不匹配返回 null。
   static ({String slot, String stamp})? parseFileName(String name) {
     final m = RegExp(
       '^${RegExp.escape(filePrefix)}([ab])-(\\d{8}-\\d{6})\\.json\$',
@@ -68,7 +88,32 @@ class CloudBackupManager {
   /// 目标槽位：固定为 b，兼容历史调用。
   static String pickTargetSlot([String? activeSlot]) => fixedSlot;
 
-  /// 从目录条目中挑出最新的备份文件（按 stamp 字典序即时间序）。
+  /// 从目录条目中挑出最新的现代备份文件（按 stamp 字典序即时间序）。
+  static Map<String, String>? pickLatestModernBackupEntry(
+    List<Map<String, dynamic>> entries,
+  ) {
+    Map<String, String>? best;
+    for (final e in entries) {
+      final name = e['name']?.toString() ?? '';
+      final parsed = parseModernFileName(name);
+      if (parsed == null) continue;
+      final resid = e['id']?.toString() ?? '';
+      final encryptedId = e['encryptedId']?.toString() ?? '';
+      if (resid.isEmpty || encryptedId.isEmpty) continue;
+      if (best == null || parsed.stamp.compareTo(best['stamp']!) > 0) {
+        best = {
+          'resid': resid,
+          'encryptedId': encryptedId,
+          'puid': e['puid']?.toString() ?? '',
+          'name': name,
+          'stamp': parsed.stamp,
+        };
+      }
+    }
+    return best;
+  }
+
+  /// 从目录条目中挑出最新的兼容备份文件（按 stamp 字典序即时间序）。
   /// 忽略非备份文件；无备份返回 null。
   static Map<String, String>? pickLatestBackupEntry(
     List<Map<String, dynamic>> entries,
@@ -95,29 +140,193 @@ class CloudBackupManager {
     return best;
   }
 
-  /// 从目录条目中挑出需删除的 resid（同前缀且非本次上传）。
-  static List<Map<String, String>> pickStaleEntries(
+  /// 从目录条目中挑出需删除的现代备份 resid（严格保留包含本次 [keepResid] 在内的最新 [keepCount] 份）。
+  static List<Map<String, String>> pickStaleModernEntries(
     List<Map<String, dynamic>> entries,
-    String keepResid,
-  ) {
-    final stale = <Map<String, String>>[];
+    String keepResid, {
+    int keepCount = defaultKeepCount,
+  }) {
+    final valid = <({String resid, String encryptedId, String puid, String stamp})>[];
     for (final e in entries) {
       final name = e['name']?.toString() ?? '';
-      if (parseFileName(name) == null) continue;
+      final parsed = parseModernFileName(name);
+      if (parsed == null) continue;
       final resid = e['id']?.toString() ?? '';
-      if (resid.isEmpty || resid == keepResid) continue;
-      stale.add({
-        'resid': resid,
-        'encryptedId': e['encryptedId']?.toString() ?? '',
-        'puid': e['puid']?.toString() ?? '',
-      });
+      final encryptedId = e['encryptedId']?.toString() ?? '';
+      if (resid.isEmpty || encryptedId.isEmpty) continue;
+      valid.add((
+        resid: resid,
+        encryptedId: encryptedId,
+        puid: e['puid']?.toString() ?? '',
+        stamp: parsed.stamp,
+      ));
+    }
+
+    valid.sort((a, b) => b.stamp.compareTo(a.stamp));
+
+    final keptResids = <String>{};
+    if (keepResid.isNotEmpty && valid.any((v) => v.resid == keepResid)) {
+      keptResids.add(keepResid);
+    }
+
+    for (final item in valid) {
+      if (keptResids.length >= keepCount) break;
+      keptResids.add(item.resid);
+    }
+
+    final stale = <Map<String, String>>[];
+    for (final item in valid) {
+      if (!keptResids.contains(item.resid) && item.resid != keepResid) {
+        stale.add({
+          'resid': item.resid,
+          'encryptedId': item.encryptedId,
+          'puid': item.puid,
+        });
+      }
     }
     return stale;
   }
 
+  /// 从目录条目中挑出需删除的兼容备份 resid（严格保留包含本次 [keepResid] 在内的最新 [keepCount] 份）。
+  static List<Map<String, String>> pickStaleEntries(
+    List<Map<String, dynamic>> entries,
+    String keepResid, {
+    int keepCount = defaultKeepCount,
+  }) {
+    final valid = <({String resid, String encryptedId, String puid, String stamp})>[];
+    for (final e in entries) {
+      final name = e['name']?.toString() ?? '';
+      final parsed = parseFileName(name);
+      if (parsed == null) continue;
+      final resid = e['id']?.toString() ?? '';
+      final encryptedId = e['encryptedId']?.toString() ?? '';
+      if (resid.isEmpty || encryptedId.isEmpty) continue;
+      valid.add((
+        resid: resid,
+        encryptedId: encryptedId,
+        puid: e['puid']?.toString() ?? '',
+        stamp: parsed.stamp,
+      ));
+    }
+
+    valid.sort((a, b) => b.stamp.compareTo(a.stamp));
+
+    final keptResids = <String>{};
+    if (keepResid.isNotEmpty && valid.any((v) => v.resid == keepResid)) {
+      keptResids.add(keepResid);
+    }
+
+    for (final item in valid) {
+      if (keptResids.length >= keepCount) break;
+      keptResids.add(item.resid);
+    }
+
+    final stale = <Map<String, String>>[];
+    for (final item in valid) {
+      if (!keptResids.contains(item.resid) && item.resid != keepResid) {
+        stale.add({
+          'resid': item.resid,
+          'encryptedId': item.encryptedId,
+          'puid': item.puid,
+        });
+      }
+    }
+    return stale;
+  }
+
+  /// 当老版设备产生较新的兼容快照时，将现代全量数据与老版的较新通用修改进行智能合并
+  static Map<String, dynamic> mergeModernWithLegacy(
+    Map<String, dynamic> modern,
+    Map<String, dynamic> legacy,
+  ) {
+    final merged = Map<String, dynamic>.from(modern);
+    merged['format'] = BackupExportService.modernBackupFormat;
+
+    final modernSettings = merged['settings'] is Map
+        ? Map<String, dynamic>.from(merged['settings'] as Map)
+        : <String, dynamic>{};
+    final legacySettings = legacy['settings'] is Map
+        ? Map<String, dynamic>.from(legacy['settings'] as Map)
+        : <String, dynamic>{};
+
+    final modernLocalData = merged['localData'] is Map
+        ? Map<String, dynamic>.from(merged['localData'] as Map)
+        : <String, dynamic>{};
+    final legacyLocalData = legacy['localData'] is Map
+        ? Map<String, dynamic>.from(legacy['localData'] as Map)
+        : <String, dynamic>{};
+
+    // 1. 基础设置项以老版较新的设置覆盖
+    const baseSettingsKeys = [
+      'languageCode',
+      'courseReminderMinutes',
+      'homeworkReminderHours',
+      'libraryReminderMinutes',
+      'courseLiveEnabled',
+      'flymeLiveEnabled',
+      'timetableAutoSyncEnabled',
+      'timetableShowEndTime',
+      'manualFirstWeekMonday',
+      'electricityRoom',
+    ];
+    for (final k in baseSettingsKeys) {
+      if (legacySettings.containsKey(k)) {
+        modernSettings[k] = legacySettings[k];
+      }
+    }
+
+    // 2. 外观设置
+    if (legacySettings.containsKey('appearance')) {
+      final legacyApp = legacySettings['appearance'] is Map
+          ? Map<String, dynamic>.from(legacySettings['appearance'] as Map)
+          : <String, dynamic>{};
+      final modernApp = modernSettings['appearance'] is Map
+          ? Map<String, dynamic>.from(modernSettings['appearance'] as Map)
+          : <String, dynamic>{};
+
+      for (final k in [
+        'homeItems',
+        'functionItems',
+        'feedItems',
+        'widgetItems',
+        'functionGroupOrder',
+        'hiddenFunctionGroups',
+      ]) {
+        if (legacyApp.containsKey(k)) {
+          modernApp[k] = legacyApp[k];
+        }
+      }
+      modernSettings['appearance'] = modernApp;
+    }
+
+    // 3. 课表与作业数据：若老版有更新则覆盖
+    for (final k in [
+      'timetableIcs',
+      'timetableMeta',
+      'courses',
+      'rawCourses',
+      'timetableRules',
+      'homeworkList',
+    ]) {
+      if (legacyLocalData.containsKey(k) && legacyLocalData[k] != null) {
+        modernLocalData[k] = legacyLocalData[k];
+      }
+    }
+
+    merged['settings'] = modernSettings;
+    merged['localData'] = modernLocalData;
+    return merged;
+  }
+
+  static const String _dirtyStorageKey = 'cloud_backup_is_dirty';
+  int _sessionGeneration = 0;
+
   /// 本地数据有更改时调用（各存储落盘点）。去抖 10s 后同步一次。
   void markDirty() {
     _debounceTimer?.cancel();
+    SharedPreferences.getInstance().then((p) {
+      p.setBool(_dirtyStorageKey, true);
+    }).catchError((_) {});
     _debounceTimer = Timer(_debounce, () => syncNow());
   }
 
@@ -140,8 +349,6 @@ class CloudBackupManager {
         // 超星会话过期：portal/index 的 Chaoxing Cookie 已失效。
         // HttpLoginService.login 本就是 portal/login→login6→index 全链路，
         // 重登一次即可重新签发 .chaoxing.com 10 件套，无需额外“绑定”请求。
-        // （之前临时 Jar 剥 campus_user 走 /login 的方案是错的：
-        // 无 CAS ticket 时 /login 只回登录页，根本不会跳 login6。）
         _cloudisk.invalidateSession();
         if (await _refreshChaoxingSession()) {
           _cloudisk.invalidateSession();
@@ -170,6 +377,7 @@ class CloudBackupManager {
   ///（槽位/resid/开关），避免下个账号复用上个账号的云盘位置。
   /// 下次登录后开关保持默认关闭，由用户手动开启。
   Future<void> resetOnLogout() async {
+    _sessionGeneration++;
     _debounceTimer?.cancel();
     _debounceTimer = null;
     _running = false;
@@ -182,6 +390,7 @@ class CloudBackupManager {
       await prefs.remove(_activeSlotKey);
       await prefs.remove(_activeResidKey);
       await prefs.remove(_activeEncryptedIdKey);
+      await prefs.remove(_dirtyStorageKey);
     } catch (e) {
       _logger.w('☁️ Cloud backup logout reset failed: $e');
     }
@@ -192,6 +401,7 @@ class CloudBackupManager {
   Future<bool> _refreshChaoxingSession() async {
     if (_refreshingAuth) return false;
     _refreshingAuth = true;
+    final currentGen = _sessionGeneration;
     try {
       final snapshot = await SecureStorageHelper().readAuthSnapshot();
       final u = snapshot.username;
@@ -199,6 +409,14 @@ class CloudBackupManager {
       if (u == null || u.isEmpty || p == null || p.isEmpty) return false;
       _logger.i('☁️ Chaoxing session expired, silent re-login…');
       final result = await HttpLoginService().login(u, p);
+
+      // 校验世代与用户，若登出或换号则丢弃旧 Cookie，避免覆盖新会话
+      final latestSnapshot = await SecureStorageHelper().readAuthSnapshot();
+      if (_sessionGeneration != currentGen || latestSnapshot.username != u) {
+        _logger.w('☁️ Silent re-login aborted: session generation mismatch or logged out');
+        return false;
+      }
+
       await AppCookieManager().saveHttpLoginCookies(result.cookies);
       _logger.i('☁️ Silent re-login ok, cookies refreshed');
       return true;
@@ -210,8 +428,9 @@ class CloudBackupManager {
     }
   }
 
-  /// 应用启动并在静默登录后拉取云端最新备份并覆盖应用到本地。
-  /// 若未开启自动同步或无凭据或云端无备份，则静默返回 null。
+  /// 应用启动并在静默登录后拉取云端最新备份。
+  /// 若本地有未同步的离线修改（dirty），进行合并并把最新数据推上云端；
+  /// 若本地无离线修改，则拉取云端最新备份写回本地。
   Future<Map<String, dynamic>?> pullLatestOnStartup() async {
     if (_running) {
       return null;
@@ -222,14 +441,26 @@ class CloudBackupManager {
       if ((prefs.getBool(toggleKey) ?? false) == false) return null;
       if (!await SecureStorageHelper().hasCredentials()) return null;
 
+      final isDirty = prefs.getBool(_dirtyStorageKey) ?? false;
+
       try {
-        return await _pullAndApply(prefs);
+        final pulled = await _pullAndApply(prefs);
+        if (isDirty) {
+          // 本地存在离线修改：合并后将最新数据推至云端并清除 dirty 标记
+          _logger.i('☁️ Local offline edits detected, merging and syncing to cloud...');
+          await _doSync(prefs);
+        }
+        return pulled;
       } on CloudiskAuthException {
         _cloudisk.invalidateSession();
         if (await _refreshChaoxingSession()) {
           _cloudisk.invalidateSession();
           try {
-            return await _pullAndApply(prefs);
+            final pulled = await _pullAndApply(prefs);
+            if (isDirty) {
+              await _doSync(prefs);
+            }
+            return pulled;
           } on CloudiskAuthException {
             _cloudisk.invalidateSession();
             return null;
@@ -301,43 +532,122 @@ class CloudBackupManager {
   }
 
   /// 下载云端最新备份并写回本地。若云端无备份返回 null。
+  /// 优先拉取现代全量轨（chilleast-modern-*）；若老版本兼容快照更新，执行智能对齐合并。
   Future<Map<String, dynamic>?> _pullAndApply(SharedPreferences prefs) async {
+    final currentGen = _sessionGeneration;
     final session = await _cloudisk.ensureSession();
-    final latest = await _findLatestBackup(session);
-    if (latest == null) return null;
+    final scan = await _findLatestBackups(session);
+    final modernEntry = scan.modern;
+    final legacyEntry = scan.legacy;
 
-    final bytes = await _cloudisk.downloadBytes(
-      resid: latest['resid']!,
-      encryptedId: latest['encryptedId']!,
-      puid: latest['puid']!.isNotEmpty ? latest['puid']! : session.puid,
-      folderId: session.rootDirId,
-    );
-    // 先校验再写回：坏文件不碰本地
-    final backup =
-        BackupExportService.parseBackupJson(utf8.decode(bytes));
+    if (modernEntry == null && legacyEntry == null) return null;
+
+    Map<String, dynamic> backup;
+    String activeSlot = fixedSlot;
+    String activeResid = '';
+    String activeEncryptedId = '';
+
+    // 决策仲裁：
+    // 1. 若现代轨存在，且 (没有老版快照 或 现代轨时间戳 >= 老版快照时间戳) -> 直接全量拉取现代轨
+    // 2. 若仅存在老版快照 -> 老用户升级，拉取老版快照
+    // 3. 若两者均存在，但老版快照更新 -> 老设备修改过基础设置，拉取两者进行合并
+    if (modernEntry != null &&
+        (legacyEntry == null ||
+            modernEntry['stamp']!.compareTo(legacyEntry['stamp']!) >= 0)) {
+      final bytes = await _cloudisk.downloadBytes(
+        resid: modernEntry['resid']!,
+        encryptedId: modernEntry['encryptedId']!,
+        puid: modernEntry['puid']!.isNotEmpty
+            ? modernEntry['puid']!
+            : session.puid,
+        folderId: session.rootDirId,
+      );
+      backup = BackupExportService.parseBackupJson(utf8.decode(bytes));
+      activeResid = modernEntry['resid']!;
+      activeEncryptedId = modernEntry['encryptedId']!;
+      _logger.i('☁️ Modern cloud backup pulled: ${modernEntry['name']}');
+    } else if (legacyEntry != null && modernEntry == null) {
+      final bytes = await _cloudisk.downloadBytes(
+        resid: legacyEntry['resid']!,
+        encryptedId: legacyEntry['encryptedId']!,
+        puid: legacyEntry['puid']!.isNotEmpty
+            ? legacyEntry['puid']!
+            : session.puid,
+        folderId: session.rootDirId,
+      );
+      backup = BackupExportService.parseBackupJson(utf8.decode(bytes));
+      activeSlot = legacyEntry['slot']!;
+      activeResid = legacyEntry['resid']!;
+      activeEncryptedId = legacyEntry['encryptedId']!;
+      _logger.i(
+          '☁️ Legacy backup pulled (upgrading to modern): ${legacyEntry['name']}');
+    } else {
+      // 场景 3：老设备修改过基础设置，拉取两者进行合并
+      final modernBytes = await _cloudisk.downloadBytes(
+        resid: modernEntry!['resid']!,
+        encryptedId: modernEntry['encryptedId']!,
+        puid: modernEntry['puid']!.isNotEmpty
+            ? modernEntry['puid']!
+            : session.puid,
+        folderId: session.rootDirId,
+      );
+      final legacyBytes = await _cloudisk.downloadBytes(
+        resid: legacyEntry!['resid']!,
+        encryptedId: legacyEntry['encryptedId']!,
+        puid: legacyEntry['puid']!.isNotEmpty
+            ? legacyEntry['puid']!
+            : session.puid,
+        folderId: session.rootDirId,
+      );
+      final modernJson =
+          BackupExportService.parseBackupJson(utf8.decode(modernBytes));
+      final legacyJson =
+          BackupExportService.parseBackupJson(utf8.decode(legacyBytes));
+      backup = mergeModernWithLegacy(modernJson, legacyJson);
+      activeResid = modernEntry['resid']!;
+      activeEncryptedId = modernEntry['encryptedId']!;
+      _logger.i('☁️ Merged modern backup with newer legacy backup');
+    }
+
+    if (_sessionGeneration != currentGen) {
+      _logger.w('☁️ Pull backup aborted: session generation changed');
+      return null;
+    }
+
     await BackupExportService.applyBackupData(backup);
-    await prefs.setString(_activeSlotKey, latest['slot']!);
-    await prefs.setString(_activeResidKey, latest['resid']!);
-    await prefs.setString(_activeEncryptedIdKey, latest['encryptedId']!);
-    _logger.i('☁️ Cloud backup pulled: ${latest['name']}');
+    if (_sessionGeneration != currentGen) {
+      return null;
+    }
+
+    await prefs.setString(_activeSlotKey, activeSlot);
+    await prefs.setString(_activeResidKey, activeResid);
+    await prefs.setString(_activeEncryptedIdKey, activeEncryptedId);
     return backup;
   }
 
-  /// 翻页找云端最新的备份文件（最多 5 页）。
-  Future<Map<String, String>?> _findLatestBackup(
+  /// 翻页检索云端最新的现代备份与兼容备份（最多 5 页）。
+  Future<({Map<String, String>? modern, Map<String, String>? legacy})>
+      _findLatestBackups(
     CloudiskSession session,
   ) async {
-    Map<String, String>? best;
+    Map<String, String>? bestModern;
+    Map<String, String>? bestLegacy;
     var page = 1;
     const size = 60;
     for (var i = 0; i < 5; i++) {
       final result =
           await _cloudisk.listRes(parentId: session.rootDirId, page: page);
-      final candidate = pickLatestBackupEntry(result.entries);
-      if (candidate != null &&
-          (best == null ||
-              candidate['stamp']!.compareTo(best['stamp']!) > 0)) {
-        best = candidate;
+      final modernCandidate = pickLatestModernBackupEntry(result.entries);
+      if (modernCandidate != null &&
+          (bestModern == null ||
+              modernCandidate['stamp']!.compareTo(bestModern['stamp']!) > 0)) {
+        bestModern = modernCandidate;
+      }
+      final legacyCandidate = pickLatestBackupEntry(result.entries);
+      if (legacyCandidate != null &&
+          (bestLegacy == null ||
+              legacyCandidate['stamp']!.compareTo(bestLegacy['stamp']!) > 0)) {
+        bestLegacy = legacyCandidate;
       }
       if (result.entries.length >= result.totalCount ||
           result.entries.length < size) {
@@ -345,46 +655,130 @@ class CloudBackupManager {
       }
       page++;
     }
-    return best;
+    return (modern: bestModern, legacy: bestLegacy);
   }
 
   Future<bool> _doSync(SharedPreferences prefs) async {
-      final data = await BackupExportService.buildBackupData();
-      final bytes = utf8.encode(const JsonEncoder().convert(data));
+    final currentGen = _sessionGeneration;
+    final now = DateTime.now();
 
-      final session = await _cloudisk.ensureSession();
-      final filename = buildFileName(fixedSlot, DateTime.now());
+    // 1. 现代轨（全量数据，format: 'chilleast-modern'）
+    final modernData = await BackupExportService.buildBackupData(
+      format: BackupExportService.modernBackupFormat,
+    );
+    final modernBytes = utf8.encode(const JsonEncoder().convert(modernData));
 
-      final uploaded = await _cloudisk.uploadJson(
-        folderId: session.rootDirId,
-        filename: filename,
-        bytes: bytes,
+    // 上传前完整性回环反序列化预检
+    try {
+      final decoded = jsonDecode(utf8.decode(modernBytes));
+      if (decoded is! Map<String, dynamic> ||
+          decoded['format'] != BackupExportService.modernBackupFormat) {
+        throw const FormatException('备份完整性校验失败：缺少合法 modern format 标识');
+      }
+    } catch (e) {
+      _logger.e('☁️ Cloud modern backup pre-upload integrity check failed: $e');
+      return false;
+    }
+
+    final session = await _cloudisk.ensureSession();
+    final modernFilename = buildModernFileName(now);
+
+    final modernUploaded = await _cloudisk.uploadJson(
+      folderId: session.rootDirId,
+      filename: modernFilename,
+      bytes: modernBytes,
+    );
+    final modernResid = modernUploaded['resid'].toString();
+
+    if (_sessionGeneration != currentGen) {
+      _logger.w('☁️ Sync backup aborted: session generation changed');
+      return false;
+    }
+
+    // 2. 兼容轨（format: 'chilleast-backup'，供 main 1.0.12 消费）
+    String? legacyResid;
+    try {
+      final legacyData = await BackupExportService.buildBackupData(
+        format: BackupExportService.legacyBackupFormat,
       );
-      final resid = uploaded['resid'].toString();
+      final legacyBytes = utf8.encode(const JsonEncoder().convert(legacyData));
+      final legacyFilename = buildFileName(fixedSlot, now);
+      final legacyUploaded = await _cloudisk.uploadJson(
+        folderId: session.rootDirId,
+        filename: legacyFilename,
+        bytes: legacyBytes,
+      );
+      legacyResid = legacyUploaded['resid']?.toString();
+    } catch (e) {
+      _logger.w('☁️ Legacy mirror sync failed: $e');
+    }
 
-      // 收敛清理：删掉所有其它同前缀旧文件
-      await _pruneOthers(session, keepResid: resid);
+    if (_sessionGeneration != currentGen) {
+      return false;
+    }
 
-      await prefs.setString(_activeSlotKey, fixedSlot);
-      await prefs.setString(_activeResidKey, resid);
-      await prefs.setString(_activeEncryptedIdKey,
-          uploaded['encryptedId']?.toString() ?? '');
-      _logger.i('☁️ Cloud backup synced: $filename');
-      return true;
+    // 3. 独立收敛清理两轨，各自严格滚动保留最新 3 份
+    await _pruneDualTracks(
+      session,
+      keepModernResid: modernResid,
+      keepLegacyResid: legacyResid,
+      keepCount: defaultKeepCount,
+    );
+
+    if (_sessionGeneration != currentGen) {
+      return false;
+    }
+
+    await prefs.setString(_activeSlotKey, fixedSlot);
+    await prefs.setString(_activeResidKey, modernResid);
+    await prefs.setString(_activeEncryptedIdKey,
+        modernUploaded['encryptedId']?.toString() ?? '');
+    await prefs.remove(_dirtyStorageKey);
+    _logger.i('☁️ Dual cloud backup synced: $modernFilename');
+    return true;
   }
 
-  Future<void> _pruneOthers(
+  Future<void> _pruneDualTracks(
     CloudiskSession session, {
-    required String keepResid,
+    required String keepModernResid,
+    String? keepLegacyResid,
+    int keepCount = defaultKeepCount,
   }) async {
+    final allEntries = <Map<String, dynamic>>[];
     var page = 1;
     const size = 60;
-    // 最多翻 5 页，防异常大目录
     for (var i = 0; i < 5; i++) {
       final result =
           await _cloudisk.listRes(parentId: session.rootDirId, page: page);
-      final stale = pickStaleEntries(result.entries, keepResid);
-      for (final s in stale) {
+      allEntries.addAll(result.entries);
+      if (result.entries.length >= result.totalCount ||
+          result.entries.length < size) {
+        break;
+      }
+      page++;
+    }
+
+    // 1. 清理现代轨（超过 3 份的旧文件）
+    final staleModern = pickStaleModernEntries(allEntries, keepModernResid,
+        keepCount: keepCount);
+    for (final s in staleModern) {
+      if (s['encryptedId']!.isEmpty) continue;
+      try {
+        await _cloudisk.deleteRes(
+          resid: s['resid']!,
+          encryptedId: s['encryptedId']!,
+          puid: s['puid']!.isNotEmpty ? s['puid']! : session.puid,
+        );
+      } catch (e) {
+        _logger.w('☁️ Prune modern backup ${s['resid']} failed: $e');
+      }
+    }
+
+    // 2. 清理兼容轨（超过 3 份的旧文件）
+    if (keepLegacyResid != null) {
+      final staleLegacy = pickStaleEntries(allEntries, keepLegacyResid,
+          keepCount: keepCount);
+      for (final s in staleLegacy) {
         if (s['encryptedId']!.isEmpty) continue;
         try {
           await _cloudisk.deleteRes(
@@ -393,15 +787,27 @@ class CloudBackupManager {
             puid: s['puid']!.isNotEmpty ? s['puid']! : session.puid,
           );
         } catch (e) {
-          // 单个删除失败不影响整体，下次同步继续收敛
-          _logger.w('☁️ Prune ${s['resid']} failed: $e');
+          _logger.w('☁️ Prune legacy backup ${s['resid']} failed: $e');
         }
       }
-      if (result.entries.length >= result.totalCount ||
-          result.entries.length < size) {
-        break;
+    }
+
+    // 3. 清理已废弃的旧 sidecar 孤儿文件（如果存在）
+    for (final e in allEntries) {
+      final name = e['name']?.toString() ?? '';
+      if (name == 'chilleast-sidecar-v2.json') {
+        final resid = e['id']?.toString() ?? '';
+        final encryptedId = e['encryptedId']?.toString() ?? '';
+        if (resid.isNotEmpty && encryptedId.isNotEmpty) {
+          try {
+            await _cloudisk.deleteRes(
+              resid: resid,
+              encryptedId: encryptedId,
+              puid: e['puid']?.toString() ?? session.puid,
+            );
+          } catch (_) {}
+        }
       }
-      page++;
     }
   }
 }

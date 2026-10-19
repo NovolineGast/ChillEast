@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ai/ai_provider.dart';
 import '../../../core/utils/l10n_extension.dart';
 import '../../../core/utils/route_utils.dart';
+import '../../profile/screens/ai_memory_screen.dart';
 import '../../profile/screens/ai_settings_screen.dart';
 
 /// 贴合 MD2 规范的 AI 响应卡片组件
@@ -25,6 +26,8 @@ class AiResponseCard extends ConsumerStatefulWidget {
 
 class _AiResponseCardState extends ConsumerState<AiResponseCard> {
   final ScrollController _scrollController = ScrollController();
+  GlobalKey _latestUserMessageKey = GlobalKey();
+  int _lastUserMessageCount = 0;
 
   @override
   void dispose() {
@@ -32,9 +35,18 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
     super.dispose();
   }
 
-  void _scrollToBottom() {
+  void _scrollToLatestUserMessage() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
+      if (!mounted) return;
+      final targetContext = _latestUserMessageKey.currentContext;
+      if (targetContext != null && targetContext.mounted) {
+        Scrollable.ensureVisible(
+          targetContext,
+          alignment: 0.0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        );
+      } else if (_scrollController.hasClients) {
         _scrollController.animateTo(
           _scrollController.position.maxScrollExtent,
           duration: const Duration(milliseconds: 250),
@@ -49,11 +61,18 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final aiState = ref.watch(aiAssistantProvider);
 
-    // 当消息增加或正在加载时滚动到底部
+    final userMessageCount =
+        aiState.displayMessages.where((m) => m.role == 'user').length;
+    if (userMessageCount != _lastUserMessageCount) {
+      _lastUserMessageCount = userMessageCount;
+      _latestUserMessageKey = GlobalKey();
+    }
+
+    // 当消息增加或正在加载时滚动到最新用户消息（用户消息在顶部，AI回答紧接着在下方）
     ref.listen<AiAssistantState>(aiAssistantProvider, (prev, next) {
       if (next.displayMessages.length != prev?.displayMessages.length ||
           next.isLoading != prev?.isLoading) {
-        _scrollToBottom();
+        _scrollToLatestUserMessage();
       }
     });
 
@@ -115,7 +134,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
   );
 }
 
-  /// 卡片头部（纯净无多余文字与分割线）
+  /// 卡片头部（显示记忆入口、新对话与配置）
   Widget _buildCardHeader(
       BuildContext context, AiAssistantState aiState, bool isDark) {
     if (aiState.displayMessages.isEmpty) {
@@ -129,6 +148,38 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
+          // 记忆快捷入口
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                createSlideUpRoute(const AiMemoryScreen()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.psychology_outlined,
+                    size: 14,
+                    color: isDark ? Colors.white60 : Colors.grey[600],
+                  ),
+                  const SizedBox(width: 3),
+                  Text(
+                    '记忆',
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      color: isDark ? Colors.white60 : Colors.grey[600],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          // 开启新对话
           GestureDetector(
             onTap: () {
               ref.read(aiAssistantProvider.notifier).clearSession();
@@ -155,11 +206,12 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
             ),
           ),
           const SizedBox(width: 8),
+          // 配置
           GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
-                createSlideUpRoute(const AiSettingsScreen()),
+                createSlideHorizontalRoute(const AiSettingsScreen()),
               );
             },
             child: Padding(
@@ -187,10 +239,15 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
       return _buildInitialQuickActions(context, isDark);
     }
 
-    final hasError = aiState.errorMessage != null && !aiState.isLoading;
+    final isLimitReached = aiState.isRoundLimitReached;
+    final hasError = aiState.errorMessage != null && !aiState.isLoading && !isLimitReached;
     final itemCount = aiState.displayMessages.length +
         (aiState.isLoading ? 1 : 0) +
-        (hasError ? 1 : 0);
+        (hasError ? 1 : 0) +
+        (isLimitReached ? 1 : 0);
+
+    final latestUserMessageIndex =
+        aiState.displayMessages.lastIndexWhere((m) => m.role == 'user');
 
     return ListView.builder(
       controller: _scrollController,
@@ -200,16 +257,104 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
       itemBuilder: (context, index) {
         if (index < aiState.displayMessages.length) {
           final msg = aiState.displayMessages[index];
-          return _buildMessageItem(msg, isDark);
+          final isLatestUser = index == latestUserMessageIndex;
+          return _buildMessageItem(
+            msg,
+            isDark,
+            key: isLatestUser ? _latestUserMessageKey : null,
+          );
         }
-        if (aiState.isLoading && index == aiState.displayMessages.length) {
-          return _buildLoadingBubble(aiState, isDark);
+        var nextIdx = index - aiState.displayMessages.length;
+        if (aiState.isLoading) {
+          if (nextIdx == 0) return _buildLoadingBubble(aiState, isDark);
+          nextIdx--;
         }
         if (hasError) {
-          return _buildErrorMessageBubble(aiState.errorMessage!, isDark);
+          if (nextIdx == 0) return _buildErrorMessageBubble(aiState.errorMessage!, isDark);
+          nextIdx--;
+        }
+        if (isLimitReached && nextIdx == 0) {
+          return _buildRoundLimitBanner(context, isDark);
         }
         return const SizedBox.shrink();
       },
+    );
+  }
+
+  /// 对话轮次达到上限提示横幅
+  Widget _buildRoundLimitBanner(BuildContext context, bool isDark) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: isDark
+            ? Colors.orangeAccent.withOpacity(0.12)
+            : const Color(0xFFFFF8E1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: isDark
+              ? Colors.orangeAccent.withOpacity(0.3)
+              : Colors.orangeAccent.withOpacity(0.4),
+          width: 0.8,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.info_outline_rounded,
+                size: 15,
+                color: Colors.orangeAccent,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                '已达本轮对话上限（20 轮）',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.orangeAccent : const Color(0xFFE65100),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '为了保证回答质量，每次对话最多支持 20 个来回。关键信息与偏好已沉淀至长期记忆，开启新对话即可继续交流。',
+            style: TextStyle(
+              fontSize: 11.5,
+              height: 1.4,
+              color: isDark ? Colors.white70 : Colors.black87,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerRight,
+            child: InkWell(
+              onTap: () {
+                ref.read(aiAssistantProvider.notifier).clearSession();
+              },
+              borderRadius: BorderRadius.circular(4),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF09C489),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: const Text(
+                  '开启新对话',
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -260,7 +405,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    createSlideUpRoute(const AiSettingsScreen()),
+                    createSlideHorizontalRoute(const AiSettingsScreen()),
                   );
                 },
                 child: Text(
@@ -297,7 +442,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
             onPressed: () {
               Navigator.push(
                 context,
-                createSlideUpRoute(const AiSettingsScreen()),
+                createSlideHorizontalRoute(const AiSettingsScreen()),
               );
             },
             icon: const Icon(Icons.code_rounded, size: 16),
@@ -340,7 +485,7 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    createSlideUpRoute(const AiSettingsScreen()),
+                    createSlideHorizontalRoute(const AiSettingsScreen()),
                   );
                 },
                 child: Padding(
@@ -380,10 +525,12 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                     width: 1.0,
                   ),
                 ),
-                onPressed: () {
-                  final text = item['text'] as String;
-                  ref.read(aiAssistantProvider.notifier).sendMessage(text);
-                },
+                onPressed: ref.watch(aiAssistantProvider).isLoading
+                    ? null
+                    : () {
+                        final text = item['text'] as String;
+                        ref.read(aiAssistantProvider.notifier).sendMessage(text);
+                      },
               );
             }).toList(),
           ),
@@ -392,39 +539,35 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
     );
   }
 
-  /// 消息渲染（完美适配明暗模式与 Markdown）
-  Widget _buildMessageItem(AiDisplayMessage msg, bool isDark) {
+  /// 消息渲染（Agent 输出直接铺在卡片背景上，用户消息保持右侧对话气泡）
+  Widget _buildMessageItem(AiDisplayMessage msg, bool isDark, {Key? key}) {
     final isUser = msg.role == 'user';
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Column(
-        crossAxisAlignment:
-            isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            decoration: BoxDecoration(
-              color: isUser
-                  ? const Color(0xFF09C489).withOpacity(isDark ? 0.25 : 0.12)
-                  : (isDark ? const Color(0xFF282828) : const Color(0xFFF1F3F4)),
-              borderRadius: BorderRadius.only(
-                topLeft: const Radius.circular(8),
-                topRight: const Radius.circular(8),
-                bottomLeft: Radius.circular(isUser ? 8 : 2),
-                bottomRight: Radius.circular(isUser ? 2 : 8),
+    if (isUser) {
+      return Padding(
+        key: key,
+        padding: const EdgeInsets.symmetric(vertical: 6),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: const Color(0xFF09C489).withOpacity(isDark ? 0.25 : 0.12),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(8),
+                  topRight: Radius.circular(8),
+                  bottomLeft: Radius.circular(8),
+                  bottomRight: Radius.circular(2),
+                ),
+                border: Border.all(
+                  color: const Color(0xFF09C489).withOpacity(isDark ? 0.4 : 0.2),
+                  width: 0.8,
+                ),
               ),
-              border: Border.all(
-                color: isUser
-                    ? const Color(0xFF09C489).withOpacity(isDark ? 0.4 : 0.2)
-                    : (isDark ? Colors.white10 : Colors.transparent),
-                width: 0.8,
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (isUser) ...[
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   if (msg.imagePath != null && File(msg.imagePath!).existsSync()) ...[
                     GestureDetector(
                       onTap: () {
@@ -476,168 +619,168 @@ class _AiResponseCardState extends ConsumerState<AiResponseCard> {
                         color: isDark ? Colors.white : const Color(0xFF202124),
                       ),
                     ),
-                ] else
-                  MarkdownBody(
-                    data: msg.text,
-                    selectable: true,
-                    shrinkWrap: true,
-                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
-                      p: TextStyle(
-                        fontSize: 13.5,
-                        height: 1.45,
-                        color: isDark ? const Color(0xFFEEEEEE) : const Color(0xFF202124),
-                      ),
-                      strong: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : Colors.black,
-                      ),
-                      em: TextStyle(
-                        fontStyle: FontStyle.italic,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                      ),
-                      h1: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF202124),
-                      ),
-                      h2: TextStyle(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF202124),
-                      ),
-                      h3: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF202124),
-                      ),
-                      listBullet: TextStyle(
-                        fontSize: 13.5,
-                        color: isDark ? Colors.white70 : Colors.black87,
-                      ),
-                      code: TextStyle(
-                        fontSize: 12,
-                        backgroundColor: isDark ? Colors.white10 : Colors.black.withOpacity(0.06),
-                        color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF09C489),
-                        fontFamily: 'monospace',
-                      ),
-                      codeblockDecoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFEAEAEA),
-                        borderRadius: BorderRadius.circular(4),
-                        border: Border.all(
-                          color: isDark ? Colors.white12 : Colors.black12,
-                          width: 0.5,
-                        ),
-                      ),
-                      blockquoteDecoration: BoxDecoration(
-                        color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
-                        borderRadius: BorderRadius.circular(2),
-                        border: const Border(
-                          left: BorderSide(
-                            color: Color(0xFF09C489),
-                            width: 3,
-                          ),
-                        ),
-                      ),
-                      tableBorder: TableBorder.all(
-                        color: isDark ? Colors.white24 : Colors.grey[300]!,
-                        width: 0.5,
-                      ),
-                      tableHead: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: isDark ? Colors.white : const Color(0xFF202124),
-                      ),
-                      tableBody: TextStyle(
-                        color: isDark ? Colors.white70 : const Color(0xFF3C4043),
-                      ),
-                      pPadding: const EdgeInsets.only(bottom: 4),
-                      listIndent: 16,
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Agent 输出：不套在对话框里，直接在背景之上，距离卡片左右两侧间距相同
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: SizedBox(
+        width: double.infinity,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            MarkdownBody(
+              data: msg.text,
+              selectable: true,
+              shrinkWrap: true,
+              styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                p: TextStyle(
+                  fontSize: 13.5,
+                  height: 1.45,
+                  color: isDark ? const Color(0xFFEEEEEE) : const Color(0xFF202124),
+                ),
+                strong: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : Colors.black,
+                ),
+                em: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+                h1: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+                h2: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+                h3: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+                listBullet: TextStyle(
+                  fontSize: 13.5,
+                  color: isDark ? Colors.white70 : Colors.black87,
+                ),
+                code: TextStyle(
+                  fontSize: 12,
+                  backgroundColor: isDark ? Colors.white10 : Colors.black.withOpacity(0.06),
+                  color: isDark ? const Color(0xFF4ADE80) : const Color(0xFF09C489),
+                  fontFamily: 'monospace',
+                ),
+                codeblockDecoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFEAEAEA),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(
+                    color: isDark ? Colors.white12 : Colors.black12,
+                    width: 0.5,
+                  ),
+                ),
+                blockquoteDecoration: BoxDecoration(
+                  color: isDark ? Colors.white.withOpacity(0.05) : Colors.black.withOpacity(0.03),
+                  borderRadius: BorderRadius.circular(2),
+                  border: const Border(
+                    left: BorderSide(
+                      color: Color(0xFF09C489),
+                      width: 3,
                     ),
                   ),
-                if (!isUser) ...[
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      GestureDetector(
-                        onTap: () {
-                          Clipboard.setData(ClipboardData(text: msg.text));
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(context.l10n.copiedAnswer),
-                              duration: const Duration(seconds: 1),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
-                        },
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 2),
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.copy_rounded,
-                                size: 13,
-                                color: isDark ? Colors.white54 : Colors.grey[500],
-                              ),
-                              const SizedBox(width: 4),
-                              Text(
-                                context.l10n.copy,
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: isDark ? Colors.white54 : Colors.grey[500],
-                                ),
-                              ),
-                            ],
+                ),
+                tableBorder: TableBorder.all(
+                  color: isDark ? Colors.white24 : Colors.grey[300]!,
+                  width: 0.5,
+                ),
+                tableHead: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: isDark ? Colors.white : const Color(0xFF202124),
+                ),
+                tableBody: TextStyle(
+                  color: isDark ? Colors.white70 : const Color(0xFF3C4043),
+                ),
+                pPadding: const EdgeInsets.only(bottom: 4),
+                listIndent: 16,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Clipboard.setData(ClipboardData(text: msg.text));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(context.l10n.copiedAnswer),
+                        duration: const Duration(seconds: 1),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 2),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.copy_rounded,
+                          size: 13,
+                          color: isDark ? Colors.white54 : Colors.grey[500],
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          context.l10n.copy,
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: isDark ? Colors.white54 : Colors.grey[500],
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ],
+                ),
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  /// 加载等待指示
+  /// 加载等待指示（直接在背景之上展示）
   Widget _buildLoadingBubble(AiAssistantState aiState, bool isDark) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Align(
         alignment: Alignment.centerLeft,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF282828) : const Color(0xFFF1F3F4),
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: isDark ? Colors.white10 : Colors.transparent,
-              width: 0.8,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation(Color(0xFF09C489)),
+              ),
             ),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(
-                width: 14,
-                height: 14,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation(Color(0xFF09C489)),
-                ),
+            const SizedBox(width: 8),
+            Text(
+              context.l10n.aiThinking,
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.white70 : Colors.grey[600],
               ),
-              const SizedBox(width: 8),
-              Text(
-                context.l10n.aiThinking,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: isDark ? Colors.white70 : Colors.grey[600],
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -711,13 +854,15 @@ class AiQuickPromptsList extends ConsumerWidget {
                         width: 1.0,
                       ),
                     ),
-                    onPressed: () {
-                      final text = item['text'] as String;
-                      if (onPromptSelected != null) {
-                        onPromptSelected!(text);
-                      }
-                      ref.read(aiAssistantProvider.notifier).sendMessage(text);
-                    },
+                    onPressed: ref.watch(aiAssistantProvider).isLoading
+                        ? null
+                        : () {
+                            final text = item['text'] as String;
+                            if (onPromptSelected != null) {
+                              onPromptSelected!(text);
+                            }
+                            ref.read(aiAssistantProvider.notifier).sendMessage(text);
+                          },
                   ),
                 );
               }).toList(),

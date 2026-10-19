@@ -12,3 +12,5 @@ export 'tools/library_tool.dart';
 export 'tools/sunshine_tool.dart';
 export 'tools/questionnaire_tool.dart';
 export 'tools/leave_tool.dart';
+export 'tools/open_page_tool.dart';
+export 'tools/settings_tool.dart';

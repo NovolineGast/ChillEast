@@ -220,18 +220,22 @@ class LeaveService {
   }) async {
     final attachment = attachmentPath;
     final hasFile = attachment != null && attachment.isNotEmpty;
-    final data = hasFile
-        ? FormData.fromMap({
-            ...fields,
-            'pathFile': await MultipartFile.fromFile(attachment,
-                filename: attachment.split('/').last),
-          })
-        : fields;
 
-    final response = await _withXgxtAuth(() => _dio.post(
+    Future<dynamic> buildData() async {
+      if (hasFile) {
+        return FormData.fromMap({
+          ...fields,
+          'pathFile': await MultipartFile.fromFile(attachment,
+              filename: attachment.split('/').last),
+        });
+      }
+      return fields;
+    }
+
+    final response = await _withXgxtAuth(() async => _dio.post(
           AppConstants.leaveApplyUrl,
           queryParameters: {'_t_s_': _stamp()},
-          data: data,
+          data: await buildData(),
           options: Options(
             responseType: ResponseType.plain,
             followRedirects: false,

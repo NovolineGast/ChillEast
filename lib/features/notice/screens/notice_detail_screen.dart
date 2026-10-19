@@ -4,14 +4,17 @@ import '../../../core/utils/l10n_extension.dart';
 import '../providers/notice_provider.dart';
 import '../services/notice_service.dart';
 import 'package:logger/logger.dart';
-import 'dart:convert';
 
 class NoticeDetailScreen extends ConsumerStatefulWidget {
   final String noticeId;
+  final bool isEmbedded;
+  final VoidCallback? onClose;
   
   const NoticeDetailScreen({
     super.key,
     required this.noticeId,
+    this.isEmbedded = false,
+    this.onClose,
   });
 
   @override
@@ -30,6 +33,14 @@ class _NoticeDetailScreenState extends ConsumerState<NoticeDetailScreen> {
   void initState() {
     super.initState();
     _loadDetail();
+  }
+
+  @override
+  void didUpdateWidget(NoticeDetailScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.noticeId != widget.noticeId) {
+      _loadDetail();
+    }
   }
   
   Future<void> _loadDetail() async {
@@ -64,10 +75,25 @@ class _NoticeDetailScreenState extends ConsumerState<NoticeDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
+      backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
       appBar: AppBar(
         title: Text(context.l10n.noticeDetail),
         elevation: 0,
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        foregroundColor: isDark ? Colors.white : Colors.black87,
+        leading: widget.isEmbedded
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: () {
+                  if (widget.onClose != null) {
+                    widget.onClose!();
+                  }
+                },
+              )
+            : null,
+        automaticallyImplyLeading: !widget.isEmbedded,
       ),
       body: _buildBody(context),
     );

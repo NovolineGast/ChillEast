@@ -90,6 +90,30 @@ class BaselineFakeStorage extends TimetableStorage {
       };
 }
 
+class LegacyStorage extends BaselineFakeStorage {
+  final customLegacy = const CourseModel(
+    id: 'custom_999',
+    name: '自定义课程',
+    teacher: '老师',
+    classroom: '教室',
+    weeks: '1(周)',
+    periods: '01-02',
+    dayOfWeek: 1,
+    startPeriod: 1,
+    endPeriod: 2,
+    isCustom: true,
+  );
+
+  @override
+  Future<bool> hasRawCourseList() async => false;
+
+  @override
+  Future<List<CourseModel>> readRawCourseList() async => [];
+
+  @override
+  Future<List<CourseModel>> readCourseList() async => [customLegacy];
+}
+
 void main() {
   group('Raw baseline immutability (rules must stay effective)', () {
     late BaselineFakeStorage fakeStorage;
@@ -185,13 +209,85 @@ void main() {
         expect(WeekParser.parseWeeks(c.weeks).contains(5), isTrue);
       }
     });
+
+    test('raw courses containing custom courses are defensively filtered out', () async {
+      // 模拟 raw_courses.json 被脏数据污染（包含自定义课程）
+      fakeStorage.rawCourses = [
+        const CourseModel(
+          id: 'c1',
+          name: '纯正教务课程',
+          teacher: '张老师',
+          classroom: '101',
+          weeks: '1-16(周)',
+          periods: '01-02',
+          dayOfWeek: 1,
+          startPeriod: 1,
+          endPeriod: 2,
+        ),
+        const CourseModel(
+          id: 'custom_12345',
+          name: '意外混入的自定义课程',
+          teacher: '自建',
+          classroom: '202',
+          weeks: '1-8(周)',
+          periods: '03-04',
+          dayOfWeek: 2,
+          startPeriod: 3,
+          endPeriod: 4,
+          isCustom: true,
+        ),
+      ];
+
+      await ruleService.applyRulesAndRegenerate();
+
+      // regenerated savedCourses 绝不会包含未通过规则加课而混在 raw 中的脏数据
+      expect(fakeStorage.savedCourses.any((c) => c.name == '纯正教务课程'), isTrue);
+      expect(fakeStorage.savedCourses.any((c) => c.name == '意外混入的自定义课程'), isFalse);
+    });
+
+    test('missing raw with legacy courses containing custom courses is forbidden from being saved to raw', () async {
+      final legacyStorage = LegacyStorage();
+      final service = TimetableRuleService(storage: legacyStorage);
+
+      await service.applyRulesAndRegenerate();
+
+      // 严禁将包含自定义课程的 courses.json 当作 raw 写入！
+      expect(legacyStorage.saveRawCallCount, equals(0));
+    });
+
+    test('clearAllRules restores pristine raw baseline without custom courses', () async {
+      // 添加自定义加课规则
+      const customCourse = CourseModel(
+        id: 'custom_test',
+        name: '手动添加课程',
+        teacher: '赵老师',
+        classroom: '303',
+        weeks: '1-4(周)',
+        periods: '05-06',
+        dayOfWeek: 3,
+        startPeriod: 5,
+        endPeriod: 6,
+        isCustom: true,
+      );
+      await ruleService.addRule(TimetableRule.createCustomCourse(course: customCourse));
+
+      expect(fakeStorage.savedCourses.any((c) => c.name == '手动添加课程'), isTrue);
+
+      // 清除所有规则
+      await ruleService.clearAllRules();
+
+      // 自定义课程完全清除，仅剩原始纯净教务课程
+      expect(fakeStorage.savedCourses.any((c) => c.name == '手动添加课程'), isFalse);
+      expect(fakeStorage.savedCourses.length, equals(2));
+      expect(fakeStorage.savedCourses.every((c) => !c.isCustom), isTrue);
+    });
   });
 
   group('MCP manage_timetable_rules schema', () {
     test('reschedule exposes precise period parameters', () {
       final tool = TimetableRuleTool.create(
           service: TimetableRuleService(storage: BaselineFakeStorage()));
-      final schema = tool.inputSchema!;
+      final schema = tool.inputSchema;
       final props = schema['properties'] as Map<String, dynamic>;
       for (final key in [
         'sourceStartPeriod',

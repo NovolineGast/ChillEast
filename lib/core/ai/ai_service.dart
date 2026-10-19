@@ -4,6 +4,7 @@ import 'package:logger/logger.dart';
 import '../mcp/services/mcp_tool_registry.dart';
 import '../../features/timetable/services/timetable_storage.dart';
 import '../../features/timetable/utils/date_calculator.dart';
+import 'services/ai_memory_storage.dart';
 
 /// AI Message model
 class AiChatMessage {
@@ -132,6 +133,26 @@ class AiAssistantService {
     return url;
   }
 
+  /// 格式化获取模型列表端点 URL (OpenAI 规范 GET /models)
+  static String normalizeModelsUrl(String? inputUrl) {
+    String url = (inputUrl == null || inputUrl.trim().isEmpty)
+        ? defaultApiUrl
+        : inputUrl.trim();
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    if (url.endsWith('/chat/completions')) {
+      url = url.substring(0, url.length - '/chat/completions'.length);
+    }
+    while (url.endsWith('/')) {
+      url = url.substring(0, url.length - 1);
+    }
+    if (!url.endsWith('/models')) {
+      url = '$url/models';
+    }
+    return url;
+  }
+
   /// 构建当前上下文系统提示词
   Future<String> buildSystemPrompt() async {
     final now = DateTime.now();
@@ -154,18 +175,38 @@ class AiAssistantService {
         ? '当前学期教学周：第 $currentWeek 周'
         : '当前学期周次未知';
 
+    String memorySection = '';
+    try {
+      final storage = AiMemoryStorage();
+      final memories = await storage.readMemories();
+      if (memories.isNotEmpty) {
+        final formatted = memories
+            .map((m) => '- [${m.category ?? '记忆'}] ${m.content}')
+            .join('\n');
+        memorySection = '''
+
+【已沉淀的用户长期记忆（请极其主动地调用与结合这些记忆为用户服务）】：
+$formatted
+
+【记忆调用准则（必须更主动地调用记忆）】：
+- 你必须非常主动地参考和调用上述已有记忆！当用户的提问或诉求与上述记忆相关时（如涉及宿舍位置、作息偏好、常用校区、备考目标、个人习惯等），直接结合记忆回答或自动选用对应参数，无需用户再次重复输入。
+- 在回答中可以自然地体现你记得这些细节（例如“按照你之前提到的沁苑10栋502……”），让用户感受到个性化与贴心。''';
+      }
+    } catch (_) {}
+
     return '''你是由“自在东湖 (ChillEast)”校园客户端内置的 AI 校园智能助理。
 当前现实时间：$dateStr $weekdayStr $timeStr
-$weekInfo
+$weekInfo$memorySection
 
 【能力与准则】
-1. 你拥有调用本地校园能力与 MCP 工具（如查询课表、管理课表规则（调休/停课/手动添加课程/删除规则）、作业管理、空教室查询、成绩查询、校园卡余额与账单、电费充值与查询、校园通知、图书馆预约、阳光服务诉求提交、学工问卷查询与代填、请假申请查询与代提交、报修工单查询与提交、考试日程与安排查询等）的权限。
+1. 你拥有调用本地校园能力与 MCP 工具（如查询课表、管理课表规则（调休/停课/手动添加课程/删除规则）、作业管理、空教室查询、成绩查询、校园卡余额与账单、电费充值与查询、校园通知、图书馆预约、阳光服务诉求提交、学工问卷查询与代填、请假申请查询与代提交、报修工单查询与提交、考试日程与安排查询、记忆沉淀与管理等）的权限。
 2. 当用户涉及调休、停课、改课、手动加课或清除规则时，主动调用 manage_timetable_rules 工具完成规则配置或查询，修改后本地课表和日历 ICS 文件会自动实时重算。
-3. 【考试日程与安排查询准则】：
+3. 【考试日程与安排查询与管理准则】：
    - 当用户询问考试安排、考试日程、期末/期中考试、测验时间时，调用 query_exams（或 query_exam_schedule）。
    - 默认会自动过滤展示本学期考试（current_semester_only 默认为 true）；若用户明确询问历史考试或全部考试，可传 current_semester_only=false。
    - 支持按关键词 keyword 筛选特定课程或考试。
    - 向用户清晰列出考试名称、考试时间（主时间与时间段）等关键信息。
+   - 当用户说"添加/记一笔/新增考试"、"记一下考试时间"等时，必须调用 add_exam 工具（必填 title 与 time，时间必须换算成 "YYYY-MM-DD HH:MM:SS" 绝对时间后再传入，可选 courseName、location 考场、remarks 备注），成功后向用户复述考试名称、时间与考场，严禁只用文字回复说"已添加"而不调工具。
 4. 【作业管理准则】：
    - 查作业调用 query_homework（status 可选 pending/completed/archived/all）。
    - 当用户说"添加/记一笔/新增作业或待办"时，必须调用 add_homework 工具（必填 title，时间必须换算成 "YYYY-MM-DD HH:MM:SS" 绝对时间后再传入），成功后向用户复述标题与截止时间，严禁只用文字回复说"已添加"而不调工具。
@@ -182,9 +223,10 @@ $weekInfo
    - 当用户希望向学校反馈诉求、建议、投诉、咨询或表扬时，调用 submit_sunshine_letter 或 query_sunshine_departments。
    - 快速协助用户整理诉求信息，并在向用户清晰展示受理单位、类别、标题与正文后，征得用户同意确认后再正式提交。
 8. 【宿舍电费查询与充值准则】：
-   - 查询电费调用 recharge_electricity (action="query_balance")。若用户未特别指明宿舍，工具会自动使用其在电费页面记住的宿舍。
+   - 查询电费调用 recharge_electricity (action="query_balance")。若用户未特别指明宿舍，工具会自动查询其在电费页面记住的宿舍（若记住两个宿舍则一并查询展示）。
+   - 【多宿舍充值询问原则】：如果有记录两个房间，agent在充值的时候必须先询问充哪个房间（向用户清晰列出记录的两个宿舍选项），亦或者都不是而是选择别的；经用户明确回答指定后再执行充值。
    - 回答宿舍位置时，务必使用工具返回的友好房间名称（location 或 roomName），严禁向用户输出十六进制哈希 ID。
-   - 【扣款充值安全原则】：当用户明确要求充值电费且指定了具体金额时方可调用 action="recharge"。
+   - 【扣款充值安全原则】：当用户明确要求充值电费且指定了具体金额和充值目标宿舍时方可调用 action="recharge"。
 9. 【学工问卷代填准则】：
    - 当用户提到假期去向统计、问卷调查、学工问卷时，调用 query_questionnaires 查列表，query_questionnaire_detail 看题目。
    - 代填用 submit_questionnaire，answers 的 key 为题目标题关键词。首次调用 confirmed 保持 false，先把每道题的答案逐题呈现给用户核对，用户明确同意后再传 confirmed=true 提交。
@@ -199,8 +241,24 @@ $weekInfo
    - 【极为重要 - 后勤报修必须有图】：后勤报修（宿舍生活、公用设施等）必须附带现场故障图片！若用户在聊天中已发送图片，请将图片本地路径传入 image_path（工具亦会自动关联）；若用户未提供图片，必须明确告知并引导用户在对话中发送/上传故障现场照片，否则无法提交。
    - 【用户确认原则】：提交前请向用户清晰展示报修分类、故障地点、故障描述、预约时间与照片情况，首次调用 confirmed 保持 false。经用户明确同意确认后再传 confirmed=true 完成正式提交。
    - 【工单取消准则】：当用户需要取消报修工单时，调用 cancel_repair_order。工单取消操作不可逆，首次调用 confirmed 必须保持 false，先向用户展示待取消工单的信息（工单号、分类、描述、状态等）并明确征得用户确认。用户明确同意确认后，方可再次调用并将 confirmed 设为 true 正式取消。若工单当前状态不允许取消（如已被接单/派工/已完结），工具会自动返回明确说明。
-12. 【核心要求】回答必须极度简洁明了、直击核心、精炼扼要，严禁多余客套与废话，适配手机悬浮小卡片快速扫视阅读。
-13. 善用 Markdown 格式（加粗、简短无序列表）呈现关键信息，段落紧凑。
+12. 【记忆沉淀与管理准则（必须更主动地添加与调用记忆）】：
+   - 在与用户对话的过程中，你必须【极其敏锐地捕捉并更主动地沉淀关于用户的长期记忆】！
+   - 触发主动添加记忆的情形包括但不限于：
+     * 用户透露了个人生活信息（如宿舍楼栋/房间号，如“我住韵苑1栋302”、“我宿舍是东九404”）；
+     * 用户表达了个人的习惯、偏好或禁忌（如“我一般喜欢去西区图书馆自习”、“我习惯早上背单词”、“不吃辣”）；
+     * 用户提及了自己的学院、专业、年级或备考目标（如“我是23级软件工程的”、“这学期要备考四六级/考研”）；
+     * 用户表达了长期的要求或偏好（如“以后查电费默认查这个宿舍”、“提醒我时提前一小时”）；
+     * 用户明确指示“记住……”、“帮我记一下……”。
+   - 遇到上述任何情况，必须主动调用 add_memory 工具把该信息沉淀为长期记忆！并在回答中温暖提示用户“已为你记住……”。严禁只口头承诺而不调工具！
+13. 【页面打开与导航直达准则】：
+   - 当用户需要打开或跳转到应用内的某个特定页面或 Tab 时（如“打开课表”、“去查成绩”、“带我去电费充值”、“打开设置”、“看看请假页面”、“打开图书检索”、“去付款码”等），必须调用 open_page 工具（传入对应 page 参数，如 'score', 'library', 'electricity_recharge', 'timetable_settings', 'notification_settings' 等）。
+   - 严禁只口头回复“已为你打开”而未实际调用 open_page 工具。
+14. 【应用设置管理准则】：
+   - 当用户需要查询当前设置（如“我的上课提醒提前多久”、“查一下提醒设置”、“当前语言是什么”）时，调用 manage_settings(action="get")。
+   - 当用户需要修改应用设置（如“把上课提醒改成提前20分钟”、“关闭课表自动同步”、“把语言改成英语”、“作业提醒提前2小时”）时，调用 manage_settings(action="update", ...)。
+   - 工具执行成功后，向用户清晰复述修改后的设置项与生效结果。
+15. 【核心要求】回答必须极度简洁明了、直击核心、精炼扼要，严禁多余客套与废话，适配手机悬浮小卡片快速扫视阅读。
+16. 善用 Markdown 格式（加粗、简短无序列表）呈现关键信息，段落紧凑。
 ''';
   }
 
@@ -390,6 +448,176 @@ $weekInfo
     return '抱歉，暂时未能生成回复，请稍后再试。';
   }
 
+  /// 获取可用模型列表 (兼容 OpenAI GET /models 规范)
+  Future<List<String>> fetchModels({
+    required String apiKey,
+    String? apiUrl,
+  }) async {
+    final effectiveApiKey = apiKey.trim().isNotEmpty
+        ? apiKey.trim()
+        : (defaultApiKey.isNotEmpty ? defaultApiKey : '');
+
+    if (effectiveApiKey.isEmpty) {
+      throw Exception('未配置 API Key，请先填入 API Key');
+    }
+
+    final modelsEndpoint = normalizeModelsUrl(apiUrl);
+    _logger.d('Fetching models from $modelsEndpoint');
+
+    try {
+      final response = await _dio.get(
+        modelsEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $effectiveApiKey',
+            'api-key': effectiveApiKey,
+          },
+        ),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('获取模型列表失败 (${response.statusCode})');
+      }
+
+      final data = response.data;
+      final List<String> modelList = [];
+
+      if (data is Map) {
+        final rawList = data['data'] ?? data['models'];
+        if (rawList is List) {
+          for (final item in rawList) {
+            if (item is Map) {
+              final id = item['id'] ?? item['name'] ?? item['model'];
+              if (id != null && id.toString().trim().isNotEmpty) {
+                modelList.add(id.toString().trim());
+              }
+            } else if (item is String && item.trim().isNotEmpty) {
+              modelList.add(item.trim());
+            }
+          }
+        }
+      } else if (data is List) {
+        for (final item in data) {
+          if (item is Map) {
+            final id = item['id'] ?? item['name'] ?? item['model'];
+            if (id != null && id.toString().trim().isNotEmpty) {
+              modelList.add(id.toString().trim());
+            }
+          } else if (item is String && item.trim().isNotEmpty) {
+            modelList.add(item.trim());
+          }
+        }
+      }
+
+      if (modelList.isEmpty) {
+        throw Exception('未获取到可用模型');
+      }
+
+      final uniqueModels = modelList.toSet().toList()..sort();
+      return uniqueModels;
+    } on DioException catch (e) {
+      final statusCode = e.response?.statusCode;
+      final responseData = e.response?.data;
+      String errorMsg = '获取模型列表失败';
+      if (responseData is Map && responseData['error'] != null) {
+        final err = responseData['error'];
+        if (err is Map && err['message'] != null) {
+          errorMsg = '${err['message']}';
+        } else {
+          errorMsg = '$err';
+        }
+      } else if (statusCode == 401) {
+        errorMsg = 'API Key 无效或未授权 (401)';
+      } else if (statusCode == 404) {
+        errorMsg = '模型列表端点不存在 (404)';
+      } else if (e.message != null && e.message!.isNotEmpty) {
+        errorMsg = e.message!;
+      }
+      throw Exception(errorMsg);
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// 测试与大模型服务的联通性 (发送最简 chat completion 并计算延迟)
+  Future<Duration> testConnection({
+    required String apiKey,
+    String? apiUrl,
+    String? model,
+  }) async {
+    final effectiveApiKey = apiKey.trim().isNotEmpty
+        ? apiKey.trim()
+        : (defaultApiKey.isNotEmpty ? defaultApiKey : '');
+
+    if (effectiveApiKey.isEmpty) {
+      throw Exception('未配置 API Key，请先填入 API Key');
+    }
+
+    final effectiveEndpoint = normalizeEndpointUrl(apiUrl);
+    final effectiveModel =
+        (model != null && model.trim().isNotEmpty) ? model.trim() : defaultModel;
+
+    final requestData = {
+      'model': effectiveModel,
+      'messages': [
+        {'role': 'user', 'content': 'hi'}
+      ],
+      'max_tokens': 5,
+    };
+
+    final stopwatch = Stopwatch()..start();
+    try {
+      final response = await _dio.post(
+        effectiveEndpoint,
+        data: requestData,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $effectiveApiKey',
+            'api-key': effectiveApiKey,
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+      stopwatch.stop();
+
+      if (response.statusCode != 200) {
+        throw Exception('API 请求失败 (${response.statusCode}): ${response.data}');
+      }
+
+      final data = response.data;
+      if (data is! Map || data['choices'] == null || (data['choices'] as List).isEmpty) {
+        throw Exception('响应格式异常或未返回有效内容');
+      }
+
+      return stopwatch.elapsed;
+    } on DioException catch (e) {
+      stopwatch.stop();
+      final statusCode = e.response?.statusCode;
+      final responseData = e.response?.data;
+      String errorMsg = '测试连接失败';
+      if (responseData is Map && responseData['error'] != null) {
+        final err = responseData['error'];
+        if (err is Map && err['message'] != null) {
+          errorMsg = '${err['message']}';
+        } else {
+          errorMsg = '$err';
+        }
+      } else if (statusCode == 401) {
+        errorMsg = 'API Key 无效或未授权 (401)';
+      } else if (statusCode == 404) {
+        errorMsg = 'API 端点不存在 (404)';
+      } else if (statusCode == 429) {
+        errorMsg = 'API 调用频率超限或余额不足 (429)';
+      } else if (e.message != null && e.message!.isNotEmpty) {
+        errorMsg = e.message!;
+      }
+      throw Exception(errorMsg);
+    } catch (e) {
+      stopwatch.stop();
+      rethrow;
+    }
+  }
+
   String _getFriendlyToolName(String name) {
     switch (name) {
       case 'query_timetable':
@@ -448,6 +676,28 @@ $weekInfo
       case 'query_card_transactions':
       case 'query_bill':
         return '校园卡账单';
+      case 'query_exams':
+      case 'query_exam_schedule':
+        return '考试查询';
+      case 'add_exam':
+      case 'add_exam_schedule':
+        return '添加考试日程';
+      case 'add_memory':
+      case 'save_memory':
+        return '保存长期记忆';
+      case 'query_memories':
+        return '查询记忆';
+      case 'delete_memory':
+        return '删除记忆';
+      case 'open_page':
+      case 'navigate_to_page':
+      case 'open_screen':
+        return '打开页面';
+      case 'manage_settings':
+      case 'configure_settings':
+      case 'query_settings':
+      case 'modify_settings':
+        return '应用设置';
       default:
         return name;
     }

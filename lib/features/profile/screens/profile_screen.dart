@@ -7,6 +7,7 @@ import '../../auth/screens/login_screen.dart';
 import 'settings_screen.dart';
 import 'about_screen.dart';
 import 'help_feedback_screen.dart';
+import '../../cloudisk/screens/cloud_sync_prompt_screen.dart';
 import '../../../core/utils/l10n_extension.dart';
 
 
@@ -46,7 +47,7 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  createSlideUpRoute(const SettingsScreen()),
+                  createSlideHorizontalRoute(const SettingsScreen()),
                 );
               },
             ),
@@ -57,7 +58,18 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  createSlideUpRoute(const HelpFeedbackScreen()),
+                  createSlideHorizontalRoute(const HelpFeedbackScreen()),
+                );
+              },
+            ),
+            _buildListTile(
+              context,
+              icon: Icons.rocket_launch_outlined,
+              title: context.l10n.startGuide,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  CloudSyncPromptScreen.route(),
                 );
               },
             ),
@@ -68,7 +80,7 @@ class ProfileScreen extends ConsumerWidget {
               onTap: () {
                 Navigator.push(
                   context,
-                  createSlideUpRoute(const AboutScreen()),
+                  createSlideHorizontalRoute(const AboutScreen()),
                 );
               },
             ),
@@ -241,6 +253,10 @@ class ProfileScreen extends ConsumerWidget {
 
     if (confirmed == true) {
       await ref.read(authStateProvider.notifier).logout();
+      if (context.mounted) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      }
     }
   }
 }
+

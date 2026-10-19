@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/constants/app_constants.dart';
 import '../../../core/utils/l10n_extension.dart';
 import '../services/campus_card_service.dart';
 import '../../../core/utils/app_logger.dart';
@@ -264,7 +263,7 @@ class _PaymentCodeScreenState extends ConsumerState<PaymentCodeScreen> with Widg
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: isDark ? Colors.white70 : Colors.black87),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.maybePop(context),
         ),
       ),
       body: SafeArea(

@@ -7,6 +7,11 @@ class ExamScheduleModel {
   final String courseName;
   /// 日程显示的主时间（必须为 watermark 容器内第一个出现的时间）
   final DateTime time;
+  /// 考试结束时间（watermark 容器内第二个出现的时间，若有）
+  final DateTime? endTime;
+
+  /// 开始时间（等同于 time，即 watermark 容器内第一个出现的时间）
+  DateTime get startTime => time;
   /// watermark 容器内提取到的全部时间列表
   final List<DateTime> allTimes;
   /// 原始时间字符串列表（如 ["2026-05-10 17:00", "2026-05-10 23:59"]）
@@ -15,6 +20,12 @@ class ExamScheduleModel {
   final String detailUrl;
   /// 考试状态（如 "未交", "已完成", "未开始", "进行中"）
   final String status;
+  /// 是否为手动添加
+  final bool isManual;
+  /// 考场 / 教室地点
+  final String? location;
+  /// 备注信息
+  final String? remarks;
   /// 学生姓名
   final String? studentName;
   /// 学生学号
@@ -27,10 +38,14 @@ class ExamScheduleModel {
     required this.title,
     this.courseName = '',
     required this.time,
+    this.endTime,
     this.allTimes = const [],
     this.rawTimeStrs = const [],
     this.detailUrl = '',
     this.status = '',
+    this.isManual = false,
+    this.location,
+    this.remarks,
     this.studentName,
     this.studentId,
     this.createdAt,
@@ -41,10 +56,14 @@ class ExamScheduleModel {
         'title': title,
         'courseName': courseName,
         'time': time.toIso8601String(),
+        'endTime': endTime?.toIso8601String(),
         'allTimes': allTimes.map((t) => t.toIso8601String()).toList(),
         'rawTimeStrs': rawTimeStrs,
         'detailUrl': detailUrl,
         'status': status,
+        'isManual': isManual,
+        'location': location,
+        'remarks': remarks,
         'studentName': studentName,
         'studentId': studentId,
         'createdAt': createdAt?.toIso8601String(),
@@ -55,7 +74,10 @@ class ExamScheduleModel {
       id: json['id'] as String? ?? '',
       title: json['title'] as String? ?? '',
       courseName: json['courseName'] as String? ?? '',
-      time: DateTime.parse(json['time'] as String),
+      time: DateTime.parse((json['time'] ?? json['startTime']) as String),
+      endTime: json['endTime'] != null
+          ? DateTime.parse(json['endTime'] as String)
+          : null,
       allTimes: (json['allTimes'] as List<dynamic>?)
               ?.map((t) => DateTime.parse(t as String))
               .toList() ??
@@ -66,6 +88,9 @@ class ExamScheduleModel {
           [],
       detailUrl: json['detailUrl'] as String? ?? '',
       status: json['status'] as String? ?? '',
+      isManual: json['isManual'] as bool? ?? false,
+      location: json['location'] as String?,
+      remarks: json['remarks'] as String?,
       studentName: json['studentName'] as String?,
       studentId: json['studentId'] as String?,
       createdAt: json['createdAt'] != null
@@ -79,10 +104,14 @@ class ExamScheduleModel {
     String? title,
     String? courseName,
     DateTime? time,
+    DateTime? endTime,
     List<DateTime>? allTimes,
     List<String>? rawTimeStrs,
     String? detailUrl,
     String? status,
+    bool? isManual,
+    String? location,
+    String? remarks,
     String? studentName,
     String? studentId,
     DateTime? createdAt,
@@ -92,10 +121,14 @@ class ExamScheduleModel {
       title: title ?? this.title,
       courseName: courseName ?? this.courseName,
       time: time ?? this.time,
+      endTime: endTime ?? this.endTime,
       allTimes: allTimes ?? this.allTimes,
       rawTimeStrs: rawTimeStrs ?? this.rawTimeStrs,
       detailUrl: detailUrl ?? this.detailUrl,
       status: status ?? this.status,
+      isManual: isManual ?? this.isManual,
+      location: location ?? this.location,
+      remarks: remarks ?? this.remarks,
       studentName: studentName ?? this.studentName,
       studentId: studentId ?? this.studentId,
       createdAt: createdAt ?? this.createdAt,

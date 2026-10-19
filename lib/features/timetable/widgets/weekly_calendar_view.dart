@@ -9,12 +9,16 @@ import '../../../core/utils/l10n_extension.dart';
 class WeeklyCalendarView extends StatefulWidget {
   final List<CourseModel> courses;
   final DateTime firstWeekMonday;
+  final bool showEndTime;
+  final VoidCallback? onCourseColorChanged;
   
   const WeeklyCalendarView({
-    Key? key,
+    super.key,
     required this.courses,
     required this.firstWeekMonday,
-  }) : super(key: key);
+    this.showEndTime = false,
+    this.onCourseColorChanged,
+  });
 
   @override
   WeeklyCalendarViewState createState() => WeeklyCalendarViewState();
@@ -30,6 +34,7 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
     final initialWeek = DateCalculator.getCurrentWeekNumber(widget.firstWeekMonday);
     _currentWeekNumber = initialWeek.clamp(1, 20);
     _pageController = PageController(initialPage: _currentWeekNumber - 1);
+    CourseColorUtils.syncCourses(widget.courses.map((c) => c.name));
   }
 
   void jumpToToday() {
@@ -45,7 +50,10 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
   @override
   void didUpdateWidget(WeeklyCalendarView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.courses != widget.courses || oldWidget.firstWeekMonday != widget.firstWeekMonday) {
+    if (oldWidget.courses != widget.courses ||
+        oldWidget.firstWeekMonday != widget.firstWeekMonday ||
+        oldWidget.showEndTime != widget.showEndTime) {
+      CourseColorUtils.syncCourses(widget.courses.map((c) => c.name));
       setState(() {});
     }
   }
@@ -198,9 +206,31 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
           margin: EdgeInsets.only(bottom: gap),
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: widget.showEndTime
+                ? MainAxisAlignment.spaceBetween
+                : MainAxisAlignment.start,
             children: [
-              Text(times[index][0], style: TextStyle(fontSize: 11, color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : const Color(0xFF636E72), fontWeight: FontWeight.w500)),
+              Text(
+                times[index][0],
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white54
+                      : const Color(0xFF636E72),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (widget.showEndTime)
+                Text(
+                  times[index][1],
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white38
+                        : const Color(0xFF9E9E9E),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
             ],
           ),
         );
@@ -349,7 +379,7 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
             ),
             if (hasConflict)
               const Positioned(
-                top: 0,
+                bottom: 0,
                 right: 0,
                 child: Icon(
                   Icons.layers_rounded,
@@ -372,68 +402,26 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
 
     showDialog(
       context: context,
-      builder: (context) {
+      builder: (dialogContext) {
         if (!hasMultiple) {
-          return AlertDialog(
-            title: Text(course.name),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDetailRow(context.l10n.teacher, course.teacher),
-                _buildDetailRow(context.l10n.classroom, course.classroom),
-                _buildDetailRow(context.l10n.weeksLabel, WeekParser.formatWeeksLocalized(
-                  context,
-                  WeekParser.parseWeeks(course.weeks),
-                )),
-                _buildDetailRow(
-                  context.l10n.periodsLabel,
-                  context.l10n.periodsRange(course.startPeriod, course.endPeriod),
-                ),
-                _buildDetailRow(
-                  context.l10n.timeLabel,
-                  '${DateCalculator.getSectionTime(course.startPeriod)['start']!.format(context)}-'
-                  '${DateCalculator.getSectionTime(course.endPeriod)['end']!.format(context)}',
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text(context.l10n.close),
-              ),
-            ],
+          return _SingleCourseDetailDialog(
+            course: course,
+            onColorChanged: () {
+              setState(() {});
+              widget.onCourseColorChanged?.call();
+            },
           );
         }
 
         return _ConflictingCoursesDialog(
           initialCourse: course,
           courses: conflictingCourses,
+          onColorChanged: () {
+            setState(() {});
+            widget.onCourseColorChanged?.call();
+          },
         );
       },
-    );
-  }
-  
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 60,
-            child: Text(
-              '$label:',
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          Expanded(
-            child: Text(value.isEmpty ? context.l10n.unknown : value),
-          ),
-        ],
-      ),
     );
   }
   
@@ -520,14 +508,109 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
 }
 
 
+/// 单门课程详情弹窗
+class _SingleCourseDetailDialog extends StatefulWidget {
+  final CourseModel course;
+  final VoidCallback onColorChanged;
+
+  const _SingleCourseDetailDialog({
+    required this.course,
+    required this.onColorChanged,
+  });
+
+  @override
+  State<_SingleCourseDetailDialog> createState() =>
+      _SingleCourseDetailDialogState();
+}
+
+class _SingleCourseDetailDialogState extends State<_SingleCourseDetailDialog> {
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.course.name),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildDetailRow(context.l10n.teacher, widget.course.teacher),
+          _buildDetailRow(context.l10n.classroom, widget.course.classroom),
+          _buildDetailRow(
+            context.l10n.weeksLabel,
+            WeekParser.formatWeeksLocalized(
+              context,
+              WeekParser.parseWeeks(widget.course.weeks),
+            ),
+          ),
+          _buildDetailRow(
+            context.l10n.periodsLabel,
+            context.l10n.periodsRange(
+              widget.course.startPeriod,
+              widget.course.endPeriod,
+            ),
+          ),
+          _buildDetailRow(
+            context.l10n.timeLabel,
+            '${DateCalculator.getSectionTime(widget.course.startPeriod)['start']!.format(context)}-'
+            '${DateCalculator.getSectionTime(widget.course.endPeriod)['end']!.format(context)}',
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (pickerContext) => _MaterialColorPickerDialog(
+                courseName: widget.course.name,
+                onColorChanged: () {
+                  setState(() {});
+                  widget.onColorChanged();
+                },
+              ),
+            );
+          },
+          child: Text(context.l10n.changeColor),
+        ),
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.close),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 60,
+            child: Text(
+              '$label:',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          Expanded(
+            child: Text(value.isEmpty ? context.l10n.unknown : value),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// 冲突课程浏览弹窗：支持在同时间段多门重叠课程之间切换查看详情
 class _ConflictingCoursesDialog extends StatefulWidget {
   final CourseModel initialCourse;
   final List<CourseModel> courses;
+  final VoidCallback onColorChanged;
 
   const _ConflictingCoursesDialog({
     required this.initialCourse,
     required this.courses,
+    required this.onColorChanged,
   });
 
   @override
@@ -608,6 +691,21 @@ class _ConflictingCoursesDialogState extends State<_ConflictingCoursesDialog> {
       ),
       actions: [
         TextButton(
+          onPressed: () {
+            showDialog(
+              context: context,
+              builder: (pickerContext) => _MaterialColorPickerDialog(
+                courseName: current.name,
+                onColorChanged: () {
+                  setState(() {});
+                  widget.onColorChanged();
+                },
+              ),
+            );
+          },
+          child: Text(context.l10n.changeColor),
+        ),
+        TextButton(
           onPressed: () => Navigator.pop(context),
           child: Text(context.l10n.close),
         ),
@@ -633,6 +731,133 @@ class _ConflictingCoursesDialogState extends State<_ConflictingCoursesDialog> {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 基于 https://materialui.co/colors 规范的课程颜色选择弹窗
+class _MaterialColorPickerDialog extends StatelessWidget {
+  final String courseName;
+  final VoidCallback onColorChanged;
+
+  const _MaterialColorPickerDialog({
+    required this.courseName,
+    required this.onColorChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final currentColor = CourseColorUtils.getColorForCourse(courseName);
+
+    return AlertDialog(
+      title: Row(
+        children: [
+          const Icon(Icons.palette, size: 20),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              context.l10n.selectCourseColor,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+      content: SizedBox(
+        width: double.maxFinite,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.55,
+          ),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    alignment: WrapAlignment.start,
+                    children: CourseColorUtils.materialColorItems.map((item) {
+                      final isCurrent =
+                          item.color.toARGB32() == currentColor.toARGB32();
+                      final occupyingCourse =
+                          CourseColorUtils.getCourseUsingColor(
+                        item.color,
+                        excludeCourse: courseName,
+                      );
+
+                      return InkWell(
+                        borderRadius: BorderRadius.circular(22),
+                        onTap: () async {
+                          final conflict = occupyingCourse;
+                          await CourseColorUtils.setCourseColor(
+                            courseName,
+                            item.color,
+                          );
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                          onColorChanged();
+                          if (conflict != null && context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  context.l10n.colorSwappedNotice(conflict),
+                                ),
+                                duration: const Duration(seconds: 2),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
+                        },
+                        child: Tooltip(
+                          message: occupyingCourse != null
+                              ? '${item.family} ${item.shade} ($occupyingCourse)'
+                              : '${item.family} ${item.shade}',
+                          child: Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: item.color,
+                              shape: BoxShape.circle,
+                            ),
+                            child: isCurrent
+                                ? const Icon(
+                                    Icons.check,
+                                    size: 24,
+                                    color: Colors.white,
+                                  )
+                                : (occupyingCourse != null
+                                    ? Center(
+                                        child: Container(
+                                          width: 8,
+                                          height: 8,
+                                          decoration: BoxDecoration(
+                                            color: Colors.white.withValues(alpha: 0.85),
+                                            shape: BoxShape.circle,
+                                          ),
+                                        ),
+                                      )
+                                    : null),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(context.l10n.close),
+        ),
+      ],
     );
   }
 }

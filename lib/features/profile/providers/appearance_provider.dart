@@ -21,6 +21,7 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
   static const String _widgetItemsKey = 'widget_function_items';
   static const String _groupOrderKey = 'function_group_order';
   static const String _hiddenGroupsKey = 'hidden_function_groups';
+  static const String _feedAutoSortKey = 'feed_auto_sort';
 
   static final List<FunctionItem> _masterPool = [
     const FunctionItem(id: 'sunshine', label: '阳光服务', icon: Icons.wb_sunny_outlined, color: Color(0xFF09C489)),
@@ -37,6 +38,7 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
     const FunctionItem(id: 'gym', label: '场馆预约', icon: Icons.sports_basketball_outlined, color: Colors.pink),
     const FunctionItem(id: 'teaching_eval', label: '教评系统', icon: Icons.rate_review_outlined, color: Colors.cyan),
     const FunctionItem(id: 'score', label: '成绩查询', icon: Icons.article_outlined, color: Color(0xFFE63476)),
+    const FunctionItem(id: 'exam', label: '考试安排', icon: Icons.assignment_outlined, color: Color(0xFF5C6BC0)),
     const FunctionItem(id: 'vpn', label: 'VPN转换', icon: Icons.vpn_lock_outlined, color: Color(0xFF607D8B)),
     const FunctionItem(id: 'campus_card', label: '校园卡', icon: Icons.credit_card_outlined, color: Color(0xFF008268)),
     const FunctionItem(id: 'ele_recharge', label: '电费充值', icon: Icons.bolt_outlined, color: Colors.yellow),
@@ -97,15 +99,15 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
     return items;
   }
 
-  /// 首页信息流区块（默认全显示，顺序即展示顺序）
   static final List<FunctionItem> _feedPool = [
     const FunctionItem(id: 'feed_quick', label: '快捷功能', icon: Icons.apps_rounded, color: Color(0xFF09C489)),
     const FunctionItem(id: 'feed_library', label: '图书馆预约', icon: Icons.local_library_outlined, color: Color(0xFF795548)),
     const FunctionItem(id: 'feed_agenda', label: '今日日程', icon: Icons.calendar_today_outlined, color: Color(0xFF09C489)),
-    const FunctionItem(id: 'feed_balance', label: '余额', icon: Icons.account_balance_wallet_outlined, color: Color(0xFF1677FF)),
-    const FunctionItem(id: 'feed_questionnaire', label: '待完成的问卷', icon: Icons.assignment_outlined, color: Color(0xFF2E7D32)),
+    const FunctionItem(id: 'feed_homework', label: '作业', icon: Icons.assignment_outlined, color: Color(0xFFF39C12)),
     const FunctionItem(id: 'feed_leave', label: '请假申请', icon: Icons.event_note_outlined, color: Color(0xFF009688)),
     const FunctionItem(id: 'feed_repair', label: '报修工单', icon: Icons.handyman_outlined, color: Colors.blueGrey),
+    const FunctionItem(id: 'feed_questionnaire', label: '待完成的问卷', icon: Icons.assignment_outlined, color: Color(0xFF2E7D32)),
+    const FunctionItem(id: 'feed_balance', label: '余额', icon: Icons.account_balance_wallet_outlined, color: Color(0xFF1677FF)),
   ];
 
   static List<FunctionItem> get feedPool =>
@@ -126,7 +128,7 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
     // 默认全选，按照指定顺序
     final functionIds = [
       'payment_code', 'recharge', 'ele_recharge', 'library', 'empty_classroom', 'repairs', 
-      'sunshine', 'questionnaire', 'leave', 'dormitory', 'gym', 'info_portal', 'ehall', 'xgxt', 'teaching_eval', 'score', 'vpn', 'campus_card', 'bus', 'cs_bus', 'campus_bus_route'
+      'sunshine', 'questionnaire', 'leave', 'dormitory', 'gym', 'info_portal', 'ehall', 'xgxt', 'teaching_eval', 'score', 'exam', 'vpn', 'campus_card', 'bus', 'cs_bus', 'campus_bus_route'
     ];
     final items = functionIds.map((id) => _masterPool.firstWhere((item) => item.id == id)).toList();
     // 兜底：只加了 _masterPool 忘记加 functionIds 的新功能，自动追加为可见，避免新装用户丢失
@@ -238,6 +240,9 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
         debugPrint('Error loading hidden groups: $e');
       }
     }
+
+    final feedAutoSort = prefs.getBool(_feedAutoSortKey) ?? false;
+    state = state.copyWith(feedAutoSort: feedAutoSort);
   }
 
   /// 备份导入后重新从持久化层加载（新功能自动合并追加）。
@@ -317,6 +322,13 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
         // 快捷功能是后加入的，老用户存档里没有，默认插到最顶部
         if (masterItem.id == 'feed_quick') {
           items.insert(0, masterItem);
+        } else if (masterItem.id == 'feed_homework') {
+          final agendaIdx = items.indexWhere((e) => e.id == 'feed_agenda');
+          if (agendaIdx != -1) {
+            items.insert(agendaIdx + 1, masterItem);
+          } else {
+            items.add(masterItem);
+          }
         } else {
           items.add(masterItem);
         }
@@ -520,5 +532,12 @@ class AppearanceNotifier extends StateNotifier<AppearanceState> {
       hiddenFunctionGroups: hiddenSet.toList(),
     );
     _saveSettings();
+  }
+
+  Future<void> updateFeedAutoSort(bool value) async {
+    state = state.copyWith(feedAutoSort: value);
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_feedAutoSortKey, value);
+    CloudBackupManager.instance.markDirty();
   }
 }

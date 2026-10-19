@@ -134,25 +134,25 @@ abstract class AppLocalizations {
   /// Agent 设置项
   ///
   /// In zh, this message translates to:
-  /// **'Agent 设置'**
+  /// **'Agent'**
   String get agentSettings;
 
   /// 外观设置项
   ///
   /// In zh, this message translates to:
-  /// **'外观设置'**
+  /// **'外观'**
   String get appearanceSettings;
 
   /// 通知设置项
   ///
   /// In zh, this message translates to:
-  /// **'通知设置'**
+  /// **'通知'**
   String get notificationSettings;
 
   /// 语言设置项
   ///
   /// In zh, this message translates to:
-  /// **'语言设置'**
+  /// **'语言'**
   String get language;
 
   /// 跟随系统选项
@@ -581,6 +581,144 @@ abstract class AppLocalizations {
   /// **'我的宿舍'**
   String get funcDormitory;
 
+  /// No description provided for @funcExamSchedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试安排'**
+  String get funcExamSchedule;
+
+  /// No description provided for @examSchedule.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试安排'**
+  String get examSchedule;
+
+  /// No description provided for @addExam.
+  ///
+  /// In zh, this message translates to:
+  /// **'添加考试'**
+  String get addExam;
+
+  /// No description provided for @examTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试名称'**
+  String get examTitle;
+
+  /// No description provided for @inputExamTitleHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入考试名称（如期末考试）'**
+  String get inputExamTitleHint;
+
+  /// No description provided for @examCourse.
+  ///
+  /// In zh, this message translates to:
+  /// **'所属课程'**
+  String get examCourse;
+
+  /// No description provided for @inputExamCourseHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入课程名称（可选）'**
+  String get inputExamCourseHint;
+
+  /// No description provided for @examTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试时间'**
+  String get examTime;
+
+  /// No description provided for @selectExamTimeHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择考试日期和时间'**
+  String get selectExamTimeHint;
+
+  /// No description provided for @examLocation.
+  ///
+  /// In zh, this message translates to:
+  /// **'考场地点'**
+  String get examLocation;
+
+  /// No description provided for @inputExamLocationHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入考场或教室（可选）'**
+  String get inputExamLocationHint;
+
+  /// No description provided for @examRemarks.
+  ///
+  /// In zh, this message translates to:
+  /// **'备注'**
+  String get examRemarks;
+
+  /// No description provided for @inputExamRemarksHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'输入备注或准备事项（可选）'**
+  String get inputExamRemarksHint;
+
+  /// No description provided for @noCurrentSemesterExams.
+  ///
+  /// In zh, this message translates to:
+  /// **'本学期暂无考试安排'**
+  String get noCurrentSemesterExams;
+
+  /// No description provided for @manualExamTag.
+  ///
+  /// In zh, this message translates to:
+  /// **'手动添加'**
+  String get manualExamTag;
+
+  /// No description provided for @delete.
+  ///
+  /// In zh, this message translates to:
+  /// **'删除'**
+  String get delete;
+
+  /// No description provided for @deleteExamConfirm.
+  ///
+  /// In zh, this message translates to:
+  /// **'确定要删除此考试吗？'**
+  String get deleteExamConfirm;
+
+  /// No description provided for @examDeleted.
+  ///
+  /// In zh, this message translates to:
+  /// **'已删除考试'**
+  String get examDeleted;
+
+  /// No description provided for @examAdded.
+  ///
+  /// In zh, this message translates to:
+  /// **'已成功添加考试'**
+  String get examAdded;
+
+  /// No description provided for @examStatusPending.
+  ///
+  /// In zh, this message translates to:
+  /// **'待考'**
+  String get examStatusPending;
+
+  /// No description provided for @examStatusEnded.
+  ///
+  /// In zh, this message translates to:
+  /// **'已结束'**
+  String get examStatusEnded;
+
+  /// No description provided for @examDetails.
+  ///
+  /// In zh, this message translates to:
+  /// **'考试详情'**
+  String get examDetails;
+
+  /// No description provided for @openInChaoXing.
+  ///
+  /// In zh, this message translates to:
+  /// **'在学习通中查看'**
+  String get openInChaoXing;
+
   /// No description provided for @dormitoryBuilding.
   ///
   /// In zh, this message translates to:
@@ -731,6 +869,18 @@ abstract class AppLocalizations {
   /// **'信息流设置'**
   String get feedButtonsTitle;
 
+  /// No description provided for @feedAutoSort.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动排序'**
+  String get feedAutoSort;
+
+  /// No description provided for @feedAutoSortSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启后忽视手动排序和显隐，按智能规则动态排序'**
+  String get feedAutoSortSubtitle;
+
   /// No description provided for @visibleFunctions.
   ///
   /// In zh, this message translates to:
@@ -752,7 +902,7 @@ abstract class AppLocalizations {
   /// No description provided for @widgetSettings.
   ///
   /// In zh, this message translates to:
-  /// **'小组件设置'**
+  /// **'小组件'**
   String get widgetSettings;
 
   /// No description provided for @widgetQuickTitle.
@@ -1499,6 +1649,12 @@ abstract class AppLocalizations {
   /// **'通知详情'**
   String get noticeDetail;
 
+  /// No description provided for @selectNoticeHint.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择左侧通知查看详情'**
+  String get selectNoticeHint;
+
   /// No description provided for @noticeNotFound.
   ///
   /// In zh, this message translates to:
@@ -1616,7 +1772,7 @@ abstract class AppLocalizations {
   /// No description provided for @timetableSettings.
   ///
   /// In zh, this message translates to:
-  /// **'课表设置'**
+  /// **'课表'**
   String get timetableSettings;
 
   /// No description provided for @notSet.
@@ -1630,6 +1786,12 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'自动同步课表'**
   String get timetableAutoSync;
+
+  /// No description provided for @timetableShowEndTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'周视图中显示下课时间'**
+  String get timetableShowEndTime;
 
   /// No description provided for @disableAutoSyncTitle.
   ///
@@ -1930,6 +2092,36 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'时间'**
   String get timeLabel;
+
+  /// No description provided for @courseColor.
+  ///
+  /// In zh, this message translates to:
+  /// **'课程颜色'**
+  String get courseColor;
+
+  /// No description provided for @changeColor.
+  ///
+  /// In zh, this message translates to:
+  /// **'修改颜色'**
+  String get changeColor;
+
+  /// No description provided for @selectCourseColor.
+  ///
+  /// In zh, this message translates to:
+  /// **'选择课程颜色'**
+  String get selectCourseColor;
+
+  /// No description provided for @colorSwappedNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'已与「{course}」互换课程颜色'**
+  String colorSwappedNotice(String course);
+
+  /// No description provided for @materialColorNotice.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅支持从高对比度 Material UI 色板中选取'**
+  String get materialColorNotice;
 
   /// No description provided for @close.
   ///
@@ -5319,12 +5511,6 @@ abstract class AppLocalizations {
   /// **'在请假小程序中办理'**
   String get ehallOpenNativeLeave;
 
-  /// No description provided for @examSchedule.
-  ///
-  /// In zh, this message translates to:
-  /// **'考试日程'**
-  String get examSchedule;
-
   /// No description provided for @examTimePrefix.
   ///
   /// In zh, this message translates to:
@@ -5360,6 +5546,432 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。'**
   String get clearWebViewCacheConfirmMessage;
+
+  /// Agent设置获取模型列表按钮
+  ///
+  /// In zh, this message translates to:
+  /// **'获取模型列表'**
+  String get aiFetchModels;
+
+  /// Agent设置选择模型标题
+  ///
+  /// In zh, this message translates to:
+  /// **'选择模型'**
+  String get aiSelectModel;
+
+  /// 搜索模型提示词
+  ///
+  /// In zh, this message translates to:
+  /// **'搜索模型名称…'**
+  String get aiSearchModelHint;
+
+  /// 未找到模型提示
+  ///
+  /// In zh, this message translates to:
+  /// **'未找到匹配的模型'**
+  String get aiNoModelsFound;
+
+  /// Agent设置测试连接按钮
+  ///
+  /// In zh, this message translates to:
+  /// **'测试连接'**
+  String get aiTestConnection;
+
+  /// 测试连接中状态
+  ///
+  /// In zh, this message translates to:
+  /// **'正在测试连接…'**
+  String get aiTestingConnection;
+
+  /// 连接成功提示
+  ///
+  /// In zh, this message translates to:
+  /// **'连接成功 (耗时 {ms}ms)'**
+  String aiTestSuccess(int ms);
+
+  /// 连接失败提示
+  ///
+  /// In zh, this message translates to:
+  /// **'连接失败: {error}'**
+  String aiTestFailed(String error);
+
+  /// 缺少API Key提示
+  ///
+  /// In zh, this message translates to:
+  /// **'请先配置 API Key'**
+  String get aiApiKeyRequired;
+
+  /// 模型选择成功提示
+  ///
+  /// In zh, this message translates to:
+  /// **'已选择模型: {model}'**
+  String aiModelSelected(String model);
+
+  /// No description provided for @timetableSubscription.
+  ///
+  /// In zh, this message translates to:
+  /// **'课表订阅'**
+  String get timetableSubscription;
+
+  /// No description provided for @timetableSubscriptionSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'在线日历订阅与云端自动同步'**
+  String get timetableSubscriptionSubtitle;
+
+  /// No description provided for @timetableSubscriptionAutoUpload.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启课表订阅'**
+  String get timetableSubscriptionAutoUpload;
+
+  /// No description provided for @timetableSubscriptionAutoUploadDesc.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启后，从教务系统同步或调整课表后，将自动把调停后的课表上传云端供订阅；关闭后云端课表一并删除'**
+  String get timetableSubscriptionAutoUploadDesc;
+
+  /// No description provided for @timetableSubscriptionUrl.
+  ///
+  /// In zh, this message translates to:
+  /// **'日历订阅链接'**
+  String get timetableSubscriptionUrl;
+
+  /// No description provided for @copySubscriptionUrl.
+  ///
+  /// In zh, this message translates to:
+  /// **'复制链接'**
+  String get copySubscriptionUrl;
+
+  /// No description provided for @subscriptionUrlCopied.
+  ///
+  /// In zh, this message translates to:
+  /// **'订阅链接已复制到剪切板'**
+  String get subscriptionUrlCopied;
+
+  /// No description provided for @openInCalendar.
+  ///
+  /// In zh, this message translates to:
+  /// **'在日历中订阅'**
+  String get openInCalendar;
+
+  /// No description provided for @openInCalendarFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'无法调起系统日历，请手动复制链接订阅'**
+  String get openInCalendarFailed;
+
+  /// No description provided for @syncToCloudNow.
+  ///
+  /// In zh, this message translates to:
+  /// **'立即同步到云端'**
+  String get syncToCloudNow;
+
+  /// No description provided for @syncSuccess.
+  ///
+  /// In zh, this message translates to:
+  /// **'云端同步成功'**
+  String get syncSuccess;
+
+  /// No description provided for @syncFailed.
+  ///
+  /// In zh, this message translates to:
+  /// **'云端同步失败: {error}'**
+  String syncFailed(String error);
+
+  /// No description provided for @resetSubscriptionUrl.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置链接'**
+  String get resetSubscriptionUrl;
+
+  /// No description provided for @resetSubscriptionConfirmTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置订阅链接'**
+  String get resetSubscriptionConfirmTitle;
+
+  /// No description provided for @resetSubscriptionConfirmMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'重置后旧的订阅链接将立即失效，云端旧课表将被删除，您需要在订阅的设备中重新添加新链接。是否继续？'**
+  String get resetSubscriptionConfirmMessage;
+
+  /// No description provided for @subscriptionTutorialTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'第三方日历订阅指南'**
+  String get subscriptionTutorialTitle;
+
+  /// No description provided for @subscriptionTutorialContent.
+  ///
+  /// In zh, this message translates to:
+  /// **'• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，粘贴链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，粘贴链接并保存。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并保存。\n\n• 提示：\n订阅链接包含调停后的全部课程，若有调课或教务更新，订阅源会自动保持最新。'**
+  String get subscriptionTutorialContent;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'欢迎使用 ChillEast'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingWelcomeSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'专为湖南农业大学学子打造的现代化校园生活助手'**
+  String get onboardingWelcomeSubtitle;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In zh, this message translates to:
+  /// **'跳过'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In zh, this message translates to:
+  /// **'下一步'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingStart.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始使用'**
+  String get onboardingStart;
+
+  /// No description provided for @onboardingGoToLogin.
+  ///
+  /// In zh, this message translates to:
+  /// **'去登录'**
+  String get onboardingGoToLogin;
+
+  /// No description provided for @onboardingGuideTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'迎新导览与功能介绍'**
+  String get onboardingGuideTitle;
+
+  /// No description provided for @onboardingGuideSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'快速了解 ChillEast 的核心功能与使用技巧'**
+  String get onboardingGuideSubtitle;
+
+  /// No description provided for @onboardingSlide1Tag.
+  ///
+  /// In zh, this message translates to:
+  /// **'课表与日程'**
+  String get onboardingSlide1Tag;
+
+  /// No description provided for @onboardingSlide1Title.
+  ///
+  /// In zh, this message translates to:
+  /// **'智能课表 · 桌面实况'**
+  String get onboardingSlide1Title;
+
+  /// No description provided for @onboardingSlide1Desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'全自动同步教务课表，智能对齐调停补变动。配合桌面实况与小组件，随时随地查看精彩日程。'**
+  String get onboardingSlide1Desc;
+
+  /// No description provided for @onboardingSlide2Tag.
+  ///
+  /// In zh, this message translates to:
+  /// **'学业助手'**
+  String get onboardingSlide2Tag;
+
+  /// No description provided for @onboardingSlide2Title.
+  ///
+  /// In zh, this message translates to:
+  /// **'作业同步 · 智能预警'**
+  String get onboardingSlide2Title;
+
+  /// No description provided for @onboardingSlide2Desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'无缝同步超星学习通作业，倒计时清晰直观。支持自定义截止前提醒，告别拖延与作业遗漏。'**
+  String get onboardingSlide2Desc;
+
+  /// No description provided for @onboardingSlide3Tag.
+  ///
+  /// In zh, this message translates to:
+  /// **'校园服务'**
+  String get onboardingSlide3Tag;
+
+  /// No description provided for @onboardingSlide3Title.
+  ///
+  /// In zh, this message translates to:
+  /// **'校园生活 · 一站通办'**
+  String get onboardingSlide3Title;
+
+  /// No description provided for @onboardingSlide3Desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'图书馆选座到期提醒、一卡通账单余额明细、宿舍电费余量预警，日常校园事务一手掌握。'**
+  String get onboardingSlide3Desc;
+
+  /// No description provided for @onboardingSlide4Tag.
+  ///
+  /// In zh, this message translates to:
+  /// **'多端同步'**
+  String get onboardingSlide4Tag;
+
+  /// No description provided for @onboardingSlide4Title.
+  ///
+  /// In zh, this message translates to:
+  /// **'日历订阅 · 云端备份'**
+  String get onboardingSlide4Title;
+
+  /// No description provided for @onboardingSlide4Desc.
+  ///
+  /// In zh, this message translates to:
+  /// **'一键生成 Webcal 日历订阅，无缝连接手机、手表与电脑；云端自动加密备份，多设备漫游换机无忧。'**
+  String get onboardingSlide4Desc;
+
+  /// No description provided for @postLoginSetupStep.
+  ///
+  /// In zh, this message translates to:
+  /// **'第 {current} / {total} 步'**
+  String postLoginSetupStep(int current, int total);
+
+  /// No description provided for @postLoginSetupSkip.
+  ///
+  /// In zh, this message translates to:
+  /// **'跳过'**
+  String get postLoginSetupSkip;
+
+  /// No description provided for @postLoginSetupEnable.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启'**
+  String get postLoginSetupEnable;
+
+  /// No description provided for @courseReminderPromptMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'在课程开始前通知提醒上课教室。'**
+  String get courseReminderPromptMessage;
+
+  /// No description provided for @postLoginSetupNext.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启'**
+  String get postLoginSetupNext;
+
+  /// No description provided for @postLoginSetupFinish.
+  ///
+  /// In zh, this message translates to:
+  /// **'开启'**
+  String get postLoginSetupFinish;
+
+  /// No description provided for @postLoginSetupFinishWithoutEnable.
+  ///
+  /// In zh, this message translates to:
+  /// **'跳过'**
+  String get postLoginSetupFinishWithoutEnable;
+
+  /// No description provided for @timetableAutoSyncPromptTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'课表自动同步'**
+  String get timetableAutoSyncPromptTitle;
+
+  /// No description provided for @timetableAutoSyncPromptMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'自动拉取教务系统，时刻获取最新课表。'**
+  String get timetableAutoSyncPromptMessage;
+
+  /// No description provided for @timetableAutoSyncPromptBadge.
+  ///
+  /// In zh, this message translates to:
+  /// **'推荐开启'**
+  String get timetableAutoSyncPromptBadge;
+
+  /// No description provided for @homeworkReminderPromptTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'作业截止提醒'**
+  String get homeworkReminderPromptTitle;
+
+  /// No description provided for @homeworkReminderPromptMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'作业截止前通知提醒，避免错过作业提交。'**
+  String get homeworkReminderPromptMessage;
+
+  /// No description provided for @homeworkReminderPromptBadge.
+  ///
+  /// In zh, this message translates to:
+  /// **'提前预警'**
+  String get homeworkReminderPromptBadge;
+
+  /// No description provided for @libraryReminderPromptTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'图书馆座位提醒'**
+  String get libraryReminderPromptTitle;
+
+  /// No description provided for @libraryReminderPromptMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'预约时段开始前发送通知，防止错过预约'**
+  String get libraryReminderPromptMessage;
+
+  /// No description provided for @libraryReminderPromptBadge.
+  ///
+  /// In zh, this message translates to:
+  /// **'提前提醒'**
+  String get libraryReminderPromptBadge;
+
+  /// No description provided for @timetableSubscriptionPromptTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'课表日历订阅'**
+  String get timetableSubscriptionPromptTitle;
+
+  /// No description provided for @timetableSubscriptionPromptMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'生成 Webcal 订阅，一键导入系统日历与 Google Calendar。'**
+  String get timetableSubscriptionPromptMessage;
+
+  /// No description provided for @timetableSubscriptionPromptBadge.
+  ///
+  /// In zh, this message translates to:
+  /// **'全平台日程同步'**
+  String get timetableSubscriptionPromptBadge;
+
+  /// No description provided for @useLiveActivityPrompt.
+  ///
+  /// In zh, this message translates to:
+  /// **'使用实时活动'**
+  String get useLiveActivityPrompt;
+
+  /// No description provided for @startGuide.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始引导'**
+  String get startGuide;
+
+  /// No description provided for @postLoginDoneTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'大功告成！'**
+  String get postLoginDoneTitle;
+
+  /// No description provided for @postLoginDoneMessage.
+  ///
+  /// In zh, this message translates to:
+  /// **'欢迎使用「自在东湖」。'**
+  String get postLoginDoneMessage;
+
+  /// No description provided for @postLoginDoneButton.
+  ///
+  /// In zh, this message translates to:
+  /// **'完成'**
+  String get postLoginDoneButton;
 }
 
 class _AppLocalizationsDelegate

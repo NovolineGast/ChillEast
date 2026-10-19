@@ -181,7 +181,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get funcEmptyClassroom => 'Salas Livres';
 
   @override
-  String get funcInfoPortal => '更多小程序';
+  String get funcInfoPortal => 'Mais Miniaplicativos';
 
   @override
   String get funcXgxt => 'Assuntos Estudantis';
@@ -190,25 +190,26 @@ class AppLocalizationsPt extends AppLocalizations {
   String get funcRepairs => 'Reparos do Campus';
 
   @override
-  String get repairWorkOrders => '报修工单';
+  String get repairWorkOrders => 'Chamados de reparo';
 
   @override
-  String get feedBalance => '余额';
+  String get feedBalance => 'Saldo';
 
   @override
   String get campusCardBalance => 'Saldo do Cartão';
 
   @override
-  String get dormitoryElectricity => '宿舍电费';
+  String get dormitoryElectricity => 'Energia do dormitório';
 
   @override
-  String get noSavedDormitory => '暂未保存宿舍房间';
+  String get noSavedDormitory => 'Nenhum quarto de dormitório salvo';
 
   @override
-  String get clickToSelectDormitory => '点击前往选择房间或充值';
+  String get clickToSelectDormitory =>
+      'Toque para selecionar o quarto ou recarregar';
 
   @override
-  String get quickActions => '快捷功能';
+  String get quickActions => 'Ações rápidas';
 
   @override
   String get funcGym => 'Reserva de Espaços';
@@ -235,10 +236,82 @@ class AppLocalizationsPt extends AppLocalizations {
   String get funcCsBus => 'Ônibus de Changsha';
 
   @override
-  String get funcCampusBusRoute => '校内公交线路';
+  String get funcCampusBusRoute => 'Linhas de Ônibus do Campus';
 
   @override
-  String get funcDormitory => 'Meu dormitório';
+  String get funcDormitory => 'Meu Dormitório';
+
+  @override
+  String get funcExamSchedule => 'Calendário de Exames';
+
+  @override
+  String get examSchedule => 'Calendário de Exames';
+
+  @override
+  String get addExam => 'Adicionar exame';
+
+  @override
+  String get examTitle => 'Nome do exame';
+
+  @override
+  String get inputExamTitleHint => 'Digite o nome do exame (ex: Exame Final)';
+
+  @override
+  String get examCourse => 'Disciplina';
+
+  @override
+  String get inputExamCourseHint => 'Digite o nome da disciplina (opcional)';
+
+  @override
+  String get examTime => 'Data e horário do exame';
+
+  @override
+  String get selectExamTimeHint => 'Selecione a data e o horário';
+
+  @override
+  String get examLocation => 'Local do exame';
+
+  @override
+  String get inputExamLocationHint => 'Digite a sala ou prédio (opcional)';
+
+  @override
+  String get examRemarks => 'Observações';
+
+  @override
+  String get inputExamRemarksHint =>
+      'Digite observações ou materiais necessários (opcional)';
+
+  @override
+  String get noCurrentSemesterExams =>
+      'Nenhum exame agendado para este semestre';
+
+  @override
+  String get manualExamTag => 'Manual';
+
+  @override
+  String get delete => 'Excluir';
+
+  @override
+  String get deleteExamConfirm =>
+      'Tem certeza de que deseja excluir este exame?';
+
+  @override
+  String get examDeleted => 'Exame excluído com sucesso';
+
+  @override
+  String get examAdded => 'Exame adicionado com sucesso';
+
+  @override
+  String get examStatusPending => 'Agendado';
+
+  @override
+  String get examStatusEnded => 'Concluído';
+
+  @override
+  String get examDetails => 'Detalhes do exame';
+
+  @override
+  String get openInChaoXing => 'Abrir no XueXiTong';
 
   @override
   String get dormitoryBuilding => 'Prédio';
@@ -274,7 +347,8 @@ class AppLocalizationsPt extends AppLocalizations {
   String get dormitoryDetail => 'Detalhes do dormitório';
 
   @override
-  String get dormitoryBedPrompt => 'Acesse o portal para chamada e serviços';
+  String get dormitoryBedPrompt =>
+      'Acesse o portal do alojamento para verificação de presença e solicitações de dormitório';
 
   @override
   String get more => 'Mais';
@@ -294,28 +368,35 @@ class AppLocalizationsPt extends AppLocalizations {
   String get functionsButtonsTitle => 'Botões de Serviços';
 
   @override
-  String get groupPayment => '支付';
+  String get groupPayment => 'Pagamento';
 
   @override
-  String get groupStudy => '学习';
+  String get groupStudy => 'Estudos';
 
   @override
-  String get groupLife => '生活';
+  String get groupLife => 'Vida no campus';
 
   @override
-  String get groupTravel => '出行';
+  String get groupTravel => 'Transporte';
 
   @override
-  String get groupTools => '工具';
+  String get groupTools => 'Ferramentas';
 
   @override
-  String get groupMiniApps => '小程序';
+  String get groupMiniApps => 'Miniaplicativos';
 
   @override
-  String get feedButtonsSetting => '信息流排序与隐藏';
+  String get feedButtonsSetting => 'Organização e visibilidade do feed';
 
   @override
-  String get feedButtonsTitle => '信息流设置';
+  String get feedButtonsTitle => 'Feed inicial';
+
+  @override
+  String get feedAutoSort => 'Organização automática';
+
+  @override
+  String get feedAutoSortSubtitle =>
+      'Ignora a ordem personalizada e organiza os cartões dinamicamente por prioridade';
 
   @override
   String get visibleFunctions => 'Serviços Visíveis';
@@ -328,28 +409,31 @@ class AppLocalizationsPt extends AppLocalizations {
       'Pressione e arraste os ícones para reordenar, exibir ou ocultar serviços';
 
   @override
-  String get widgetSettings => '小组件设置';
+  String get widgetSettings => 'Configurações de widgets';
 
   @override
-  String get widgetQuickTitle => '快捷功能（选择 4 个）';
+  String get widgetQuickTitle => 'Ações rápidas (escolha 4)';
 
   @override
-  String get widgetQuickHint => '小组件的快捷入口独立于首页，可单独配置';
+  String get widgetQuickHint =>
+      'Os atalhos do widget são independentes da tela inicial e podem ser configurados separadamente';
 
   @override
-  String get widgetHowToAdd => '回到手机桌面，长按空白处添加「今日日程」「快捷功能」「日程 + 快捷」小组件';
+  String get widgetHowToAdd =>
+      'Toque e segure uma área vazia na tela inicial para adicionar os widgets \'Agenda de Hoje\', \'Ações Rápidas\' ou \'Agenda + Ações\'';
 
   @override
-  String get widgetNeedFour => '请选择 4 个功能';
+  String get widgetNeedFour => 'Selecione 4 funções';
 
   @override
-  String get widgetSaved => '已保存，小组件将自动刷新';
+  String get widgetSaved =>
+      'Salvo. Os widgets serão atualizados automaticamente';
 
   @override
-  String get widgetRefreshed => '小组件数据已刷新';
+  String get widgetRefreshed => 'Dados do widget atualizados';
 
   @override
-  String get widgetRefresh => '立即刷新小组件';
+  String get widgetRefresh => 'Atualizar widgets agora';
 
   @override
   String get loginRequiredTitle => 'Login Necessário';
@@ -655,10 +739,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get todayTimetable => 'Horário de Hoje';
 
   @override
-  String get tomorrowAgenda => '明日日程';
+  String get tomorrowAgenda => 'Agenda de amanhã';
 
   @override
-  String get todayAgenda => '今日日程';
+  String get todayAgenda => 'Agenda de hoje';
 
   @override
   String get timetableLoginRequiredTitle => 'Login Necessário para o Horário';
@@ -744,6 +828,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get noticeDetail => 'Detalhes do Aviso';
 
   @override
+  String get selectNoticeHint =>
+      'Selecione um aviso à esquerda para ver os detalhes';
+
+  @override
   String get noticeNotFound => 'Detalhes do aviso não encontrados';
 
   @override
@@ -808,29 +896,34 @@ class AppLocalizationsPt extends AppLocalizations {
   String get refreshTimetable => 'Atualizar Horário';
 
   @override
-  String get timetableSettings => '课表设置';
+  String get timetableSettings => 'Configurações da grade horária';
 
   @override
-  String get notSet => '未设置';
+  String get notSet => 'Não configurado';
 
   @override
-  String get timetableAutoSync => '自动同步课表';
+  String get timetableAutoSync => 'Sincronização automática da grade horária';
 
   @override
-  String get disableAutoSyncTitle => '关闭自动同步？';
+  String get timetableShowEndTime =>
+      'Mostrar horário de término na visualização semanal';
+
+  @override
+  String get disableAutoSyncTitle => 'Desativar sincronização automática?';
 
   @override
   String get disableAutoSyncMessage =>
-      '关闭后将删除本地课表（调课、停课等规则会保留），如需查看课表，可点击课表页右上角刷新按钮手动同步。';
+      'Ao desativar, a grade horária local será excluída (as regras de remarcação e suspensão serão mantidas). Para visualizar seus horários, toque no botão de atualizar na página da grade para sincronizar manualmente.';
 
   @override
-  String get localTimetableDeleted => '本地课表已删除';
+  String get localTimetableDeleted => 'Grade horária local excluída';
 
   @override
-  String get noLocalTimetable => '暂无本地课表';
+  String get noLocalTimetable => 'Nenhuma grade horária local';
 
   @override
-  String get tapRefreshButtonToSync => '点击右上角刷新按钮手动同步';
+  String get tapRefreshButtonToSync =>
+      'Toque no botão de atualizar no canto superior direito para sincronizar manualmente';
 
   @override
   String get shareTimetable => 'Compartilhar Horário';
@@ -975,6 +1068,24 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get timeLabel => 'Horário';
+
+  @override
+  String get courseColor => 'Cor da disciplina';
+
+  @override
+  String get changeColor => 'Alterar cor';
+
+  @override
+  String get selectCourseColor => 'Selecionar cor da disciplina';
+
+  @override
+  String colorSwappedNotice(String course) {
+    return 'Cor da disciplina trocada com $course';
+  }
+
+  @override
+  String get materialColorNotice =>
+      'Disponível apenas a partir da paleta de alto contraste do Material UI';
 
   @override
   String get close => 'Fechar';
@@ -1845,7 +1956,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get studentWorkQuestionnaire => 'Questionário Estudantil';
 
   @override
-  String get pendingQuestionnaires => '待完成的问卷';
+  String get pendingQuestionnaires => 'Questionários pendentes';
 
   @override
   String get statusSubmitted => 'Enviado';
@@ -2277,51 +2388,53 @@ class AppLocalizationsPt extends AppLocalizations {
   String get quickReserve => 'Reserva Rápida';
 
   @override
-  String get quickReserveTip => '系统将根据您设置的时间与位置偏好自动匹配空闲座位，助您快速锁定。';
+  String get quickReserveTip =>
+      'O sistema encontrará automaticamente um assento disponível com base nas suas preferências de horário e localização.';
 
   @override
-  String get startMatchingSeats => '开始匹配座位';
+  String get startMatchingSeats => 'Buscar assento disponível';
 
   @override
-  String get matchingSeats => '正在匹配座位...';
+  String get matchingSeats => 'Buscando assento...';
 
   @override
-  String get matchedSeatSuccess => '已为您分配推荐座位';
+  String get matchedSeatSuccess => 'Assento recomendado encontrado';
 
   @override
-  String get changeAnotherSeat => '换一个';
+  String get changeAnotherSeat => 'Trocar assento';
 
   @override
   String changeAnotherSeatWithCooldown(int seconds) {
-    return '换一个 (${seconds}s)';
+    return 'Trocar (${seconds}s)';
   }
 
   @override
-  String get confirmQuickReserve => '确认';
+  String get confirmQuickReserve => 'Confirmar';
 
   @override
-  String get allFloors => '全部楼层';
+  String get allFloors => 'Todos os andares';
 
   @override
-  String get allRooms => '全部阅览室';
+  String get allRooms => 'Todas as salas de leitura';
 
   @override
-  String get locationPreference => '位置偏好';
+  String get locationPreference => 'Preferência de localização';
 
   @override
-  String get optionalLabel => '可选';
+  String get optionalLabel => 'Opcional';
 
   @override
-  String get floorLabel => '楼层';
+  String get floorLabel => 'Andar';
 
   @override
-  String get roomLabel => '阅览室';
+  String get roomLabel => 'Sala de leitura';
 
   @override
-  String get noMatchedSeatFound => '暂无符合条件的空闲座位，请调整时段或位置后重试';
+  String get noMatchedSeatFound =>
+      'Nenhum assento disponível encontrado. Ajuste o horário ou a localização e tente novamente.';
 
   @override
-  String get adjustFilters => '修改筛选条件';
+  String get adjustFilters => 'Ajustar filtros';
 
   @override
   String get selectDate => 'Selecionar Data';
@@ -2474,419 +2587,682 @@ class AppLocalizationsPt extends AppLocalizations {
   String get ruleModeShift => 'Mover';
 
   @override
-  String get uploadImage => '上传图片';
+  String get uploadImage => 'Enviar imagem';
 
   @override
-  String get describeImagePrompt => '请分析或描述这张图片';
+  String get describeImagePrompt => 'Analise ou descreva esta imagem';
 
   @override
-  String get removeImage => '移除图片';
+  String get removeImage => 'Remover imagem';
 
   @override
-  String get repairsTitle => '报修平台';
+  String get repairsTitle => 'Plataforma de reparos';
 
   @override
-  String get repairsQuickReport => '我要报修';
+  String get repairsQuickReport => 'Solicitar reparo';
 
   @override
-  String get repairsQuickReportHint => '按问题类型快速进入原生填报页面';
+  String get repairsQuickReportHint =>
+      'Use formulários integrados para relatar problemas rapidamente';
 
   @override
-  String get repairsMyOrders => '我的工单';
+  String get repairsMyOrders => 'Meus chamados';
 
   @override
-  String get repairsMyOrdersHint => '报修记录会同步到校园报修平台';
+  String get repairsMyOrdersHint =>
+      'O status dos chamados é sincronizado com a plataforma do campus';
 
   @override
-  String get repairsInProgress => '处理中';
+  String get repairsInProgress => 'Em andamento';
 
   @override
-  String get repairsCompleted => '已完成';
+  String get repairsCompleted => 'Concluído';
 
   @override
-  String get repairsHeroTitle => '校园服务，一键报修';
+  String get repairsHeroTitle => 'Serviços do campus: reparo em um toque';
 
   @override
-  String get repairsHeroSubtitle => '原生界面填写，工单状态实时同步；请选择最符合问题的服务类型。';
+  String get repairsHeroSubtitle =>
+      'Preenchimento direto com sincronização em tempo real. Escolha a categoria de serviço adequada ao seu problema.';
 
   @override
-  String get repairsNoCompleted => '暂无已完成工单';
+  String get repairsNoCompleted => 'Nenhum chamado concluído';
 
   @override
-  String get repairsNoOngoing => '暂无处理中工单';
+  String get repairsNoOngoing => 'Nenhum chamado em andamento';
 
   @override
-  String get repairsUnnamedOrder => '未命名工单';
+  String get repairsUnnamedOrder => 'Chamado sem título';
 
   @override
-  String get repairsEnterValue => '请输入或粘贴平台选项值';
+  String get repairsEnterValue =>
+      'Digite ou cole o valor da opção da plataforma';
 
   @override
   String repairsRequiredField(String field) {
-    return '请填写$field';
+    return 'Preencha $field';
   }
 
   @override
-  String get repairsSubmitSuccess => '提交成功';
+  String get repairsSubmitSuccess => 'Enviado com sucesso';
 
   @override
-  String get repairsSubmitSuccessMessage => '工单已提交，处理进度可在“我的工单”中查看。';
+  String get repairsSubmitSuccessMessage =>
+      'Chamado enviado. Acompanhe o andamento em \'Meus chamados\'.';
 
   @override
-  String get repairsFormHint => '带 * 的字段为必填项。图片附件功能将随平台接口适配逐步开放。';
+  String get repairsFormHint =>
+      'Campos marcados com * são obrigatórios. As fotos podem ser tiradas com a câmera ou escolhidas da galeria.';
 
   @override
-  String get repairsSelectValue => '请选择';
+  String get repairsSelectValue => 'Selecione';
 
   @override
-  String get repairsSubmit => '提交工单';
+  String get repairsSubmit => 'Enviar chamado';
 
   @override
-  String get repairsSubmitting => '正在提交…';
+  String get repairsSubmitting => 'Enviando chamado…';
 
   @override
-  String get repairsOrderDetail => '工单详情';
+  String get repairsOrderDetail => 'Detalhes do chamado';
 
   @override
-  String get repairsOrderNumber => '工单编号';
+  String get repairsOrderNumber => 'Número do chamado';
 
   @override
-  String get repairsOrderStatus => '当前状态';
+  String get repairsOrderStatus => 'Status atual';
 
   @override
-  String get repairsOrderType => '服务类型';
+  String get repairsOrderType => 'Tipo de serviço';
 
   @override
-  String get repairsDepartment => '处理部门';
+  String get repairsDepartment => 'Departamento responsável';
 
   @override
-  String get repairsCreatedAt => '创建时间';
+  String get repairsCreatedAt => 'Data de abertura';
 
   @override
-  String get repairsDescription => '问题描述';
+  String get repairsDescription => 'Descrição do problema';
 
   @override
-  String get repairsNoDescription => '暂无描述';
+  String get repairsNoDescription => 'Sem descrição';
 
   @override
-  String get repairsDrafts => '草稿箱';
+  String get repairsDrafts => 'Rascunhos';
 
   @override
-  String get repairsNoDrafts => '暂无草稿';
+  String get repairsNoDrafts => 'Nenhum rascunho';
 
   @override
-  String get repairsSaveDraft => '保存草稿';
+  String get repairsSaveDraft => 'Salvar rascunho';
 
   @override
-  String get repairsSavingDraft => '正在保存…';
+  String get repairsSavingDraft => 'Salvando rascunho…';
 
   @override
-  String get repairsSaveDraftSuccess => '已保存到草稿箱';
+  String get repairsSaveDraftSuccess => 'Salvo nos rascunhos';
 
   @override
-  String get repairsCancelOrder => '取消报修';
+  String get repairsCancelOrder => 'Cancelar chamado';
 
   @override
-  String get repairsCancellingOrder => '正在取消…';
+  String get repairsCancellingOrder => 'Cancelando chamado…';
 
   @override
-  String get repairsCancelConfirmTitle => '确认取消报修？';
+  String get repairsCancelConfirmTitle => 'Cancelar chamado?';
 
   @override
-  String get repairsCancelConfirmMessage => '取消后该报修工单将停止处理，是否确认取消？';
+  String get repairsCancelConfirmMessage =>
+      'Após o cancelamento, o atendimento deste chamado será interrompido. Tem certeza de que deseja cancelar?';
 
   @override
-  String get repairsCancelSuccess => '报修工单已成功取消';
+  String get repairsCancelSuccess => 'Chamado cancelado com sucesso';
 
   @override
-  String get repairsApplicant => '报修人';
+  String get repairsApplicant => 'Solicitante';
 
   @override
-  String get repairsApplicantDepartment => '报修部门';
+  String get repairsApplicantDepartment => 'Departamento do solicitante';
 
   @override
-  String get repairsPhone => '联系电话';
+  String get repairsPhone => 'Telefone de contato';
 
   @override
-  String get repairsHandler => '处理人员';
+  String get repairsHandler => 'Responsável pelo atendimento';
 
   @override
-  String get repairsHandleResult => '处理结果';
+  String get repairsHandleResult => 'Resultado do atendimento';
 
   @override
-  String get repairsUserFeedback => '评价反馈';
+  String get repairsUserFeedback => 'Avaliação do atendimento';
 
   @override
-  String get repairsRating => '评价得分';
+  String get repairsRating => 'Nota da avaliação';
 
   @override
-  String get repairsSupplement => '补充说明';
+  String get repairsSupplement => 'Observações adicionais';
 
   @override
-  String get repairsPriority => '优先级';
+  String get repairsPriority => 'Prioridade';
 
   @override
-  String get repairsCurrentNode => '当前环节';
+  String get repairsCurrentNode => 'Etapa atual';
 
   @override
-  String get repairsCompletedAt => '办结时间';
+  String get repairsCompletedAt => 'Data de conclusão';
 
   @override
-  String get repairsActivityTimeline => '流转记录';
+  String get repairsActivityTimeline => 'Histórico de andamento';
 
   @override
-  String get repairsAttachments => '附件照片';
+  String get repairsAttachments => 'Fotos em anexo';
 
   @override
-  String get repairsNoActivity => '暂无流转记录';
+  String get repairsNoActivity => 'Nenhum registro de andamento';
 
   @override
-  String get repairsUploadImage => '添加图片';
+  String get repairsUploadImage => 'Adicionar foto';
 
   @override
-  String get repairsUploading => '正在上传图片…';
+  String get repairsUploading => 'Enviando foto…';
 
   @override
-  String get repairsUploadFailed => '图片上传失败';
+  String get repairsUploadFailed => 'Falha ao enviar foto';
 
   @override
-  String get repairsDeleteImage => '删除图片';
+  String get repairsDeleteImage => 'Excluir foto';
 
   @override
-  String get repairsDeleteConfirm => '确认删除此图片？';
+  String get repairsDeleteConfirm =>
+      'Tem certeza de que deseja excluir esta foto?';
 
   @override
-  String get repairsSubmitTicket => '填写报修单';
+  String get repairsSubmitTicket => 'Abrir chamado de reparo';
 
   @override
-  String get repairsSelectCategory => '选择报修类型';
+  String get repairsSelectCategory => 'Selecionar categoria de reparo';
 
   @override
-  String get dataSyncSettings => '数据';
+  String get dataSyncSettings => 'Dados';
 
   @override
-  String get dataBackup => '数据导出';
+  String get dataBackup => 'Exportar dados';
 
   @override
-  String get backupSecurityTip => '备份不含登录密码，含自定义 AI Key，请妥善保管';
+  String get backupSecurityTip =>
+      'O backup não inclui senhas de acesso, mas contém sua chave de IA personalizada. Guarde-o com segurança.';
 
   @override
-  String get backupShareText => '我的自在东湖数据备份';
+  String get backupShareText => 'Meu backup de dados do ChillEast';
 
   @override
-  String get backupExportSuccess => '备份已导出，可选择保存或分享';
+  String get backupExportSuccess =>
+      'Backup exportado. Escolha onde salvar ou compartilhar';
 
   @override
   String backupExportFailed(String error) {
-    return '导出失败: $error';
+    return 'Falha ao exportar: $error';
   }
 
   @override
-  String get dataImport => '数据导入';
+  String get dataImport => 'Importar dados';
 
   @override
-  String get dataImportConfirmTitle => '确认导入？';
+  String get dataImportConfirmTitle => 'Confirmar restauração?';
 
   @override
-  String get dataImportConfirmMessage => '导入将覆盖当前设置与本地资料，是否继续？';
+  String get dataImportConfirmMessage =>
+      'A restauração substituirá as configurações atuais e os dados locais. Deseja continuar?';
 
   @override
-  String get dataImportSuccess => '备份已导入';
+  String get dataImportSuccess => 'Backup restaurado com sucesso';
 
   @override
   String dataImportFailed(String error) {
-    return '导入失败: $error';
+    return 'Falha ao restaurar: $error';
   }
 
   @override
-  String get dataImportInvalidFile => '不是有效的备份文件';
+  String get dataImportInvalidFile => 'Arquivo de backup inválido';
 
   @override
-  String get dataImportVersionTooNew => '备份版本过新，请先升级 App 后再导入';
+  String get dataImportVersionTooNew =>
+      'O backup foi criado por uma versão mais recente do aplicativo. Atualize o app antes de importar';
 
   @override
-  String get cloudBackupAutoSync => '自动同步';
+  String get cloudBackupAutoSync => 'Sincronização automática';
 
   @override
-  String get cloudBackupAutoSyncSubtitle => '通过学习通网盘';
+  String get cloudBackupAutoSyncSubtitle => 'Via nuvem do Chaoxing';
 
   @override
-  String get cloudSyncPromptTitle => '开启自动同步';
+  String get cloudSyncPromptTitle => 'Ativar sincronização automática';
 
   @override
-  String get cloudSyncPromptMessage => '自动把课表、作业等本地数据同步到学习通网盘，换机也不丢，随时可在设置里关闭。';
+  String get cloudSyncPromptMessage =>
+      'Sincronize automaticamente horários, tarefas e outros dados locais com a nuvem do Chaoxing para não perder nada ao trocar de aparelho. Você pode desativar isso a qualquer momento nas Configurações.';
 
   @override
-  String get cloudSyncPromptEnable => '立即开启';
+  String get cloudSyncPromptEnable => 'Ativar agora';
 
   @override
-  String get bookSearch => '图书查询';
+  String get bookSearch => 'Consulta de Acervo';
 
   @override
-  String get bookSearchSubtitle => '检索馆藏图书与借阅状态';
+  String get bookSearchSubtitle =>
+      'Pesquise o acervo da biblioteca e consulte empréstimos';
 
   @override
-  String get bookSearchHint => '搜索书名、作者、主题或标准编码...';
+  String get bookSearchHint =>
+      'Pesquisar por título, autor, assunto ou ISBN...';
 
   @override
   String bookSearchTotalCount(int count) {
-    return '共找到 $count 本图书';
+    return 'Foram encontrados $count livros';
   }
 
   @override
-  String get bookSearchLoading => '正在加载...';
+  String get bookSearchLoading => 'Carregando...';
 
   @override
-  String get bookSearchEmpty => '未检索到相关图书';
+  String get bookSearchEmpty => 'Nenhum livro encontrado';
 
   @override
-  String get bookDetailTitle => '图书详情';
+  String get bookDetailTitle => 'Detalhes do livro';
 
   @override
-  String get holdingsTitle => '馆藏信息';
+  String get holdingsTitle => 'Exemplares no acervo';
 
   @override
-  String get barcode => '条码号';
+  String get barcode => 'Código de barras';
 
   @override
-  String get callNumber => '索书号';
+  String get callNumber => 'Número de chamada';
 
   @override
-  String get holdingLocation => '典藏地';
+  String get holdingLocation => 'Localização no acervo';
 
   @override
-  String get holdingStatus => '状态';
+  String get holdingStatus => 'Status';
 
   @override
-  String get holdingUnit => '馆藏单位';
+  String get holdingUnit => 'Biblioteca';
 
   @override
-  String get copyType => '单册类型';
+  String get copyType => 'Tipo de exemplar';
 
   @override
-  String get accessionNo => '登录号';
+  String get accessionNo => 'Número de registro';
 
   @override
-  String get searchTypeTitle => '书名';
+  String get searchTypeTitle => 'Título';
 
   @override
-  String get searchTypeAuthor => '作者';
+  String get searchTypeAuthor => 'Autor';
 
   @override
-  String get searchTypeSubject => '主题';
+  String get searchTypeSubject => 'Assunto';
 
   @override
-  String get searchTypeIdentifier => '标准编码';
+  String get searchTypeIdentifier => 'Código padrão (ISBN)';
 
   @override
-  String get statusInLibrary => '在库';
+  String get statusInLibrary => 'Disponível';
 
   @override
-  String get statusBorrowed => '借出';
+  String get statusBorrowed => 'Emprestado';
 
   @override
-  String get search => '搜索';
+  String get search => 'Pesquisar';
 
   @override
-  String get funcEhall => '办事大厅';
+  String get funcEhall => 'Central de Serviços';
 
   @override
-  String get ehallSubtitle => '线上办事、流程审批与综合服务';
+  String get ehallSubtitle =>
+      'Serviços online, aprovação de processos e atendimento do campus';
 
   @override
-  String get ehallHotServices => '热门服务';
+  String get ehallHotServices => 'Serviços populares';
 
   @override
-  String get ehallAllServices => '全部服务';
+  String get ehallAllServices => 'Todos os serviços';
 
   @override
-  String get ehallCategories => '服务分类';
+  String get ehallCategories => 'Categorias';
 
   @override
-  String get ehallDepartments => '服务部门';
+  String get ehallDepartments => 'Departamentos';
 
   @override
-  String get ehallMyOrders => '我的办件';
+  String get ehallMyOrders => 'Minhas solicitações';
 
   @override
-  String get ehallSearchHint => '搜索服务名称、部门或描述...';
+  String get ehallSearchHint => 'Pesquisar serviços ou departamentos...';
 
   @override
-  String get ehallNoServicesFound => '未找到匹配的服务';
+  String get ehallNoServicesFound => 'Nenhum serviço correspondente encontrado';
 
   @override
-  String get ehallApplyNow => '我要办理';
+  String get ehallApplyNow => 'Solicitar agora';
 
   @override
-  String get ehallViewDetail => '查看详情';
+  String get ehallViewDetail => 'Ver detalhes';
 
   @override
-  String get ehallServiceType => '服务类型';
+  String get ehallServiceType => 'Tipo de serviço';
 
   @override
-  String get ehallDepartment => '主办部门';
+  String get ehallDepartment => 'Departamento responsável';
 
   @override
-  String get ehallVisits => '访问量';
+  String get ehallVisits => 'Acessos';
 
   @override
-  String get ehallExternalLink => '外部系统跳转';
+  String get ehallExternalLink => 'Link externo';
 
   @override
-  String get ehallProcessWorkflow => '线上审批流程';
+  String get ehallProcessWorkflow => 'Fluxo de aprovação online';
 
   @override
-  String get ehallOpenInWeb => '网页版大厅';
+  String get ehallOpenInWeb => 'Abrir portal web';
 
   @override
-  String get ehallOngoing => '进行中';
+  String get ehallOngoing => 'Em andamento';
 
   @override
-  String get ehallCompleted => '已办结';
+  String get ehallCompleted => 'Concluído';
 
   @override
-  String get ehallNoOrders => '暂无办件记录';
+  String get ehallNoOrders => 'Nenhuma solicitação registrada';
 
   @override
-  String get ehallFavorites => '我的收藏';
+  String get ehallFavorites => 'Favoritos';
 
   @override
-  String get ehallAddToFavorites => '收藏服务';
+  String get ehallAddToFavorites => 'Adicionar aos favoritos';
 
   @override
-  String get ehallRemoveFromFavorites => '取消收藏';
+  String get ehallRemoveFromFavorites => 'Remover dos favoritos';
 
   @override
-  String get ehallServiceUnavailable => '办事大厅暂时不可用，请稍后重试';
+  String get ehallServiceUnavailable =>
+      'A Central de Serviços está temporariamente indisponível. Tente novamente mais tarde';
 
   @override
-  String get ehallSessionExpired => '办事大厅登录态已过期，请重新登录';
+  String get ehallSessionExpired =>
+      'A sessão da Central de Serviços expirou. Faça login novamente';
 
   @override
-  String get ehallExternalJumpPrompt => '即将跳转至外部服务';
+  String get ehallExternalJumpPrompt => 'Redirecionando para serviço externo';
 
   @override
-  String get ehallOpenNativeLeave => '在请假小程序中办理';
+  String get ehallOpenNativeLeave => 'Solicitar no miniaplicativo de licença';
 
   @override
-  String get examSchedule => '考试日程';
+  String get examTimePrefix => 'Horário do exame';
 
   @override
-  String get examTimePrefix => '考试时间';
+  String get clearWebViewCache => 'Limpar cache';
 
   @override
-  String get clearWebViewCache => '清理缓存';
+  String get clearWebViewCacheSubtitle =>
+      'Limpar cache em disco do InAppWebView e dados offline da web';
 
   @override
-  String get clearWebViewCacheSubtitle => '清理 InAppWebView 磁盘缓存与网页离线数据';
+  String get clearWebViewCacheSuccess => 'Cache limpo com sucesso';
 
   @override
-  String get clearWebViewCacheSuccess => '已清理缓存';
-
-  @override
-  String get clearWebViewCacheConfirmTitle => '确认清理缓存？';
+  String get clearWebViewCacheConfirmTitle => 'Limpar cache?';
 
   @override
   String get clearWebViewCacheConfirmMessage =>
-      '将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。';
+      'Isso limpará o cache offline local e os dados temporários das páginas web internas. Sua sessão de login não será afetada.';
+
+  @override
+  String get aiFetchModels => 'Obter lista de modelos';
+
+  @override
+  String get aiSelectModel => 'Selecionar modelo';
+
+  @override
+  String get aiSearchModelHint => 'Pesquisar modelo…';
+
+  @override
+  String get aiNoModelsFound => 'Nenhum modelo encontrado';
+
+  @override
+  String get aiTestConnection => 'Testar conexão';
+
+  @override
+  String get aiTestingConnection => 'Testando conexão…';
+
+  @override
+  String aiTestSuccess(int ms) {
+    return 'Conexão bem-sucedida ($ms ms)';
+  }
+
+  @override
+  String aiTestFailed(String error) {
+    return 'Falha na conexão: $error';
+  }
+
+  @override
+  String get aiApiKeyRequired => 'Configure uma chave de API primeiro';
+
+  @override
+  String aiModelSelected(String model) {
+    return 'Modelo selecionado: $model';
+  }
+
+  @override
+  String get timetableSubscription => 'Assinatura da grade horária';
+
+  @override
+  String get timetableSubscriptionSubtitle =>
+      'Assinatura de calendário online e sincronização automática na nuvem';
+
+  @override
+  String get timetableSubscriptionAutoUpload =>
+      'Ativar assinatura da grade horária';
+
+  @override
+  String get timetableSubscriptionAutoUploadDesc =>
+      'Quando ativado, a grade horária ajustada será enviada automaticamente para a nuvem para ser assinada por calendários externos sempre que for atualizada; ao desativar, o arquivo na nuvem será excluído.';
+
+  @override
+  String get timetableSubscriptionUrl => 'Link de assinatura do calendário';
+
+  @override
+  String get copySubscriptionUrl => 'Copiar link';
+
+  @override
+  String get subscriptionUrlCopied =>
+      'Link de assinatura copiado para a área de transferência';
+
+  @override
+  String get openInCalendar => 'Assinar no Calendário';
+
+  @override
+  String get openInCalendarFailed =>
+      'Não foi possível abrir o calendário do sistema. Copie o link para assinar manualmente.';
+
+  @override
+  String get syncToCloudNow => 'Sincronizar com a nuvem agora';
+
+  @override
+  String get syncSuccess => 'Sincronização na nuvem realizada com sucesso';
+
+  @override
+  String syncFailed(String error) {
+    return 'Falha na sincronização com a nuvem: $error';
+  }
+
+  @override
+  String get resetSubscriptionUrl => 'Redefinir link';
+
+  @override
+  String get resetSubscriptionConfirmTitle => 'Redefinir link de assinatura?';
+
+  @override
+  String get resetSubscriptionConfirmMessage =>
+      'O link de assinatura atual se tornará inválido imediatamente e a grade antiga na nuvem será excluída. Você precisará adicionar o novo link em todos os seus dispositivos inscritos. Deseja continuar?';
+
+  @override
+  String get subscriptionTutorialTitle =>
+      'Como assinar em calendários externos';
+
+  @override
+  String get subscriptionTutorialContent =>
+      '• Apple Calendar (iPhone / iPad / Mac):\nToque em \'Assinar no Calendário\' acima ou, no aplicativo Calendário, escolha \'Adicionar Calendário Assinado\' e cole o link.\n\n• Google Agenda:\nNa versão web, clique no \'+\' ao lado de \'Outras agendas\', escolha \'Do URL\' e cole o link.\n\n• Microsoft Outlook:\nSelecione \'Adicionar calendário\' -> \'Assinar pela Web\', insira o link e salve.\n\n• Dica:\nO link de assinatura inclui todas as aulas e alterações. Caso haja remarcações ou atualizações acadêmicas, o feed será mantido atualizado automaticamente.';
+
+  @override
+  String get onboardingWelcomeTitle => 'Boas-vindas ao ChillEast';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'Seu assistente moderno de vida no campus, feito para estudantes da HUNAU';
+
+  @override
+  String get onboardingSkip => 'Pular';
+
+  @override
+  String get onboardingNext => 'Avançar';
+
+  @override
+  String get onboardingStart => 'Começar';
+
+  @override
+  String get onboardingGoToLogin => 'Fazer login';
+
+  @override
+  String get onboardingGuideTitle => 'Guia de boas-vindas e recursos';
+
+  @override
+  String get onboardingGuideSubtitle =>
+      'Conheça rapidamente os principais recursos e dicas do ChillEast';
+
+  @override
+  String get onboardingSlide1Tag => 'Grade horária e agenda';
+
+  @override
+  String get onboardingSlide1Title => 'Grade inteligente · Atividades ao vivo';
+
+  @override
+  String get onboardingSlide1Desc =>
+      'Sincronização automática com o sistema acadêmico, incluindo alterações e reposições. Com Atividades ao vivo e widgets, acompanhe sua rotina a qualquer momento.';
+
+  @override
+  String get onboardingSlide2Tag => 'Assistente de estudos';
+
+  @override
+  String get onboardingSlide2Title =>
+      'Tarefas sincronizadas · Alertas de prazo';
+
+  @override
+  String get onboardingSlide2Desc =>
+      'Sincronização integrada de tarefas do Chaoxing com contagem regressiva intuitiva. Configure lembretes antes do prazo e não perca nenhuma entrega.';
+
+  @override
+  String get onboardingSlide3Tag => 'Serviços do campus';
+
+  @override
+  String get onboardingSlide3Title => 'Vida no campus · Tudo em um só lugar';
+
+  @override
+  String get onboardingSlide3Desc =>
+      'Lembretes de reserva da biblioteca, saldo e extrato do cartão universitário e alerta de energia do dormitório: controle sua rotina na ponta dos dedos.';
+
+  @override
+  String get onboardingSlide4Tag => 'Multiplataforma';
+
+  @override
+  String get onboardingSlide4Title =>
+      'Assinatura de calendário · Backup na nuvem';
+
+  @override
+  String get onboardingSlide4Desc =>
+      'Gere assinaturas Webcal em um toque para sincronizar no celular, relógio e computador. Com backup criptografado na nuvem, mude de aparelho sem preocupações.';
+
+  @override
+  String postLoginSetupStep(int current, int total) {
+    return 'Passo $current de $total';
+  }
+
+  @override
+  String get postLoginSetupSkip => 'Pular';
+
+  @override
+  String get postLoginSetupEnable => 'Ativar';
+
+  @override
+  String get courseReminderPromptMessage =>
+      'Receba notificações antes da aula começar com a sala e o local.';
+
+  @override
+  String get postLoginSetupNext => 'Ativar';
+
+  @override
+  String get postLoginSetupFinish => 'Ativar';
+
+  @override
+  String get postLoginSetupFinishWithoutEnable => 'Pular';
+
+  @override
+  String get timetableAutoSyncPromptTitle =>
+      'Sincronização automática da grade';
+
+  @override
+  String get timetableAutoSyncPromptMessage =>
+      'Obtenha dados automaticamente do sistema acadêmico para manter sua grade sempre em dia.';
+
+  @override
+  String get timetableAutoSyncPromptBadge => 'Recomendado';
+
+  @override
+  String get homeworkReminderPromptTitle => 'Lembrete de prazo de tarefas';
+
+  @override
+  String get homeworkReminderPromptMessage =>
+      'Receba alertas antes do prazo final das tarefas para não esquecer de enviar.';
+
+  @override
+  String get homeworkReminderPromptBadge => 'Alerta antecipado';
+
+  @override
+  String get libraryReminderPromptTitle => 'Lembrete de assento na biblioteca';
+
+  @override
+  String get libraryReminderPromptMessage =>
+      'Receba um aviso antes do horário da reserva para não perder seu lugar.';
+
+  @override
+  String get libraryReminderPromptBadge => 'Aviso prévio';
+
+  @override
+  String get timetableSubscriptionPromptTitle =>
+      'Assinatura de calendário da grade';
+
+  @override
+  String get timetableSubscriptionPromptMessage =>
+      'Gere uma assinatura Webcal para importar no calendário do sistema ou Google Agenda com um toque.';
+
+  @override
+  String get timetableSubscriptionPromptBadge =>
+      'Sincronização multiplataforma';
+
+  @override
+  String get useLiveActivityPrompt => 'Usar Atividades ao vivo';
+
+  @override
+  String get startGuide => 'Iniciar assistente';
+
+  @override
+  String get postLoginDoneTitle => 'Tudo pronto!';
+
+  @override
+  String get postLoginDoneMessage => 'Boas-vindas ao ChillEast.';
+
+  @override
+  String get postLoginDoneButton => 'Concluir';
 }

@@ -12,9 +12,7 @@ import '../utils/ics_parser.dart';
 import '../utils/date_calculator.dart';
 import '../utils/week_parser.dart';
 import '../utils/course_color_utils.dart';
-import '../../../core/widgets/triangle_painter.dart';
 import '../providers/timetable_status_provider.dart';
-import '../providers/reminder_trigger_provider.dart';
 import '../widgets/weekly_calendar_view.dart';
 import '../widgets/empty_timetable_state.dart';
 import '../widgets/timetable_rule_dialogs.dart';
@@ -22,6 +20,7 @@ import '../../homework/providers/homework_provider.dart';
 import '../../homework/models/homework_model.dart';
 import '../../exam/providers/exam_provider.dart';
 import '../../exam/models/exam_schedule_model.dart';
+import '../../exam/services/exam_storage.dart';
 import '../../workspace/screens/webview_detail_screen.dart';
 import '../../../core/state/auth_state.dart';
 import '../../profile/providers/settings_provider.dart';
@@ -169,6 +168,10 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
             firstWeekMonday = await _storage.resolveFirstWeekMonday();
           } catch (_) {}
 
+          await CourseColorUtils.init();
+          CourseColorUtils.syncCourses(courses.map((c) => c.name));
+
+          if (!mounted) return;
           setState(() {
             _courses = courses;
             _hasLocalTimetable = true;
@@ -182,6 +185,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           // 如果在日程页且数据加载完成，直接跳转
           _scrollToToday();
         } else {
+          if (!mounted) return;
           setState(() {
             _hasLocalTimetable = false;
             _isLoading = false;
@@ -209,6 +213,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
@@ -276,6 +281,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           orElse: () => <ExamScheduleModel>[],
         );
     for (final e in examList) {
+      if (ExamStorage.isManualExamExpired(e)) continue;
       if (!e.isCurrentSemester(firstWeekMonday: _firstWeekMonday)) continue;
       final dayKey = DateTime(e.time.year, e.time.month, e.time.day);
       if (!grouped.containsKey(dayKey)) {
@@ -349,6 +355,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       final courseCount = _agendaTimeline[i].value.length;
       final examCount = examList
           .where((e) =>
+              !ExamStorage.isManualExamExpired(e) &&
               e.isCurrentSemester(firstWeekMonday: _firstWeekMonday) &&
               e.time.year == date.year &&
               e.time.month == date.month &&
@@ -410,9 +417,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
 
       // 刷新全局状态
       ref.read(timetableStatusProvider.notifier).refresh();
-      ref
-          .read(classReminderTriggerProvider.notifier)
-          .update((state) => state + 1);
 
       // 重新安排通知
       final l10n = context.l10n;
@@ -447,9 +451,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       onRuleApplied: () async {
         await _loadLocalTimetable();
         ref.read(timetableStatusProvider.notifier).refresh();
-        ref
-            .read(classReminderTriggerProvider.notifier)
-            .update((state) => state + 1);
         await ref.read(settingsProvider.notifier).rescheduleNotifications();
       },
     );
@@ -466,6 +467,13 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
 
     final l10n = context.l10n;
     try {
+      // 确保分享出去的 ICS 已经完整应用所有调课、停课及自定义规则
+      try {
+        await TimetableRuleService().applyRulesAndRegenerate();
+      } catch (e) {
+        _logger.w('Regenerating rules before sharing failed: $e');
+      }
+
       final filePath = await _storage.getTimetableFilePath();
       if (filePath == null) {
         throw Exception(l10n.timetableFileNotFound);
@@ -487,6 +495,20 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
 
   @override
   Widget build(BuildContext context) {
+    // 监听全局课表状态刷新（云备份恢复/后台同步完成），立即重载本地课表
+    ref.listen(timetableStatusProvider, (_, __) {
+      if (mounted) {
+        _loadLocalTimetable();
+      }
+    });
+
+    // 监听静默同步进程（完成时重新拉取最新课表，确保退出转圈状态）
+    ref.listen(timetableSyncInProgressProvider, (previous, next) {
+      if (previous == true && next == false && mounted) {
+        _loadLocalTimetable();
+      }
+    });
+
     // 监听作业变化，同步刷新日程轴
     ref.listen(homeworkProvider, (_, __) {
       if (_courses.isNotEmpty && _firstWeekMonday != null) {
@@ -528,14 +550,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       height: 52,
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
-        border: Border(
-          bottom: BorderSide(
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white.withOpacity(0.05)
-                : Colors.black.withOpacity(0.05),
-            width: 1,
-          ),
-        ),
       ),
       child: Row(
         children: [
@@ -628,14 +642,22 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
     }
 
     if (_isLoading) return const Center(child: CircularProgressIndicator());
+    if (_errorMessage != null) return _buildErrorState();
     if (!_hasLocalTimetable) {
       final autoSyncEnabled =
           ref.watch(settingsProvider).timetableAutoSyncEnabled;
-      return EmptyTimetableState(autoSyncEnabled: autoSyncEnabled);
+      final isSyncing = ref.watch(timetableSyncInProgressProvider);
+      return EmptyTimetableState(
+        autoSyncEnabled: autoSyncEnabled,
+        isSyncing: isSyncing,
+      );
     }
 
     // 如果没有课程但是有元数据（已同步过），则继续渲染（为了展示作业）
     if (_firstWeekMonday == null) return _buildMetadataMissingState();
+
+    final showEndTime =
+        ref.watch(settingsProvider.select((s) => s.timetableShowEndTime));
 
     return TabBarView(
       controller: _tabController,
@@ -646,6 +668,10 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
             key: _weeklyKey,
             courses: _courses,
             firstWeekMonday: _firstWeekMonday!,
+            showEndTime: showEndTime,
+            onCourseColorChanged: () {
+              setState(() {});
+            },
           ),
         ),
       ],
@@ -827,7 +853,10 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           Text(
             course.name,
             style: const TextStyle(
-                color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+              color: Colors.white,
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -836,7 +865,10 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
             [timeRange, course.classroom.trim(), course.teacher.trim()]
                 .where((s) => s.isNotEmpty)
                 .join(', '),
-            style: const TextStyle(color: Colors.white, fontSize: 12),
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 12,
+            ),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
@@ -877,6 +909,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       data: (list) {
         final dayExams = list
             .where((e) =>
+                !ExamStorage.isManualExamExpired(e) &&
                 e.isCurrentSemester(firstWeekMonday: _firstWeekMonday) &&
                 e.time.year == date.year &&
                 e.time.month == date.month &&
@@ -895,6 +928,18 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
   Widget _buildExamAgendaTask(ExamScheduleModel item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final timeStr = DateFormat('HH:mm').format(item.time);
+    final location = item.location?.trim() ?? '';
+    final timeLocation = location.isNotEmpty ? '$timeStr @ $location' : timeStr;
+
+    final title = item.title.trim();
+    final course = item.courseName.trim();
+    final displayTitle = course.isNotEmpty
+        ? (title.isNotEmpty && title != course ? '$course · $title' : course)
+        : title;
+
+    final showStatus = item.status.isNotEmpty &&
+        item.status != '待考' &&
+        item.status != context.l10n.examStatusPending;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -914,12 +959,12 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       child: Container(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 4),
-        padding: const EdgeInsets.all(12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF382326) : const Color(0xFFFFEBEE),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: const Color(0xFFE53935).withOpacity(isDark ? 0.3 : 0.2),
+            color: const Color(0xFFE53935).withValues(alpha: isDark ? 0.3 : 0.2),
             width: 1,
           ),
         ),
@@ -927,7 +972,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
           children: [
             const Icon(
               Icons.quiz_outlined,
-              size: 18,
+              size: 22,
               color: Color(0xFFE53935),
             ),
             const SizedBox(width: 12),
@@ -939,10 +984,11 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
                     children: [
                       Expanded(
                         child: Text(
-                          item.title,
+                          displayTitle,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
+                            height: 1.2,
                             color: isDark
                                 ? Colors.white
                                 : const Color(0xFF2D3436),
@@ -951,13 +997,13 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (item.status.isNotEmpty) ...[
+                      if (showStatus) ...[
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE53935).withOpacity(0.12),
+                            color: const Color(0xFFE53935).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -972,9 +1018,9 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
                       ],
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 4),
                   Text(
-                    '${context.l10n.examTimePrefix} $timeStr',
+                    timeLocation,
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark

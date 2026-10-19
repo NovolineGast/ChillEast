@@ -56,6 +56,7 @@ class HomeWidgetService {
     'xgxt',
     'teaching_eval',
     'score',
+    'exam',
     'vpn',
     'campus_card',
     'bus',
@@ -80,6 +81,7 @@ class HomeWidgetService {
     'gym': '🏀',
     'teaching_eval': '📝',
     'score': '📊',
+    'exam': '📅',
     'vpn': '🔒',
     'campus_card': '💰',
     'bus': '🚌',
@@ -105,6 +107,7 @@ class HomeWidgetService {
     'gym': 0xFFE91E63,
     'teaching_eval': 0xFF00BCD4,
     'score': 0xFFE63476,
+    'exam': 0xFF5C6BC0,
     'vpn': 0xFF607D8B,
     'campus_card': 0xFF008268,
     'ele_recharge': 0xFFFFEB3B,
@@ -409,6 +412,8 @@ class HomeWidgetService {
         return l10n.funcTeachingEval;
       case 'score':
         return l10n.funcScore;
+      case 'exam':
+        return l10n.examSchedule;
       case 'vpn':
         return l10n.funcVpn;
       case 'campus_card':
@@ -569,6 +574,20 @@ class HomeWidgetService {
       });
     } catch (_) {
       // 原生侧尚未就绪（如桌面暂无小组件）时忽略
+    }
+  }
+
+  /// 退出登录时清除小组件的日程数据
+  Future<void> clearWidgets() async {
+    try {
+      final sp = await SharedPreferences.getInstance();
+      await sp.remove(agendaJsonKey);
+      await sp.remove(updatedAtKey);
+      await _channel.invokeMethod('updateWidgets', {
+        'alarms': <int>[],
+      });
+    } catch (e) {
+      debugPrint('⚠️ Clear HomeWidget data failed: $e');
     }
   }
 

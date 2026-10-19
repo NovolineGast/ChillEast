@@ -52,6 +52,7 @@ class AppearanceState {
   final List<FunctionItem> widgetItems;
   final List<String> functionGroupOrder;
   final List<String> hiddenFunctionGroups;
+  final bool feedAutoSort;
 
   const AppearanceState({
     required this.homeItems,
@@ -60,6 +61,7 @@ class AppearanceState {
     required this.widgetItems,
     required this.functionGroupOrder,
     required this.hiddenFunctionGroups,
+    this.feedAutoSort = false,
   });
 
   AppearanceState copyWith({
@@ -69,6 +71,7 @@ class AppearanceState {
     List<FunctionItem>? widgetItems,
     List<String>? functionGroupOrder,
     List<String>? hiddenFunctionGroups,
+    bool? feedAutoSort,
   }) {
     return AppearanceState(
       homeItems: homeItems ?? this.homeItems,
@@ -77,6 +80,7 @@ class AppearanceState {
       widgetItems: widgetItems ?? this.widgetItems,
       functionGroupOrder: functionGroupOrder ?? this.functionGroupOrder,
       hiddenFunctionGroups: hiddenFunctionGroups ?? this.hiddenFunctionGroups,
+      feedAutoSort: feedAutoSort ?? this.feedAutoSort,
     );
   }
 }
@@ -94,7 +98,7 @@ const List<FunctionGroup> functionGroups = [
       ids: ['payment_code', 'recharge', 'ele_recharge']),
   FunctionGroup(
       titleKey: 'groupStudy',
-      ids: ['library', 'empty_classroom', 'score']),
+      ids: ['library', 'empty_classroom', 'score', 'exam']),
   FunctionGroup(
       titleKey: 'groupLife',
       ids: ['repairs', 'leave', 'questionnaire', 'sunshine', 'dormitory']),
@@ -159,6 +163,8 @@ extension FunctionItemLocalization on FunctionItem {
         return l10n.funcTeachingEval;
       case 'score':
         return l10n.funcScore;
+      case 'exam':
+        return l10n.examSchedule;
       case 'vpn':
         return l10n.funcVpn;
       case 'campus_card':
@@ -179,6 +185,8 @@ extension FunctionItemLocalization on FunctionItem {
         return l10n.libraryReservation;
       case 'feed_agenda':
         return l10n.todayAgenda;
+      case 'feed_homework':
+        return l10n.tabHomework;
       case 'feed_questionnaire':
         return l10n.pendingQuestionnaires;
       case 'feed_leave':

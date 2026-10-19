@@ -58,6 +58,41 @@ class LibraryTimeUtils {
     return [today];
   }
 
+  /// 获取初始推荐预约日期：
+  /// - 22:00 后默认选明天；
+  /// - 今天没有可用时段时（如 21:30 后今天已无时段可选），自动切换至明天；
+  /// - 否则默认选今天。
+  static String initialReserveDay({DateTime? now}) {
+    final beijing = getBeijingNow(now);
+    final today = formatDate(beijing);
+    final tomorrow = formatDate(beijing.add(const Duration(days: 1)));
+    if (beijing.hour >= 22) {
+      return tomorrow;
+    }
+    final todaySlots = availableStartSlots(today, now: now);
+    if (todaySlots.isEmpty) {
+      return tomorrow;
+    }
+    return today;
+  }
+
+  /// 根据指定基准日期（例如服务端返回的 ymd）与当前时间计算有效预约日期：
+  /// - 22:00 后默认选明天；
+  /// - 若当前日期在当前时刻已无可用时段，自动顺延切换至明天；
+  /// - 否则保持基准日期。
+  static String resolveEffectiveDay(String day, {DateTime? now}) {
+    final beijing = getBeijingNow(now);
+    final slots = availableStartSlots(day, now: now);
+    if (beijing.hour >= 22 || slots.isEmpty) {
+      final parsed = DateTime.tryParse(day);
+      if (parsed != null) {
+        return formatDate(parsed.add(const Duration(days: 1)));
+      }
+      return formatDate(beijing.add(const Duration(days: 1)));
+    }
+    return day;
+  }
+
   /// 格式化日期标签（例如：今天 (9月2日)、明天 (9月3日)）。
   /// 基于北京时间判断今天与明天。
   static String formatDayLabel(String dayStr, {DateTime? now}) {

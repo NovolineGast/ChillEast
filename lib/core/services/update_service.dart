@@ -154,24 +154,34 @@ class UpdateService {
       ),
     );
 
+    final messenger = ScaffoldMessenger.maybeOf(context);
+    final l10n = context.l10n;
+
     // 显示下载进度对话框 (保持原有的进度对话框)
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => _DownloadProgressDialog(
+      builder: (dialogContext) => _DownloadProgressDialog(
         url: url,
         fileName: 'chilleast_v$version.apk',
         onCompleted: (path) {
           snackBar.close();
-          Navigator.pop(context);
+          if (dialogContext.mounted) {
+            Navigator.pop(dialogContext);
+          }
           _installApk(path);
         },
         onError: (err) {
           snackBar.close();
-          Navigator.pop(context);
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(context.l10n.downloadFailedWithReason(err)), behavior: SnackBarBehavior.floating),
+          if (dialogContext.mounted) {
+            Navigator.pop(dialogContext);
+          }
+          messenger?.showSnackBar(
+            SnackBar(content: Text(l10n.downloadFailedWithReason(err)), behavior: SnackBarBehavior.floating),
           );
+        },
+        onCancel: () {
+          snackBar.close();
         },
       ),
     );
@@ -195,12 +205,14 @@ class _DownloadProgressDialog extends StatefulWidget {
   final String fileName;
   final Function(String) onCompleted;
   final Function(String) onError;
+  final VoidCallback? onCancel;
 
   const _DownloadProgressDialog({
     required this.url,
     required this.fileName,
     required this.onCompleted,
     required this.onError,
+    this.onCancel,
   });
 
   @override
@@ -253,7 +265,7 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
           }
         } catch (_) {}
       }
-      if (!CancelToken.isCancel(e as DioException)) {
+      if (e is! DioException || !CancelToken.isCancel(e)) {
         widget.onError(e.toString());
       }
     }
@@ -262,6 +274,7 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
   @override
   void dispose() {
     _cancelToken?.cancel();
+    widget.onCancel?.call();
     super.dispose();
   }
 
@@ -282,6 +295,7 @@ class _DownloadProgressDialogState extends State<_DownloadProgressDialog> {
         TextButton(
           onPressed: () {
             _cancelToken?.cancel();
+            widget.onCancel?.call();
             Navigator.pop(context);
           },
           child: Text(context.l10n.cancel),

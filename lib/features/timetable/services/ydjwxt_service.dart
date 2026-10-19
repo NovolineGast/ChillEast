@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:dio/dio.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/utils/app_logger.dart';
@@ -8,21 +10,62 @@ import '../models/course_model.dart';
 import '../parsers/ydjwxt_json_parser.dart';
 import '../services/timetable_storage.dart';
 import '../services/timetable_rule_service.dart';
+import '../services/timetable_subscription_service.dart';
 import '../utils/ics_generator.dart';
+
+/// 课表同步结果模型
+class TimetableSyncResult {
+  final bool success;
+  final int courseCount;
+  final String? message;
+
+  const TimetableSyncResult({
+    required this.success,
+    this.courseCount = 0,
+    this.message,
+  });
+}
 
 class YdjwxtService {
   final _logger = AppLogger.instance;
   final _authService = YdjwxtAuthService();
   String? _token;
 
+  /// 单飞 (single-flight) 互斥锁：同一时间仅允许一个在途同步，并发调用直接复用该 Future
+  static Future<TimetableSyncResult>? _syncInProgress;
+
   /// 全自动同步课表
   ///
   /// [onProgress] 进度回调
   /// [firstWeekMonday] 本学期第一周周一 (可选，若不传则从 API 自动解析)
   ///
-  /// 同步是原子的：开始前先备份本地课表，任何一步失败都会回滚，
+  /// 同步是原子的：开始前先物理备份本地课表为 .bak，任何一步失败都会回滚，
   /// 保证旧课表不受损（调用方只需 catch 提示失败即可）。
-  Future<void> syncTimetable({
+  /// 并发保护：无论登录、课表页下拉、设置页还是 MCP 调用，同一时间仅允许一个在途同步，并发直接复用。
+  Future<TimetableSyncResult> syncTimetable({
+    required Function(String progress) onProgress,
+    DateTime? firstWeekMonday,
+  }) async {
+    if (_syncInProgress != null) {
+      _logger.i('⏳ Timetable sync already in progress, joining existing task...');
+      onProgress('课表同步已在进行中...');
+      return await _syncInProgress!;
+    }
+
+    final future = _doSyncTimetable(
+      onProgress: onProgress,
+      firstWeekMonday: firstWeekMonday,
+    );
+    _syncInProgress = future;
+
+    try {
+      return await future;
+    } finally {
+      _syncInProgress = null;
+    }
+  }
+
+  Future<TimetableSyncResult> _doSyncTimetable({
     required Function(String progress) onProgress,
     DateTime? firstWeekMonday,
   }) async {
@@ -110,12 +153,33 @@ class YdjwxtService {
         firstWeekMonday: calculatedFirstWeekMonday,
       );
 
-      onProgress('同步成功！已更新 ${finalCourses.length} 门课程');
+      // 5. 课表云端订阅自动同步（若开启）：将调停后的 ICS 自动上传到 Cloudflare R2
+      try {
+        final subService = TimetableSubscriptionService(storage: storage);
+        if (await subService.isEnabled()) {
+          onProgress('正在同步课表订阅至云端...');
+          await subService.uploadTimetable(icsContent: icsContent);
+        }
+      } catch (e) {
+        _logger.w('⚠️ Uploading timetable subscription failed: $e');
+      }
+
+      if (backup != null) {
+        await backup.cleanup();
+      }
+
+      final msg = '同步成功！已更新 ${finalCourses.length} 门课程';
+      onProgress(msg);
       _logger.i('🎉 YDJWXT Sync Completed successfully (applied ${rules.length} local rules).');
 
+      return TimetableSyncResult(
+        success: true,
+        courseCount: finalCourses.length,
+        message: msg,
+      );
     } catch (e) {
       _logger.e('❌ YDJWXT sync failed: $e');
-      // 回滚到同步前的本地课表（尽力而为，不掩盖原始错误）
+      // 回滚到同步前的本地课表（仅从 .bak 还原 capture 时真实存在的文件）
       if (backup != null) await backup.restore(storage);
       rethrow;
     }
@@ -155,65 +219,101 @@ class YdjwxtService {
 
 /// 本地课表备份：同步失败时原样写回，保证旧数据不受损。
 ///
-/// 覆盖 ICS 文件、元数据、课程列表、原始课程列表四份文件。
-/// 注意：规则文件（timetable_rules.json）同步全程只读不写，无需备份。
+/// 回滚机制：在同步前 capture 时，直接将物理文件（current_timetable.ics, timetable_meta.json, courses.json, raw_courses.json）备份为 .bak 文件。
+/// 若同步中途失败触发 rollback 时：仅当 capture 时文件物理存在时才从 .bak 还原，如果原先物理不存在才删除；
+/// 严禁因读取 JSON 失败返回 null/[] 就武断调用 deleteTimetable()。
 class TimetableBackup {
-  final String? ics;
-  final Map<String, dynamic>? metadata;
-  final List<CourseModel> courses;
-  final List<CourseModel> rawCourses;
+  static const List<String> targetFileNames = [
+    'current_timetable.ics',
+    'timetable_meta.json',
+    'courses.json',
+    'raw_courses.json',
+  ];
+  static const String backupExtension = '.bak';
+
+  final String _baseDir;
+  final Map<String, bool> _fileExisted;
 
   const TimetableBackup({
-    this.ics,
-    this.metadata,
-    this.courses = const [],
-    this.rawCourses = const [],
-  });
+    required String baseDir,
+    required Map<String, bool> fileExisted,
+  })  : _baseDir = baseDir,
+        _fileExisted = fileExisted;
 
-  /// 读取当前本地文件生成备份（无文件时对应字段为 null/空）。
+  /// 在同步前 capture 时，直接将物理文件备份为 .bak 文件
   static Future<TimetableBackup> capture(TimetableStorage storage) async {
+    final dir = await getApplicationDocumentsDirectory();
+    final fileExisted = <String, bool>{};
+
+    for (final name in targetFileNames) {
+      final file = File('${dir.path}/$name');
+      final bakFile = File('${dir.path}/$name$backupExtension');
+      final exists = await file.exists();
+      fileExisted[name] = exists;
+
+      if (exists) {
+        try {
+          await file.copy(bakFile.path);
+        } catch (e) {
+          AppLogger.instance.w('⚠️ Failed to backup file $name to $backupExtension: $e');
+        }
+      } else {
+        // 原文件不存在，若残留旧 .sync_bak 则清理，防止误还原
+        if (await bakFile.exists()) {
+          try {
+            await bakFile.delete();
+          } catch (_) {}
+        }
+      }
+    }
+
     return TimetableBackup(
-      ics: await storage.readTimetable(),
-      metadata: await storage.readMetadata(),
-      courses: await storage.readCourseList(),
-      rawCourses: await storage.readRawCourseList(),
+      baseDir: dir.path,
+      fileExisted: fileExisted,
     );
   }
 
-  /// 把备份写回本地。原本就没有的文件会被删掉（清理同步写一半的残留），
-  /// 原本就有的则恢复原内容。尽力而为，内部失败只打日志不抛异常。
+  /// 若同步中途失败触发 rollback 时：
+  /// 仅当 capture 时文件物理存在时才从 .bak 还原，如果原先物理不存在才删除；
+  /// 严禁因读取 JSON 失败返回 null/[] 就武断调用 deleteTimetable()。
   Future<void> restore(TimetableStorage storage) async {
     try {
-      if (ics == null) {
-        await storage.deleteTimetable();
-      } else {
-        await storage.saveTimetable(ics!);
-      }
+      for (final name in targetFileNames) {
+        final file = File('$_baseDir/$name');
+        final bakFile = File('$_baseDir/$name$backupExtension');
+        final existed = _fileExisted[name] ?? false;
 
-      final semester = metadata?['semester'] as String?;
-      final firstWeekMondayRaw = metadata?['firstWeekMonday'];
-      if (semester == null || firstWeekMondayRaw == null) {
-        await storage.deleteMetadata();
-      } else {
-        await storage.saveMetadata(
-          semester: semester,
-          firstWeekMonday: DateTime.parse(firstWeekMondayRaw as String),
-        );
-      }
-
-      if (courses.isEmpty) {
-        await storage.deleteCourseList();
-      } else {
-        await storage.saveCourseList(courses);
-      }
-
-      if (rawCourses.isEmpty) {
-        await storage.deleteRawCourseList();
-      } else {
-        await storage.saveRawCourseList(rawCourses);
+        if (existed) {
+          if (await bakFile.exists()) {
+            await bakFile.copy(file.path);
+            await bakFile.delete();
+          }
+        } else {
+          // 原先物理不存在：如果同步中途写了半截残留文件，删除该残留
+          if (await file.exists()) {
+            await file.delete();
+          }
+          if (await bakFile.exists()) {
+            await bakFile.delete();
+          }
+        }
       }
     } catch (e) {
       AppLogger.instance.w('⚠️ Timetable rollback failed: $e');
+    }
+  }
+
+  /// 同步成功后清理 .bak 文件
+  Future<void> cleanup() async {
+    try {
+      for (final name in targetFileNames) {
+        final bakFile = File('$_baseDir/$name$backupExtension');
+        if (await bakFile.exists()) {
+          await bakFile.delete();
+        }
+      }
+    } catch (e) {
+      AppLogger.instance.w('⚠️ Timetable backup cleanup failed: $e');
     }
   }
 }

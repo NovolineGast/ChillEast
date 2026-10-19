@@ -15,16 +15,16 @@ class AppLocalizationsGan extends AppLocalizations {
   String get settings => '设置';
 
   @override
-  String get agentSettings => 'Agent 设置';
+  String get agentSettings => 'Agent';
 
   @override
-  String get appearanceSettings => '外观设置';
+  String get appearanceSettings => '外观面子';
 
   @override
-  String get notificationSettings => '通知设置';
+  String get notificationSettings => '提醒通告';
 
   @override
-  String get language => '语言设置';
+  String get language => '话语方言';
 
   @override
   String get followSystem => '跟随系统';
@@ -75,40 +75,40 @@ class AppLocalizationsGan extends AppLocalizations {
   String get tabHome => '首页';
 
   @override
-  String get tabTimetable => '课表';
+  String get tabTimetable => '课程表';
 
   @override
-  String get tabHomework => '作业';
+  String get tabHomework => '做功课';
 
   @override
-  String get tabNotice => '通知';
+  String get tabNotice => '通告';
 
   @override
-  String get tabFunctions => '功能';
+  String get tabFunctions => '百宝箱';
 
   @override
-  String get cancel => '取消';
+  String get cancel => '算哩';
 
   @override
-  String get confirm => '确定';
+  String get confirm => '准当';
 
   @override
   String get loggingInWait => '正登录，请等哈子...';
 
   @override
-  String get profile => '个人中心';
+  String get profile => '自家中心';
 
   @override
-  String get helpFeedback => '帮助与反馈';
+  String get helpFeedback => '寻指点与提意见';
 
   @override
-  String get about => '关于';
+  String get about => '话底';
 
   @override
-  String get logout => '退出登录';
+  String get logout => '退出来';
 
   @override
-  String get notLoggedIn => '冒有登录';
+  String get notLoggedIn => '冇曾登录';
 
   @override
   String get clickToLogin => '点登录就得用多些功能';
@@ -117,34 +117,34 @@ class AppLocalizationsGan extends AppLocalizations {
   String get defaultStudentName => '湖南农大学子';
 
   @override
-  String get logoutConfirmTitle => '确认退出';
+  String get logoutConfirmTitle => '真个要退出来？';
 
   @override
-  String get logoutConfirmContent => '退出登录后会清掉侬个本地凭证，数据连接也会断开。';
+  String get logoutConfirmContent => '退出来后会抹脱你个本地凭证，数据连接也会断开。';
 
   @override
-  String get checkUpdate => '检查更新';
+  String get checkUpdate => '望哈有冇新版';
 
   @override
-  String get openSourceLicenses => '开源声明';
+  String get openSourceLicenses => '开源照会';
 
   @override
-  String get visitWebsite => '访问官网';
+  String get visitWebsite => '去望官网';
 
   @override
   String get sendEmail => '发出邮件';
 
   @override
-  String get developer => '开发者';
+  String get developer => '做软件个人';
 
   @override
-  String get loginTitle => '登录';
+  String get loginTitle => '登进来';
 
   @override
   String get loginSubtitle => '请先登录再继续。';
 
   @override
-  String get studentId => '学号';
+  String get studentId => '学生号';
 
   @override
   String get studentIdHint => '请填入学号';
@@ -156,103 +156,172 @@ class AppLocalizationsGan extends AppLocalizations {
   String get passwordHint => '请填入密码';
 
   @override
-  String get loginButton => '登录';
+  String get loginButton => '登进来';
 
   @override
-  String get funcSunshine => '阳光服务';
+  String get funcSunshine => '阳光办事';
 
   @override
-  String get funcQuestionnaire => '学工问卷';
+  String get funcQuestionnaire => '学工查访';
 
   @override
-  String get funcLeave => '请假申请';
+  String get funcLeave => '告假禀帖';
 
   @override
-  String get funcPaymentCode => '付款码';
+  String get funcPaymentCode => '付钱码';
 
   @override
-  String get funcRecharge => '校园卡充值';
+  String get funcRecharge => '校园卡充钱';
 
   @override
-  String get funcLibrary => '图书馆';
+  String get funcLibrary => '借书楼';
 
   @override
-  String get funcEmptyClassroom => '空教室';
+  String get funcEmptyClassroom => '空课堂间';
 
   @override
-  String get funcInfoPortal => '更多小程序';
+  String get funcInfoPortal => '还有小程序';
 
   @override
-  String get funcXgxt => '学工系统';
+  String get funcXgxt => '学工门路';
 
   @override
   String get funcRepairs => '报修平台';
 
   @override
-  String get repairWorkOrders => '报修工单';
+  String get repairWorkOrders => '报修单子';
 
   @override
-  String get feedBalance => '余额';
+  String get feedBalance => '剩哩钱';
 
   @override
-  String get campusCardBalance => '校园卡余额';
+  String get campusCardBalance => '校园卡剩哩钱';
 
   @override
-  String get dormitoryElectricity => '宿舍电费';
+  String get dormitoryElectricity => '宿舍电钱';
 
   @override
-  String get noSavedDormitory => '暂未保存宿舍房间';
+  String get noSavedDormitory => '还没存过宿舍房号';
 
   @override
-  String get clickToSelectDormitory => '点击前往选择房间或充值';
+  String get clickToSelectDormitory => '点前往拣房间或充值';
 
   @override
-  String get quickActions => '快捷功能';
+  String get quickActions => '随手搞';
 
   @override
-  String get funcGym => '场馆预约';
+  String get funcGym => '场馆占座';
 
   @override
-  String get funcTeachingEval => '教评系统';
+  String get funcTeachingEval => '评老师系统';
 
   @override
-  String get funcScore => '成绩查询';
+  String get funcScore => '查考分';
 
   @override
-  String get funcVpn => 'VPN转换';
+  String get funcVpn => 'VPN倒腾';
 
   @override
   String get funcCampusCard => '校园卡';
 
   @override
-  String get funcEleRecharge => '电费充值';
+  String get funcEleRecharge => '充水电费';
 
   @override
-  String get funcBus => '实时校车';
+  String get funcBus => '校车现时跑哪';
 
   @override
   String get funcCsBus => '长沙实时公交';
 
   @override
-  String get funcCampusBusRoute => '校内公交线路';
+  String get funcCampusBusRoute => '校内公交路线';
 
   @override
   String get funcDormitory => '我个宿舍';
 
   @override
-  String get dormitoryBuilding => '宿舍楼';
+  String get funcExamSchedule => '考试安排';
+
+  @override
+  String get examSchedule => '考试安排';
+
+  @override
+  String get addExam => '添考试';
+
+  @override
+  String get examTitle => '考试叫甚哩';
+
+  @override
+  String get inputExamTitleHint => '填入考试名称（比如期末考试）';
+
+  @override
+  String get examCourse => '属于哪门课';
+
+  @override
+  String get inputExamCourseHint => '填入课程名称（选填）';
+
+  @override
+  String get examTime => '考试时辰';
+
+  @override
+  String get selectExamTimeHint => '拣考试日子和时辰';
+
+  @override
+  String get examLocation => '考场哪块';
+
+  @override
+  String get inputExamLocationHint => '填入考场或教室（选填）';
+
+  @override
+  String get examRemarks => '记哈';
+
+  @override
+  String get inputExamRemarksHint => '填入备注或准备事项（选填）';
+
+  @override
+  String get noCurrentSemesterExams => '该个学期暂且冇得考试安排';
+
+  @override
+  String get manualExamTag => '手动添';
+
+  @override
+  String get delete => '删脱';
+
+  @override
+  String get deleteExamConfirm => '真个要删脱该个考试啵？';
+
+  @override
+  String get examDeleted => '已删掉考试';
+
+  @override
+  String get examAdded => '已成功添考试';
+
+  @override
+  String get examStatusPending => '等考';
+
+  @override
+  String get examStatusEnded => '考完哩';
+
+  @override
+  String get examDetails => '考试细则';
+
+  @override
+  String get openInChaoXing => '在学习通中望下';
+
+  @override
+  String get dormitoryBuilding => '宿舍楼栋';
 
   @override
   String get dormitoryUnit => '单元';
 
   @override
-  String get dormitoryFloor => '楼层';
+  String get dormitoryFloor => '几多楼';
 
   @override
-  String get dormitoryRoom => '宿舍';
+  String get dormitoryRoom => '房号';
 
   @override
-  String get dormitoryBed => '床号';
+  String get dormitoryBed => '铺号';
 
   @override
   String get dormitoryAcademicYear => '学年';
@@ -270,7 +339,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get dormitoryOpenWeb => '学生公寓平台';
 
   @override
-  String get dormitoryDetail => '宿舍详情';
+  String get dormitoryDetail => '宿舍细则';
 
   @override
   String get dormitoryBedPrompt => '去学生公寓服务平台办查寝签到或床位';
@@ -279,10 +348,10 @@ class AppLocalizationsGan extends AppLocalizations {
   String get more => '多些';
 
   @override
-  String get homeButtonsSetting => '首页按钮排序与隐藏';
+  String get homeButtonsSetting => '首页按钮排队搭藏起';
 
   @override
-  String get homeButtonsTitle => '首页按钮设置';
+  String get homeButtonsTitle => '首页按钮拾掇';
 
   @override
   String get functionsButtonsSetting => '功能页按钮排序与隐藏';
@@ -291,28 +360,34 @@ class AppLocalizationsGan extends AppLocalizations {
   String get functionsButtonsTitle => '功能页按钮设置';
 
   @override
-  String get groupPayment => '支付';
+  String get groupPayment => '付钱';
 
   @override
-  String get groupStudy => '学习';
+  String get groupStudy => '读书';
 
   @override
-  String get groupLife => '生活';
+  String get groupLife => '过日子';
 
   @override
-  String get groupTravel => '出行';
+  String get groupTravel => '出门';
 
   @override
-  String get groupTools => '工具';
+  String get groupTools => '家什';
 
   @override
   String get groupMiniApps => '小程序';
 
   @override
-  String get feedButtonsSetting => '信息流排序与隐藏';
+  String get feedButtonsSetting => '信息流排队搭藏起';
 
   @override
-  String get feedButtonsTitle => '信息流设置';
+  String get feedButtonsTitle => '信息流拾掇';
+
+  @override
+  String get feedAutoSort => '自家排好';
+
+  @override
+  String get feedAutoSortSubtitle => '开了后莫管手动排序和显隐，按智能规则动态排序';
 
   @override
   String get visibleFunctions => '现显示个功能';
@@ -321,46 +396,46 @@ class AppLocalizationsGan extends AppLocalizations {
   String get hiddenFunctions => '藏起个功能（拖到简里就藏起）';
 
   @override
-  String get dragToReorderTip => '长按拖动图标，移入不同区域可显示或隐藏功能';
+  String get dragToReorderTip => '按住拖动图标，移到不同地方可以显出来或者藏起来';
 
   @override
-  String get widgetSettings => '小组件设置';
+  String get widgetSettings => '小组件';
 
   @override
-  String get widgetQuickTitle => '快捷功能（选择 4 个）';
+  String get widgetQuickTitle => '快捷功能（拣 4 个）';
 
   @override
-  String get widgetQuickHint => '小组件的快捷入口独立于首页，可单独配置';
+  String get widgetQuickHint => '小组件个快捷入口独立于首页，可单独配置';
 
   @override
-  String get widgetHowToAdd => '回到手机桌面，长按空白处添加「今日日程」「快捷功能」「日程 + 快捷」小组件';
+  String get widgetHowToAdd => '回到手机桌面，长按空白处添「今日日程」「快捷功能」「日程 + 快捷」小组件';
 
   @override
-  String get widgetNeedFour => '请选择 4 个功能';
+  String get widgetNeedFour => '请拣 4 个功能';
 
   @override
-  String get widgetSaved => '已保存，小组件将自动刷新';
+  String get widgetSaved => '存好哩，小组件会自动刷新';
 
   @override
-  String get widgetRefreshed => '小组件数据已刷新';
+  String get widgetRefreshed => '小组件数据刷新哩';
 
   @override
-  String get widgetRefresh => '立即刷新小组件';
+  String get widgetRefresh => '即刻刷新小组件';
 
   @override
   String get loginRequiredTitle => '要登录才得望内容';
 
   @override
-  String get loginRequiredMessage => '登录后就得望侬个课表、作业和成绩信息';
+  String get loginRequiredMessage => '登进来后就做得望你个课表、功课跟成绩底细';
 
   @override
-  String get noticeTitle => '通知公告';
+  String get noticeTitle => '通告消息';
 
   @override
   String get noticeLoginTitle => '要登录以收着通知';
 
   @override
-  String get noticeLoginMessage => '登录后就得向侬推送学校个新通知公告';
+  String get noticeLoginMessage => '登进来后做得向你推送学校个新通告';
 
   @override
   String get loadingNotices => '正载入通知...';
@@ -372,7 +447,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get retry => '再试';
 
   @override
-  String get noNotices => '暂冒有通知';
+  String get noNotices => '暂且冇得通告';
 
   @override
   String get noNoticesSubtitle => '有新消息就会显示到简里';
@@ -381,31 +456,31 @@ class AppLocalizationsGan extends AppLocalizations {
   String get loadingMore => '正载入多些...';
 
   @override
-  String get noMoreNotices => '冒得多些通知哩';
+  String get noMoreNotices => '冇得多些通告哩';
 
   @override
   String get homeworkLoginTitle => '要登录以同步作业';
 
   @override
-  String get homeworkLoginMessage => '登录后就得从超星平台实时同步侬个课程作业，也得点右下角手动添';
+  String get homeworkLoginMessage => '登进来后做得从超星平台实时同步你个课程作业，也做得点右下角手动添';
 
   @override
-  String get homeworkTabArchived => '存档';
+  String get homeworkTabArchived => '存起';
 
   @override
   String get homeworkTabCompleted => '做完哩';
 
   @override
-  String get homeworkTabPending => '冒做完';
+  String get homeworkTabPending => '还没做完';
 
   @override
   String get homeworkEmptyArchived => '存档里空荡荡';
 
   @override
-  String get homeworkEmptyCompleted => '还冒做完过作业哦';
+  String get homeworkEmptyCompleted => '还没做完过功课哦';
 
   @override
-  String get homeworkEmptyPending => '暂时冒得待办作业';
+  String get homeworkEmptyPending => '暂时冇得待做功课';
 
   @override
   String homeworkLoadFailed(String error) {
@@ -413,57 +488,57 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get scoreQuery => '成绩查询';
+  String get scoreQuery => '查考分';
 
   @override
-  String get currentSemester => '当前学期';
+  String get currentSemester => '该个学期';
 
   @override
-  String get noScoreData => '本学期暂冒有成绩数据';
+  String get noScoreData => '该个学期暂且冇得成绩数据';
 
   @override
   String scoreCredit(String credit) {
-    return '学分: $credit';
+    return '分数: $credit';
   }
 
   @override
-  String get normalExam => '正常考试';
+  String get normalExam => '正规考试';
 
   @override
-  String get gradeExcellent => '优秀';
+  String get gradeExcellent => '刮刮叫';
 
   @override
-  String get gradeFailed => '冒及格';
+  String get gradeFailed => '冇及格';
 
   @override
-  String get courseReminder => '上课提醒';
+  String get courseReminder => '上课提个醒';
 
   @override
   String get courseReminderTime => '上课提醒时辰';
 
   @override
-  String get homeworkReminder => '作业截止提醒';
+  String get homeworkReminder => '作业到期提个醒';
 
   @override
   String get homeworkReminderTime => '作业提醒时辰';
 
   @override
-  String get libraryReminder => '图书馆预约提醒';
+  String get libraryReminder => '图书馆占座提个醒';
 
   @override
   String get libraryReminderTime => '图书馆预约提醒时辰';
 
   @override
-  String get notifDurationNone => '冒通知';
+  String get notifDurationNone => '莫提醒';
 
   @override
   String notifMinutesBefore(int minutes) {
-    return '$minutes分钟前';
+    return '$minutes分钟头先';
   }
 
   @override
   String notifHoursBefore(String hours) {
-    return '$hours小时前';
+    return '$hours点钟头先';
   }
 
   @override
@@ -473,17 +548,17 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String setNotificationFailed(String error) {
-    return '设置通知失败: $error';
+    return '设置提醒冇搞成: $error';
   }
 
   @override
-  String get liveUpdatesNotSupported => '当前设备冒支持 Live Updates（需 Android 16+）';
+  String get liveUpdatesNotSupported => '该只设备冇支持 Live Updates（需 Android 16+）';
 
   @override
   String get needNotificationPermission => '需先准通知权限';
 
   @override
-  String get liveActivity => '实时活动';
+  String get liveActivity => '实时活计';
 
   @override
   String get liveActivitySubtitle => '用 Live Updates API 提醒';
@@ -498,7 +573,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get liveActivityEnabledFlymeDisabled => '开哩实时活动，实况通知关哩';
 
   @override
-  String get flymeLive => '实况通知';
+  String get flymeLive => '实况通报';
 
   @override
   String get flymeLiveSubtitle => '用 Flyme 实况通知 API';
@@ -516,10 +591,10 @@ class AppLocalizationsGan extends AppLocalizations {
   String get openSystemSettingsFailed => '系统设置打不开，请手动到设置 > 通知里望下';
 
   @override
-  String get doubleTapToRetract => '双击撤回';
+  String get doubleTapToRetract => '点两下撤脱';
 
   @override
-  String get systemNotificationDisabled => '系统通知冒开';
+  String get systemNotificationDisabled => '系统通知冇开';
 
   @override
   String get testRetracted => '测试撤回哩';
@@ -537,16 +612,16 @@ class AppLocalizationsGan extends AppLocalizations {
   String get aiSettingsResetDefaults => '默认配置还原哩';
 
   @override
-  String get aiApiUrl => 'API 接口地址 (Base URL)';
+  String get aiApiUrl => 'API 接口门路 (Base URL)';
 
   @override
-  String get aiApiUrlHint => '默认中转服务';
+  String get aiApiUrlHint => '照旧中转服务';
 
   @override
-  String get aiModelName => '模型名称 (Model Name)';
+  String get aiModelName => '模型名字 (Model Name)';
 
   @override
-  String get aiModelNameHint => '默认 soilzhu-latest';
+  String get aiModelNameHint => '照旧 soilzhu-latest';
 
   @override
   String get aiApiKeyCustom => 'API Key (已用自定义)';
@@ -555,10 +630,10 @@ class AppLocalizationsGan extends AppLocalizations {
   String get aiApiKeyDefault => 'API Key (用默认)';
 
   @override
-  String get aiApiKeyHint => '留空就用默认 Key，或者填侬个 Key (sk-...)';
+  String get aiApiKeyHint => '留空就用默认 Key，或者填你个 Key (sk-...)';
 
   @override
-  String get paste => '粘贴';
+  String get paste => '贴上去';
 
   @override
   String get saveSettings => '存配置';
@@ -576,21 +651,21 @@ class AppLocalizationsGan extends AppLocalizations {
   String get libraryReservation => '图书馆预约';
 
   @override
-  String get signIn => '签到';
+  String get signIn => '打卡签到';
 
   @override
   String get signBack => '退座';
 
   @override
-  String get signInSuccess => '签到成功！祝侬学习快活。';
+  String get signInSuccess => '签到搞妥喽！祝你读书欢喜。';
 
   @override
   String signInFailed(String error) {
-    return '签到失败: $error';
+    return '签到冇搞成: $error';
   }
 
   @override
-  String get signBackConfirmTitle => '确认退座？';
+  String get signBackConfirmTitle => '准当退座？';
 
   @override
   String signBackConfirmContent(String room, String seat) {
@@ -601,18 +676,18 @@ class AppLocalizationsGan extends AppLocalizations {
   String get thinkAgain => '我再想想';
 
   @override
-  String get confirmSignBack => '确认退座';
+  String get confirmSignBack => '准当退座';
 
   @override
-  String get signBackSuccess => '退座成功';
+  String get signBackSuccess => '退座搞妥喽';
 
   @override
   String signBackFailed(String error) {
-    return '退座失败: $error';
+    return '退座冇搞成: $error';
   }
 
   @override
-  String get cancelReserveConfirmTitle => '确认取消预约？';
+  String get cancelReserveConfirmTitle => '准当取消预约？';
 
   @override
   String cancelReserveConfirmContent(String room, String seat) {
@@ -620,14 +695,14 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get confirmCancel => '确认取消';
+  String get confirmCancel => '准当算哩';
 
   @override
   String get reserveCancelledSuccess => '该预约取消哩';
 
   @override
   String cancelFailed(String error) {
-    return '取消失败: $error';
+    return '取消冇搞成: $error';
   }
 
   @override
@@ -637,28 +712,28 @@ class AppLocalizationsGan extends AppLocalizations {
   String get todayTimetable => '今朝课表';
 
   @override
-  String get tomorrowAgenda => '明日日程';
+  String get tomorrowAgenda => '明朝日程';
 
   @override
-  String get todayAgenda => '今日日程';
+  String get todayAgenda => '今朝日程';
 
   @override
   String get timetableLoginRequiredTitle => '要登录以望下课表';
 
   @override
-  String get timetableLoginRequiredMessage => '登录后就得同步、望侬个课表';
+  String get timetableLoginRequiredMessage => '登进来后就做得同步、望你个课表';
 
   @override
   String get viewAll => '望下一概';
 
   @override
-  String get noCoursesTomorrow => '明朝冒有课';
+  String get noCoursesTomorrow => '明朝冇得课';
 
   @override
-  String get noCoursesToday => '今朝冒有课';
+  String get noCoursesToday => '今朝冇得课';
 
   @override
-  String get locationServiceDisabled => '位置服务冒开';
+  String get locationServiceDisabled => '定位服务冇开';
 
   @override
   String get locationPermissionDenied => '定位权限拒绝哩';
@@ -672,34 +747,34 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get newChat => '新对话';
+  String get newChat => '新开一讲';
 
   @override
-  String get requestException => '请求异常';
+  String get requestException => '请求出岔子哩';
 
   @override
-  String get checkAgentSettings => '检查 Agent 设置';
+  String get checkAgentSettings => '望哈 Agent 设置';
 
   @override
-  String get checkAgentSettingsArrow => '检查 Agent 设置 >';
+  String get checkAgentSettingsArrow => '望哈 Agent 设置 >';
 
   @override
-  String get quickPromptsTitle => '快捷提问';
+  String get quickPromptsTitle => '随手问';
 
   @override
   String get promptTodayCourses => '今朝有什哩课？';
 
   @override
-  String get promptPendingHomework => '有哪些冒做完个作业？';
+  String get promptPendingHomework => '有哪几样还没做完个功课？';
 
   @override
-  String get promptReserveLibrary => '预约图书馆座位';
+  String get promptReserveLibrary => '预约图书馆位子';
 
   @override
-  String get promptSubmitSunshine => '快速提交阳光服务';
+  String get promptSubmitSunshine => '赶忙报阳光服务';
 
   @override
-  String get promptCampusCardBalance => '查询校园卡余额';
+  String get promptCampusCardBalance => '查下校园卡剩哩钱';
 
   @override
   String get promptDormElectricity => '宿舍还剩几多电？';
@@ -714,25 +789,28 @@ class AppLocalizationsGan extends AppLocalizations {
   String get copiedAnswer => '回答内容复制哩';
 
   @override
-  String get copy => '复制';
+  String get copy => '抄一份';
 
   @override
   String get aiThinking => '正思量...';
 
   @override
-  String get noticeDetail => '通知详情';
+  String get noticeDetail => '通告细则';
 
   @override
-  String get noticeNotFound => '冒找到详情信息';
+  String get selectNoticeHint => '拣左边个通知看详情';
 
   @override
-  String get noTitle => '无标题';
+  String get noticeNotFound => '冇寻到细则底细';
+
+  @override
+  String get noTitle => '冇得标题';
 
   @override
   String get senderSystem => '系统';
 
   @override
-  String get versionUpdate => '版本更新';
+  String get versionUpdate => '换新版本';
 
   @override
   String foundNewVersion(String version) {
@@ -740,7 +818,7 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get releaseNotes => '更新日志';
+  String get releaseNotes => '升级记事';
 
   @override
   String get updateNow => '即刻更新';
@@ -753,104 +831,107 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String timetableRefreshFailed(String error) {
-    return '刷新失败: $error';
+    return '刷哈课表冇搞成: $error';
   }
 
   @override
-  String get noTimetableToShare => '冒有可分享个课表';
+  String get noTimetableToShare => '冇得做得拿拨人望个课表';
 
   @override
-  String get timetableFileNotFound => '冒寻着课表文件';
+  String get timetableFileNotFound => '冇寻着课表文件';
 
   @override
   String get shareTimetableText => '我个湖南农业大学课表';
 
   @override
   String shareFailed(String error) {
-    return '分享失败: $error';
+    return '分享冇搞成: $error';
   }
 
   @override
-  String get tabAgenda => '日程';
+  String get tabAgenda => '日程事体';
 
   @override
-  String get tabWeek => '周';
+  String get tabWeek => '礼拜';
 
   @override
-  String get adjustTimetable => '调整课表';
+  String get adjustTimetable => '挪动课表';
 
   @override
   String get backToToday => '回到今朝';
 
   @override
-  String get refreshTimetable => '刷新课表';
+  String get refreshTimetable => '重新刷下课表';
 
   @override
-  String get timetableSettings => '课表设置';
+  String get timetableSettings => '课表';
 
   @override
-  String get notSet => '未设置';
+  String get notSet => '冇设置';
 
   @override
-  String get timetableAutoSync => '自动同步课表';
+  String get timetableAutoSync => '自动跟到同步课表';
 
   @override
-  String get disableAutoSyncTitle => '关闭自动同步？';
+  String get timetableShowEndTime => '周视图里显示下课时间';
+
+  @override
+  String get disableAutoSyncTitle => '关掉自动同步？';
 
   @override
   String get disableAutoSyncMessage =>
-      '关闭后将删除本地课表（调课、停课等规则会保留），如需查看课表，可点击课表页右上角刷新按钮手动同步。';
+      '关掉后会删掉本地课表（调课、停课等规则会留到），如果要望课表，可点课表页右上角刷新按钮手动同步。';
 
   @override
-  String get localTimetableDeleted => '本地课表已删除';
+  String get localTimetableDeleted => '本地课表已删掉';
 
   @override
-  String get noLocalTimetable => '暂无本地课表';
+  String get noLocalTimetable => '暂且冇得本地课表';
 
   @override
-  String get tapRefreshButtonToSync => '点击右上角刷新按钮手动同步';
+  String get tapRefreshButtonToSync => '点右上角刷新按钮手动同步';
 
   @override
-  String get shareTimetable => '分享课表';
+  String get shareTimetable => '拿课表拨人望';
 
   @override
-  String get noCoursesThisSemester => '本学期冒有课程安排';
+  String get noCoursesThisSemester => '该个学期冇得课程安排';
 
   @override
-  String get timetableInfoIncomplete => '课表信息冒齐';
+  String get timetableInfoIncomplete => '课表底细冇齐';
 
   @override
-  String get pleaseReDownloadTimetable => '请重新下载课表';
+  String get pleaseReDownloadTimetable => '请重新落载课表';
 
   @override
   String get deadlinePrefix => '截止时辰';
 
   @override
-  String get noDeadline => '冒有截止时辰';
+  String get noDeadline => '冇得截止时间';
 
   @override
-  String get weekdayMon => '周一';
+  String get weekdayMon => '礼拜一';
 
   @override
-  String get weekdayTue => '周二';
+  String get weekdayTue => '礼拜二';
 
   @override
-  String get weekdayWed => '周三';
+  String get weekdayWed => '礼拜三';
 
   @override
-  String get weekdayThu => '周四';
+  String get weekdayThu => '礼拜四';
 
   @override
-  String get weekdayFri => '周五';
+  String get weekdayFri => '礼拜五';
 
   @override
-  String get weekdaySat => '周六';
+  String get weekdaySat => '礼拜六';
 
   @override
-  String get weekdaySun => '周日';
+  String get weekdaySun => '礼拜天';
 
   @override
-  String get month1 => '一月';
+  String get month1 => '正月';
 
   @override
   String get month2 => '二月';
@@ -883,16 +964,16 @@ class AppLocalizationsGan extends AppLocalizations {
   String get month11 => '十一月';
 
   @override
-  String get month12 => '十二月';
+  String get month12 => '腊月';
 
   @override
   String get fetchTimetable => '拿课表';
 
   @override
-  String get syncTimetablePrompt => '检测到侬已成功登录，要现今同步侬个课程安排并导入日历吗？';
+  String get syncTimetablePrompt => '望到你已经登进来哩，要该下同步你个课程安排并导进日历啵？';
 
   @override
-  String get skip => '跳过';
+  String get skip => '略过';
 
   @override
   String get syncNow => '即刻同步';
@@ -901,13 +982,13 @@ class AppLocalizationsGan extends AppLocalizations {
   String get academicSemester => '学年学期';
 
   @override
-  String get firstWeekMonday => '第一周周一';
+  String get firstWeekMonday => '头一周礼拜一';
 
   @override
   String get selectDateHint => '请拣日子';
 
   @override
-  String get importButton => '导入';
+  String get importButton => '导进来';
 
   @override
   String get selectFirstWeekMondayHelp => '拣本学期第一周个周一';
@@ -917,17 +998,17 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String importFailed(String error) {
-    return '导入失败: $error';
+    return '导进来冇搞成: $error';
   }
 
   @override
   String get timetableSyncing => '课表正同步中';
 
   @override
-  String get timetableSyncingDesc => '系统正为侬全自动拉取教务课表\n请稍等下子...';
+  String get timetableSyncingDesc => '系统正在帮你自动拉取教务课表\n等一下子...';
 
   @override
-  String get noTimetableFound => '冒有拿到课表';
+  String get noTimetableFound => '冇拿到课表';
 
   @override
   String weekNumber(int week) {
@@ -935,105 +1016,122 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get teacher => '教师';
+  String get teacher => '老师';
 
   @override
-  String get classroom => '教室';
+  String get classroom => '课堂间';
 
   @override
-  String get weeksLabel => '周次';
+  String get weeksLabel => '几多周';
 
   @override
-  String get periodsLabel => '节次';
+  String get periodsLabel => '几多节';
 
   @override
   String get timeLabel => '时辰';
 
   @override
-  String get close => '关';
+  String get courseColor => '课程色块';
 
   @override
-  String get unknown => '冒知';
+  String get changeColor => '改颜色';
 
   @override
-  String get reschedule => '调课';
+  String get selectCourseColor => '拣课程颜色';
 
   @override
-  String get suspension => '停课';
+  String colorSwappedNotice(String course) {
+    return '已经跟「$course」换哩课程色块';
+  }
 
   @override
-  String get addCourse => '加课';
+  String get materialColorNotice => '只支持从高对比度 Material UI 色板中拣';
+
+  @override
+  String get close => '关脱';
+
+  @override
+  String get unknown => '晓不得';
+
+  @override
+  String get reschedule => '挪课';
+
+  @override
+  String get suspension => '歇课';
+
+  @override
+  String get addCourse => '添课';
 
   @override
   String get myAdjustments => '我个调整';
 
   @override
-  String get rescheduleSingleClass => '调一节';
+  String get rescheduleSingleClass => '挪一节';
 
   @override
-  String get rescheduleWholeDay => '调一天';
+  String get rescheduleWholeDay => '挪一日';
 
   @override
-  String get noCoursesSyncFirst => '暂冒有课程，先同步课表';
+  String get noCoursesSyncFirst => '暂且冇得课，先同步课表';
 
   @override
   String get courseLabel => '课程';
 
   @override
-  String get classTimeSlot => '上课时段';
+  String get classTimeSlot => '上课辰光';
 
   @override
-  String get originalWeek => '原周次';
+  String get originalWeek => '原先周次';
 
   @override
-  String get currentWeekSuffix => ' (本周)';
+  String get currentWeekSuffix => ' (该周)';
 
   @override
   String noClassInWeek(int week) {
-    return '第$week周冒有这节课';
+    return '第$week周冇得该节课';
   }
 
   @override
-  String get rescheduleTo => '调到';
+  String get rescheduleTo => '挪到';
 
   @override
-  String get rescheduleAway => '调走';
+  String get rescheduleAway => '挪开';
 
   @override
-  String get targetWeek => '目标周次';
+  String get targetWeek => '挪到第几周';
 
   @override
-  String get targetWeekday => '目标星期';
+  String get targetWeekday => '挪到礼拜几';
 
   @override
   String get newWeek => '新周次';
 
   @override
-  String get newWeekday => '新星期';
+  String get newWeekday => '新礼拜';
 
   @override
   String get newPeriod => '新节次';
 
   @override
-  String get originalWeekday => '原星期';
+  String get originalWeekday => '原先礼拜几';
 
   @override
-  String get noCoursesOnDay => '当天冒有课';
+  String get noCoursesOnDay => '许日冇得课';
 
   @override
-  String get noCoursesOnDayCannotReschedule => '当天冒有课，冒办法调课';
+  String get noCoursesOnDayCannotReschedule => '许日冇得课，冇法子挪课';
 
   @override
-  String get rescheduleMethod => '调课方式';
+  String get rescheduleMethod => '挪课法子';
 
   @override
-  String get rescheduleCopy => '复制';
+  String get rescheduleCopy => '抄一份';
 
   @override
-  String get rescheduleShift => '平移';
+  String get rescheduleShift => '顺延挪';
 
   @override
-  String get rescheduleSwap => '对调';
+  String get rescheduleSwap => '换过来';
 
   @override
   String get rescheduleCopyDesc => '原日子个课保留，目标日原本个课会被覆盖';
@@ -1048,15 +1146,15 @@ class AppLocalizationsGan extends AppLocalizations {
   String get selectCourseFirst => '先拣课程';
 
   @override
-  String get confirmReschedule => '确认调课';
+  String get confirmReschedule => '准当挪课';
 
   @override
   String rescheduleWarnNoCourse(int week, String course) {
-    return '第$week周冒有《$course》，还要接着吗？';
+    return '第$week周冇得《$course》，还要接着搞啵？';
   }
 
   @override
-  String get goBack => '返回';
+  String get goBack => '倒回去';
 
   @override
   String get continueAction => '接着';
@@ -1074,22 +1172,22 @@ class AppLocalizationsGan extends AppLocalizations {
   String get allCourses => '一概课程';
 
   @override
-  String get specifyPeriods => '指定节次';
+  String get specifyPeriods => '挑定节次';
 
   @override
-  String get startWeek => '起始周';
+  String get startWeek => '头一周';
 
   @override
-  String get endWeek => '结束周';
+  String get endWeek => '末一周';
 
   @override
-  String get weekday => '星期';
+  String get weekday => '礼拜';
 
   @override
-  String get startPeriod => '开始节次';
+  String get startPeriod => '起头节次';
 
   @override
-  String get endPeriod => '结束节次';
+  String get endPeriod => '收尾节次';
 
   @override
   String get suspensionSaved => '停课已存';
@@ -1098,13 +1196,13 @@ class AppLocalizationsGan extends AppLocalizations {
   String get addCourseTitle => '添课程';
 
   @override
-  String get courseNameLabel => '课程名称';
+  String get courseNameLabel => '课程名字';
 
   @override
-  String get teacherOptional => '授课教师 (选填)';
+  String get teacherOptional => '教书老师 (选填)';
 
   @override
-  String get classroomOptional => '教室 (选填)';
+  String get classroomOptional => '课堂间 (选填)';
 
   @override
   String get pleaseEnterCourseName => '请填课程名称';
@@ -1116,16 +1214,16 @@ class AppLocalizationsGan extends AppLocalizations {
   String get add => '添';
 
   @override
-  String get noAdjustmentsYet => '还冒有任何调整';
+  String get noAdjustmentsYet => '还没搞过任何调整';
 
   @override
-  String get ruleTypeRescheduleDay => '调休';
+  String get ruleTypeRescheduleDay => '挪休';
 
   @override
-  String get ruleTypeSuspension => '停课';
+  String get ruleTypeSuspension => '歇课';
 
   @override
-  String get ruleTypeAddCourse => '加课';
+  String get ruleTypeAddCourse => '添课';
 
   @override
   String get ruleDeleted => '已删掉';
@@ -1137,10 +1235,10 @@ class AppLocalizationsGan extends AppLocalizations {
   String get clearAllAdjustmentsConfirmContent => '清空后课表还原成教务原样。';
 
   @override
-  String get clear => '清空';
+  String get clear => '扫干净';
 
   @override
-  String get cleared => '已清空';
+  String get cleared => '扫干净哩';
 
   @override
   String get clearAll => '清空一概';
@@ -1184,30 +1282,30 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String usualTimeFormat(String day, int start, int end, String weeks) {
-    return '平时：每周$day 第$start-$end节 ($weeks)';
+    return '平时：每个礼拜$day 第$start-$end节 ($weeks)';
   }
 
   @override
   String originalSlotFormat(String day, String periods, String weeks) {
-    return '周$day 第$periods节 ($weeks)';
+    return '礼拜$day 第$periods节 ($weeks)';
   }
 
   @override
   String originalPeriodSummary(String day, int start, int end) {
-    return '原$day 第$start-$end节';
+    return '原先礼拜$day 第$start-$end节';
   }
 
   @override
-  String get noDeadlineHomework => '冒有截止时辰个作业';
+  String get noDeadlineHomework => '冇得截止时间个功课';
 
   @override
   String get homeworkLoggingInWait => '⏳ 正登录中，请等下子...';
 
   @override
-  String get homeworkDetail => '作业详情';
+  String get homeworkDetail => '功课细则';
 
   @override
-  String get completeInChaoXing => '在学习通里完成';
+  String get completeInChaoXing => '到学习通里做完';
 
   @override
   String get manualAdd => '手动添';
@@ -1222,28 +1320,28 @@ class AppLocalizationsGan extends AppLocalizations {
   String get homeworkDeleted => '已删掉作业';
 
   @override
-  String get undo => '撤销';
+  String get undo => '撤脱';
 
   @override
   String get homeworkTitleHint => '准备做什哩？';
 
   @override
-  String get courseName => '课程名称';
+  String get courseName => '课程名字';
 
   @override
   String get inputCourseHint => '填入所属课程';
 
   @override
-  String get remark => '备注';
+  String get remark => '记哈';
 
   @override
   String get addRemarkHint => '添备注信息';
 
   @override
-  String get funcEvaluation => '教评系统';
+  String get funcEvaluation => '评老师系统';
 
   @override
-  String get defaultHitokoto => '自在东湖在湖东！';
+  String get defaultHitokoto => '自在东湖到湖东！';
 
   @override
   String get loggingInPleaseWait => '正登录，请等下子...';
@@ -1255,22 +1353,22 @@ class AppLocalizationsGan extends AppLocalizations {
   String get enableClassReminderHere => '在简里开上课提醒';
 
   @override
-  String get systemNotice => '系统通知';
+  String get systemNotice => '系统通告';
 
   @override
   String get noticeTagNotice => '通';
 
   @override
-  String get scoreGradeExcellent => '优秀';
+  String get scoreGradeExcellent => '刮刮叫';
 
   @override
-  String get scoreGradeFail => '冒及格';
+  String get scoreGradeFail => '冇及格';
 
   @override
-  String get feedbackEmailSubject => '自在东湖 App 反馈';
+  String get feedbackEmailSubject => '自在东湖 App 提意见';
 
   @override
-  String get bill => '账单';
+  String get bill => '账目';
 
   @override
   String get pleaseSelectStartDate => '请拣起始日子';
@@ -1297,31 +1395,31 @@ class AppLocalizationsGan extends AppLocalizations {
   String get pleaseSelect => '请拣';
 
   @override
-  String get type => '类型';
+  String get type => '样型';
 
   @override
-  String get transactionConsume => '消费';
+  String get transactionConsume => '开销';
 
   @override
-  String get transactionRecharge => '充值';
+  String get transactionRecharge => '充钱';
 
   @override
-  String get transactionSubsidy => '补助';
+  String get transactionSubsidy => '补贴';
 
   @override
-  String get transactionTransfer => '转账';
+  String get transactionTransfer => '转钱';
 
   @override
-  String get noTransactions => '暂冒有账单';
+  String get noTransactions => '暂且冇得账单';
 
   @override
   String get pleaseEnterValidAmountRange => '请填入1-1000之间个整数金额';
 
   @override
-  String get campusCardRecharge => '校园卡充值';
+  String get campusCardRecharge => '校园卡充钱';
 
   @override
-  String get refreshBalance => '刷新余额';
+  String get refreshBalance => '刷哈剩哩钱';
 
   @override
   String cardNumberPrefix(String number) {
@@ -1336,29 +1434,29 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String amountYuan(String amount) {
-    return '$amount元';
+    return '$amount块钱';
   }
 
   @override
-  String get customAmount => '其他金额';
+  String get customAmount => '别的钱数';
 
   @override
-  String get wechatPay => '微信支付';
+  String get wechatPay => '微信付钱';
 
   @override
-  String get alipay => '支付宝';
+  String get alipay => '支付宝支钱';
 
   @override
   String get paymentProcessingWechatHint => '支付处理中，请在微信中完成支付，等哈子再查';
 
   @override
-  String get paymentProcessingAlipayHint => '暂冒查到到账，请在支付宝中完成支付，等哈子再试';
+  String get paymentProcessingAlipayHint => '还没查到入账，请到支付宝里付好钱，等一下子再试';
 
   @override
-  String get rechargeCardSuccessElectricityFailed => '校园卡充值成哩，电费充值弗成';
+  String get rechargeCardSuccessElectricityFailed => '校园卡充好哩，电钱冇充成';
 
   @override
-  String get paymentSuccess => '支付成功';
+  String get paymentSuccess => '付钱搞妥喽';
 
   @override
   String get recharging => '正充值...';
@@ -1368,12 +1466,12 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String paymentConfirmationMethod(String method) {
-    return '支付确认 ($method)';
+    return '准当付钱 ($method)';
   }
 
   @override
   String paymentFailedWithReason(String reason) {
-    return '支付失败: $reason';
+    return '付钱冇搞成: $reason';
   }
 
   @override
@@ -1386,23 +1484,23 @@ class AppLocalizationsGan extends AppLocalizations {
   String get completePaymentInAlipay => '请在跳转后个支付宝中完成支付';
 
   @override
-  String get checkingPaymentStatus => '查询中...';
+  String get checkingPaymentStatus => '正在查...';
 
   @override
-  String get confirmPayment => '确认支付';
+  String get confirmPayment => '准当付钱';
 
   @override
-  String get classroomInquiry => '空教室查询';
+  String get classroomInquiry => '寻空教室';
 
   @override
   String get building => '教学楼';
 
   @override
-  String get periodSlot => '节次';
+  String get periodSlot => '几多节';
 
   @override
   String capacityCount(String count) {
-    return '容纳人数: $count';
+    return '能坐几多个人: $count';
   }
 
   @override
@@ -1412,7 +1510,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get pleaseSelectCompleteRoom => '请拣完整个房间信息';
 
   @override
-  String get payElectricityCampusCard => '缴电费 (校园卡支付)';
+  String get payElectricityCampusCard => '缴电费 (校园卡付钱)';
 
   @override
   String get payElectricity => '缴电费';
@@ -1422,7 +1520,7 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String rechargeFailedWithReason(String reason) {
-    return '充值失败: $reason';
+    return '充钱冇搞成: $reason';
   }
 
   @override
@@ -1436,28 +1534,28 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get electricityRechargeSuccess => '电费充值成功';
+  String get electricityRechargeSuccess => '电钱充好哩';
 
   @override
-  String get electricityRechargeFailed => '电费充值失败';
+  String get electricityRechargeFailed => '电钱冇充成';
 
   @override
-  String get electricityRechargeTitle => '电费充值';
+  String get electricityRechargeTitle => '充电钱';
 
   @override
-  String get currentRechargeRoom => '当前充值房间';
+  String get currentRechargeRoom => '该下充钱房间';
 
   @override
-  String get currentRechargeCard => '当前充值卡片';
+  String get currentRechargeCard => '该下充钱卡片';
 
   @override
-  String get refreshing => '刷新中';
+  String get refreshing => '正在刷';
 
   @override
-  String get noRoomSelectedYet => '还冒选房间';
+  String get noRoomSelectedYet => '还没拣房间';
 
   @override
-  String get electricityBalance => '电费余额';
+  String get electricityBalance => '剩哩电费';
 
   @override
   String get fetchFailedClickRetry => '拿失败，点下再试';
@@ -1469,50 +1567,50 @@ class AppLocalizationsGan extends AppLocalizations {
   String get dormBuilding => '楼栋';
 
   @override
-  String get dormRoom => '房间';
+  String get dormRoom => '房号';
 
   @override
-  String get campusCardPayment => '校园卡支付';
+  String get campusCardPayment => '校园卡付钱';
 
   @override
-  String get alipayPayment => '支付宝支付';
+  String get alipayPayment => '支付宝付钱';
 
   @override
-  String get paymentFailed => '支付失败';
+  String get paymentFailed => '付钱冇搞成';
 
   @override
   String get campusCard => '校园卡';
 
   @override
   String balanceAmount(String balance) {
-    return '余额 ￥$balance';
+    return '剩哩钱 ￥$balance';
   }
 
   @override
   String get tapQrToRefresh => '点下二维码就得刷新';
 
   @override
-  String get paymentNotice => '付款提示';
+  String get paymentNotice => '付钱提个醒';
 
   @override
-  String get paymentConfirmation => '支付确认';
+  String get paymentConfirmation => '准当付钱';
 
   @override
   String get continuePayment => '接着支付';
 
   @override
-  String get scanQrCode => '扫一扫';
+  String get scanQrCode => '扫一哈';
 
   @override
   String get scanQrCodeHint => '把二维码放到框内就得自动扫描';
 
   @override
   String conversionFailed(String reason) {
-    return '转换失败: $reason';
+    return '转换冇搞成: $reason';
   }
 
   @override
-  String get openBrowserFailed => '跳转浏览器失败';
+  String get openBrowserFailed => '跳到浏览器冇搞成';
 
   @override
   String get webVpnConverter => 'WebVPN 转换器';
@@ -1521,16 +1619,16 @@ class AppLocalizationsGan extends AppLocalizations {
   String get webVpnDescription => '把普通校内链接转换成 WebVPN 链接，出了校也得直接访问。';
 
   @override
-  String get originalUrl => '原始地址';
+  String get originalUrl => '原先地址';
 
   @override
-  String get conversionResult => '转换结果';
+  String get conversionResult => '转换出来个结果';
 
   @override
   String get copiedToClipboard => '复制哩到剪贴板';
 
   @override
-  String get visit => '访问';
+  String get visit => '去望哈';
 
   @override
   String get pasteUrlToConvertHint => '在上头粘贴链接就得开始转换';
@@ -1539,7 +1637,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get loadTimeoutCampusNetworkSlow => '载入超时，可能是校内网络响应缓慢。';
 
   @override
-  String get takePhoto => '拍照';
+  String get takePhoto => '照张相';
 
   @override
   String get chooseFromGallery => '从相册拣';
@@ -1558,55 +1656,55 @@ class AppLocalizationsGan extends AppLocalizations {
   String get all => '一概';
 
   @override
-  String get query => '查询';
+  String get query => '查哈';
 
   @override
-  String get done => '完成';
+  String get done => '搞妥喽';
 
   @override
-  String get noData => '冒有数据';
+  String get noData => '冇得数据';
 
   @override
-  String get ok => '确定';
+  String get ok => '准当';
 
   @override
   String get completed => '做完哩';
 
   @override
-  String get refresh => '刷新';
+  String get refresh => '刷哈';
 
   @override
-  String get workspace => '工作台';
+  String get workspace => '办事台';
 
   @override
   String get sunshineService => '阳光服务';
 
   @override
-  String get recentPublicAppeals => '近期公开诉求';
+  String get recentPublicAppeals => '近日公开诉求';
 
   @override
-  String get noPublicAppeals => '暂冒有符合条件个公开诉求';
+  String get noPublicAppeals => '暂且冇得符合条件个公开诉求';
 
   @override
   String get writeAppeal => '填诉求';
 
   @override
-  String get appealDetails => '诉求详情';
+  String get appealDetails => '诉求细则';
 
   @override
-  String get transferInfo => '流转信息';
+  String get transferInfo => '流转底细';
 
   @override
-  String get submitter => '提交人';
+  String get submitter => '递交人';
 
   @override
-  String get anonymous => '匿名';
+  String get anonymous => '藏起名字';
 
   @override
-  String get expectedDepartment => '期望受理部门';
+  String get expectedDepartment => '想拨哪只部门办';
 
   @override
-  String get handlingDepartment => '受理部门';
+  String get handlingDepartment => '经办部门';
 
   @override
   String get expectedResolveTime => '期望解决时辰';
@@ -1621,20 +1719,20 @@ class AppLocalizationsGan extends AppLocalizations {
   String get appealContent => '诉求内容';
 
   @override
-  String get noDescriptionAvailable => '（暂冒有详细问题描述）';
+  String get noDescriptionAvailable => '（暂且冇得详细说明）';
 
   @override
-  String get processingResult => '处理结果';
+  String get processingResult => '处置结果';
 
   @override
-  String get sunshineFormTitle => '阳光服务填报';
+  String get sunshineFormTitle => '阳光服务报事';
 
   @override
   String get sunshineNotice =>
       '欢迎为学校建设与发展建言献策。带 * 个栏目为必填项。\n一般问题 1–3 个工作日办复，复杂问题最长不超过 7 个工作日（以平台说明为准）。相同内容莫要重复提交或一信多投。';
 
   @override
-  String get confirmSubmitAppeal => '确认提交诉求';
+  String get confirmSubmitAppeal => '准当递交诉求';
 
   @override
   String confirmSubmitAppealMessage(
@@ -1646,72 +1744,72 @@ class AppLocalizationsGan extends AppLocalizations {
   String get continueEditing => '接着编辑';
 
   @override
-  String get confirmSubmit => '确认提交';
+  String get confirmSubmit => '准当递交';
 
   @override
-  String get appealTypeInquiry => '咨询';
+  String get appealTypeInquiry => '打听';
 
   @override
-  String get appealTypeSuggestion => '建议';
+  String get appealTypeSuggestion => '提见解';
 
   @override
-  String get appealTypeComplaint => '投诉';
+  String get appealTypeComplaint => '告状';
 
   @override
-  String get appealTypePraise => '表扬';
+  String get appealTypePraise => '夸奖';
 
   @override
-  String get appealSubmitSuccessMsg => '侬个诉求已受理，感谢侬对学校工作个支持。';
+  String get appealSubmitSuccessMsg => '你个诉求已经受理哩，多谢你对学校工作个支持。';
 
   @override
   String get appealSubmitPhoneCodeInvalidMsg =>
-      '平台提示手机号或验证码冒正确。请核对手机号；如需验证码，请到阳光服务官网完成验证。';
+      '平台提示手机号或者验证码冇对。请对准手机号；要是需要验证码，请到阳光服务官网去验证。';
 
   @override
   String get appealSubmitDuplicateMsg => '该类型问题已提交且正处理，莫要重复提交。';
 
   @override
   String get appealSubmitUnknownMsg =>
-      '暂时冒办法确认是否提交成功，先到阳光服务官网“与我相关”核实，莫要重复提交。本页已暂停再次提交。';
+      '暂时冇法子确认递交好冇，先到阳光服务官网“与我相关”核对，莫要重复递交。该页已经暂停再次递交。';
 
   @override
-  String get submitResult => '提交结果';
+  String get submitResult => '递交结果';
 
   @override
-  String get submitSuccess => '提交成功';
+  String get submitSuccess => '递交搞妥喽';
 
   @override
   String get gotIt => '晓得哩';
 
   @override
-  String get letterTypeRequired => '信件类别 *';
+  String get letterTypeRequired => '信件种类 *';
 
   @override
-  String get handlingDepartmentRequired => '受理单位 *';
+  String get handlingDepartmentRequired => '经办单位 *';
 
   @override
   String get pleaseSelectHandlingDepartment => '请拣受理单位';
 
   @override
-  String get subjectRequired => '主题 *';
+  String get subjectRequired => '讲甚哩事体 *';
 
   @override
-  String get contentRequired => '内容 *';
+  String get contentRequired => '详细内容 *';
 
   @override
-  String get appealContentHint => '请描述具体情况及侬个诉求';
+  String get appealContentHint => '请讲讲具体情形跟你个诉求';
 
   @override
-  String get nameRequired => '姓名 *';
+  String get nameRequired => '名字 *';
 
   @override
-  String get phoneRequired => '手机号码 *';
+  String get phoneRequired => '手机号 *';
 
   @override
   String get pleaseEnterValidPhone => '请填入有效个 11 位手机号';
 
   @override
-  String get emailOptional => 'Email（选填）';
+  String get emailOptional => '电子邮箱（选填）';
 
   @override
   String get pleaseEnterValidEmail => '请填入有效个邮箱地址';
@@ -1723,10 +1821,10 @@ class AppLocalizationsGan extends AppLocalizations {
   String get clearDate => '清除日子';
 
   @override
-  String get readNoticeAgreement => '已阅读填报须知，确认内容真实准确';
+  String get readNoticeAgreement => '望过填报须知哩，保准内容真实冇假';
 
   @override
-  String get fieldCannotBeEmpty => '此项冒能为空';
+  String get fieldCannotBeEmpty => '该项不能空起';
 
   @override
   String get fetchSunshineDetailFailed => '载入工单详情失败，请再试';
@@ -1738,25 +1836,25 @@ class AppLocalizationsGan extends AppLocalizations {
   String get loadFailedCheckNetwork => '载入失败，请检查网络后再试';
 
   @override
-  String get statusInProgress => '办理中';
+  String get statusInProgress => '正在办';
 
   @override
-  String get statusResolved => '已办结';
+  String get statusResolved => '办妥哩';
 
   @override
-  String get statusUnknown => '状态冒知';
+  String get statusUnknown => '状态晓不得';
 
   @override
-  String get sunshineServiceUnavailable => '阳光服务暂时冒得用，请等哈子再试';
+  String get sunshineServiceUnavailable => '阳光服务暂时冇得用，等一下子再试';
 
   @override
-  String get sunshineDataReadFailed => '冒能读取阳光服务数据，请检查登录状态后再试';
+  String get sunshineDataReadFailed => '读取不到阳光服务数据，请望哈登录状态再试';
 
   @override
   String get sunshineDataFormatError => '阳光服务返回个数据格式异常';
 
   @override
-  String get sunshineTicketNotFound => '冒找到诉求工单详情';
+  String get sunshineTicketNotFound => '冇寻着诉求单子细则';
 
   @override
   String get sunshineFormTimeout => '阳光服务表单响应超时，请等哈子再试';
@@ -1768,31 +1866,31 @@ class AppLocalizationsGan extends AppLocalizations {
   String get sunshineSessionExpired => '阳光服务登录已失效，请返回个人中心重新登录后再试';
 
   @override
-  String get noDepartmentsAvailable => '暂冒有可用受理单位，请等哈子再试';
+  String get noDepartmentsAvailable => '暂且冇得可用受理单位，等一下子再试';
 
   @override
   String get reload => '重新载入';
 
   @override
-  String get submit => '提交';
+  String get submit => '递交';
 
   @override
-  String get studentWorkQuestionnaire => '学工问卷';
+  String get studentWorkQuestionnaire => '学工查问';
 
   @override
-  String get pendingQuestionnaires => '待完成的问卷';
+  String get pendingQuestionnaires => '待完成个问卷';
 
   @override
-  String get statusSubmitted => '已提交';
+  String get statusSubmitted => '交上去哩';
 
   @override
-  String get statusExpired => '已截止';
+  String get statusExpired => '到期哩';
 
   @override
   String get statusPendingFill => '待填';
 
   @override
-  String get questionnaireDataError => '问卷数据异常';
+  String get questionnaireDataError => '问卷数据出岔子哩';
 
   @override
   String pleaseFillQuestion(String title) {
@@ -1800,7 +1898,7 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get questionnaireCannotBeSubmitted => '该问卷现今冒得提交';
+  String get questionnaireCannotBeSubmitted => '该张问卷该下递交不得';
 
   @override
   String get submitFailedRetry => '提交失败，请等哈子再试';
@@ -1815,31 +1913,31 @@ class AppLocalizationsGan extends AppLocalizations {
   String get pleaseEnter => '请填入';
 
   @override
-  String get noQuestionnairesFound => '暂冒有符合条件个问卷';
+  String get noQuestionnairesFound => '暂且冇得符合条件个问卷';
 
   @override
-  String get unnamedQuestionnaire => '冒命名问卷';
+  String get unnamedQuestionnaire => '冇取名个问卷';
 
   @override
   String get studentSystemSessionExpired => '学工系统登录已失效，请返回个人中心重新登录后再试';
 
   @override
-  String get readQuestionnaireDataFailed => '冒能读取问卷数据，请检查登录状态后再试';
+  String get readQuestionnaireDataFailed => '读取不到问卷数据，请望哈登录状态再试';
 
   @override
-  String get questionnaireListFormatError => '问卷列表数据格式异常';
+  String get questionnaireListFormatError => '问卷列表格式出岔子哩';
 
   @override
-  String get questionnaireMissingTaskId => '该问卷缺少任务标识，冒办法打开';
+  String get questionnaireMissingTaskId => '该张问卷少哩任务标识，冇法子打开';
 
   @override
-  String get leaveApplication => '请假申请';
+  String get leaveApplication => '告假申请';
 
   @override
   String get pleaseFillRemark => '请填备注';
 
   @override
-  String get leaveType => '请假类别';
+  String get leaveType => '告假种类';
 
   @override
   String get startTime => '开始时辰';
@@ -1848,13 +1946,13 @@ class AppLocalizationsGan extends AppLocalizations {
   String get endTime => '结束时辰';
 
   @override
-  String get leaveDuration => '请假时长';
+  String get leaveDuration => '告假几多辰光';
 
   @override
-  String get calculatingDuration => '（试算中…）';
+  String get calculatingDuration => '（慢眼在算…）';
 
   @override
-  String get leaveReason => '请假事由';
+  String get leaveReason => '为甚哩告假';
 
   @override
   String get emergencyContact => '紧急联系人';
@@ -1866,16 +1964,16 @@ class AppLocalizationsGan extends AppLocalizations {
   String get pleaseEnter11DigitPhone => '请填入11位手机号';
 
   @override
-  String get accompanyingPersons => '同行人员';
+  String get accompanyingPersons => '做伴个人';
 
   @override
   String get optional => '选填';
 
   @override
-  String get leaveCampus => '离校';
+  String get leaveCampus => '离校出校';
 
   @override
-  String get leaveDestination => '离校去向';
+  String get leaveDestination => '出校去哪块';
 
   @override
   String get province => '省';
@@ -1887,7 +1985,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get districtCounty => '区/县';
 
   @override
-  String get detailedAddress => '详细地址';
+  String get detailedAddress => '具体地址';
 
   @override
   String get returnToDormitory => '回宿舍';
@@ -1899,7 +1997,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get leaveProvince => '出省';
 
   @override
-  String get leaveMaterials => '请假材料';
+  String get leaveMaterials => '告假凭据';
 
   @override
   String get leaveMaterialsHint => '选填，点下从相册拣';
@@ -1944,7 +2042,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get pleaseFillEmergencyContactPhone => '请填紧急联系人电话';
 
   @override
-  String get invalidEmergencyContactPhone => '紧急联系人电话格式冒正确';
+  String get invalidEmergencyContactPhone => '紧急联系人号码格式冇对';
 
   @override
   String get pleaseSelectLeaveDestination => '请拣离校去向';
@@ -1953,16 +2051,16 @@ class AppLocalizationsGan extends AppLocalizations {
   String get pleaseFillDetailedAddress => '请填离校详细地址';
 
   @override
-  String get cancelLeavePromptTitle => '撤销请假?';
+  String get cancelLeavePromptTitle => '撤脱告假？';
 
   @override
   String get cancelLeavePromptContent => '确定撤销简条请假申请吗？';
 
   @override
-  String get revoke => '撤销';
+  String get revoke => '撤脱';
 
   @override
-  String get revokedSuccess => '已撤销';
+  String get revokedSuccess => '撤脱哩';
 
   @override
   String get revokeFailedRetry => '撤销失败，请等哈子再试';
@@ -1971,43 +2069,43 @@ class AppLocalizationsGan extends AppLocalizations {
   String get yes => '是';
 
   @override
-  String get no => '否';
+  String get no => '冇是';
 
   @override
   String durationDays(String days) {
-    return '$days天';
+    return '$days日';
   }
 
   @override
   String durationHours(String hours) {
-    return '$hours小时';
+    return '$hours点钟';
   }
 
   @override
   String get contactPhone => '联系人电话';
 
   @override
-  String get isLeavingCampus => '是否离校';
+  String get isLeavingCampus => '出不离校';
 
   @override
-  String get practiceInstructor => '实践指导老师';
+  String get practiceInstructor => '实践指点老师';
 
   @override
-  String get attachment => '附件';
+  String get attachment => '带上个材料';
 
   @override
-  String get auditStatus => '审核状态';
+  String get auditStatus => '审阅情形';
 
   @override
-  String get leaveDetails => '请假详情';
+  String get leaveDetails => '告假细则';
 
   @override
   String leaveTypeDetails(String type) {
-    return '$type详情';
+    return '$type细则';
   }
 
   @override
-  String get revokeApplication => '撤销申请';
+  String get revokeApplication => '撤脱申请';
 
   @override
   String get statusPendingAudit => '等审';
@@ -2019,44 +2117,44 @@ class AppLocalizationsGan extends AppLocalizations {
   String get statusAudited => '审过哩';
 
   @override
-  String get noLeaveRecordsFound => '暂冒有符合条件个请假记录';
+  String get noLeaveRecordsFound => '暂且冇得符合条件个告假记录';
 
   @override
   String confirmRevokeLeaveItem(String type, String timeRange) {
-    return '确定撤销《$type》($timeRange)吗？';
+    return '真要撤脱《$type》($timeRange)啵？';
   }
 
   @override
   String get library => '图书馆';
 
   @override
-  String get libraryStatusPendingCheckIn => '待签到';
+  String get libraryStatusPendingCheckIn => '等签到';
 
   @override
   String get libraryStatusInUse => '用到';
 
   @override
-  String get libraryStatusAway => '暂离中';
+  String get libraryStatusAway => '走开一眼';
 
   @override
-  String get libraryStatusCanCheckIn => '可签到';
+  String get libraryStatusCanCheckIn => '可以签到';
 
   @override
-  String get libraryStatusFinished => '已结束';
+  String get libraryStatusFinished => '完哩';
 
   @override
   String get libraryStatusCancelled => '取消哩';
 
   @override
-  String get checkInSuccessEnjoy => '签到成功！祝侬学习愉快。';
+  String get checkInSuccessEnjoy => '签到搞妥喽！祝你读书欢喜。';
 
   @override
   String checkInFailedWithReason(String reason) {
-    return '签到失败: $reason';
+    return '签到冇搞成: $reason';
   }
 
   @override
-  String get confirmCheckOutTitle => '确认退座？';
+  String get confirmCheckOutTitle => '准当退座？';
 
   @override
   String confirmCheckOutMessage(String room, String seat) {
@@ -2064,18 +2162,18 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get confirmCheckOut => '确认退座';
+  String get confirmCheckOut => '准当退座';
 
   @override
-  String get checkOutSuccess => '退座成功';
+  String get checkOutSuccess => '退座搞妥喽';
 
   @override
   String checkOutFailedWithReason(String reason) {
-    return '退座失败: $reason';
+    return '退座冇搞成: $reason';
   }
 
   @override
-  String get confirmCancelReservationTitle => '确认取消预约？';
+  String get confirmCancelReservationTitle => '准当取消预约？';
 
   @override
   String confirmCancelReservationMessage(String room, String seat) {
@@ -2087,23 +2185,23 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String cancelReservationFailedWithReason(String reason) {
-    return '取消失败: $reason';
+    return '取消冇搞成: $reason';
   }
 
   @override
   String get submittingReservation => '正提交预约...';
 
   @override
-  String get reservationSuccess => '预约成功';
+  String get reservationSuccess => '预约搞妥喽';
 
   @override
   String readingRoomLabel(String room) {
-    return '阅览室：$room';
+    return '阅览间：$room';
   }
 
   @override
   String seatNumberLabel(String seat) {
-    return '座位号：$seat 号';
+    return '位子号：$seat 号';
   }
 
   @override
@@ -2117,21 +2215,21 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get reservationNotice => '请在规定时辰内完成签到，超时冒签到就算违规。';
+  String get reservationNotice => '请到规定时间里签好到，过哩时间冇签到就算违约。';
 
   @override
-  String get reservationFailed => '预约失败';
+  String get reservationFailed => '预约冇搞成';
 
   @override
   String get iUnderstand => '我晓得哩';
 
   @override
   String seatWithNumber(String seat) {
-    return '$seat 号座位';
+    return '$seat 号位子';
   }
 
   @override
-  String get cancelReservation => '取消预约';
+  String get cancelReservation => '取消占座';
 
   @override
   String get checkIn => '签到';
@@ -2140,33 +2238,33 @@ class AppLocalizationsGan extends AppLocalizations {
   String get checkOut => '退座';
 
   @override
-  String get reserveSeat => '预约选座';
+  String get reserveSeat => '挑位子预约';
 
   @override
-  String get recentReservations => '近期预约记录';
+  String get recentReservations => '近日预约记录';
 
   @override
-  String get noReservationRecords => '暂冒有历史预约记录';
+  String get noReservationRecords => '暂且冇得往日预约底细';
 
   @override
-  String get reserve => '预约';
+  String get reserve => '占座';
 
   @override
   String get selectReadingRoom => '拣阅览室';
 
   @override
-  String get noRoomsFound => '暂冒有符合条件个阅览室';
+  String get noRoomsFound => '暂且冇得合适个阅览室';
 
   @override
   String totalSeats(String capacity) {
-    return '总座位数：$capacity';
+    return '一共几只位子：$capacity';
   }
 
   @override
   String get pleaseSelectSeatFirst => '先到地图中拣一个座位';
 
   @override
-  String get refreshSeatStatus => '刷新座位状态';
+  String get refreshSeatStatus => '刷哈位子情况';
 
   @override
   String dateAndPeriod(String day, String time) {
@@ -2174,13 +2272,13 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get seatAvailable => '可选';
+  String get seatAvailable => '可以挑';
 
   @override
   String get seatSelected => '选哩';
 
   @override
-  String get seatOccupied => '占用/冒得选';
+  String get seatOccupied => '有人哩/挑不得';
 
   @override
   String get loadingSeatMap => '正载入座位分布图...';
@@ -2189,64 +2287,64 @@ class AppLocalizationsGan extends AppLocalizations {
   String get reserveNow => '即刻预约';
 
   @override
-  String get quickReserve => '快速预约';
+  String get quickReserve => '随手挑座';
 
   @override
-  String get quickReserveTip => '系统将根据您设置的时间与位置偏好自动匹配空闲座位，助您快速锁定。';
+  String get quickReserveTip => '系统会照你设置个时辰搭喜好位置自动配好空位子，帮你赶忙占好。';
 
   @override
-  String get startMatchingSeats => '开始匹配座位';
+  String get startMatchingSeats => '开始配位子';
 
   @override
-  String get matchingSeats => '正在匹配座位...';
+  String get matchingSeats => '正匹配座位...';
 
   @override
-  String get matchedSeatSuccess => '已为您分配推荐座位';
+  String get matchedSeatSuccess => '已经帮你配好推荐位子哩';
 
   @override
-  String get changeAnotherSeat => '换一个';
+  String get changeAnotherSeat => '换一只';
 
   @override
   String changeAnotherSeatWithCooldown(int seconds) {
-    return '换一个 (${seconds}s)';
+    return '换一只 (${seconds}s)';
   }
 
   @override
-  String get confirmQuickReserve => '确认';
+  String get confirmQuickReserve => '准当';
 
   @override
-  String get allFloors => '全部楼层';
+  String get allFloors => '一概楼层';
 
   @override
-  String get allRooms => '全部阅览室';
+  String get allRooms => '一概阅览室';
 
   @override
-  String get locationPreference => '位置偏好';
+  String get locationPreference => '喜好哪块';
 
   @override
   String get optionalLabel => '可选';
 
   @override
-  String get floorLabel => '楼层';
+  String get floorLabel => '几多楼';
 
   @override
-  String get roomLabel => '阅览室';
+  String get roomLabel => '阅览间';
 
   @override
-  String get noMatchedSeatFound => '暂无符合条件的空闲座位，请调整时段或位置后重试';
+  String get noMatchedSeatFound => '暂且冇得合适个空位子，请挪动下时段或者位置再试';
 
   @override
-  String get adjustFilters => '修改筛选条件';
+  String get adjustFilters => '改筛选条件';
 
   @override
   String get selectDate => '拣日子';
 
   @override
-  String get noAvailableSlotsForDate => '简日冒有可用预约时段，请换个日子。';
+  String get noAvailableSlotsForDate => '该日冇得可用预约时段，请换一日。';
 
   @override
   String confirmReservationPeriod(String day, String start, String end) {
-    return '确认预约 ($day $start - $end)';
+    return '准当预约 ($day $start - $end)';
   }
 
   @override
@@ -2256,7 +2354,7 @@ class AppLocalizationsGan extends AppLocalizations {
   String get selectReservationPeriod => '拣预约时段';
 
   @override
-  String get confirmPeriod => '确定时段';
+  String get confirmPeriod => '准当时段';
 
   @override
   String todayWithDate(String date) {
@@ -2286,7 +2384,7 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String checkUpdateFailed(String error) {
-    return '检查更新失败: $error';
+    return '望新版冇搞成: $error';
   }
 
   @override
@@ -2299,23 +2397,23 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String downloadFailedWithReason(String error) {
-    return '下载失败: $error';
+    return '落载冇搞成: $error';
   }
 
   @override
-  String get classReminderChannelName => '上课提醒';
+  String get classReminderChannelName => '上课提个醒';
 
   @override
   String get classReminderChannelDesc => '在每节课开始前发出提醒';
 
   @override
-  String get homeworkReminderChannelName => '作业截止提醒';
+  String get homeworkReminderChannelName => '作业到期提个醒';
 
   @override
   String get homeworkReminderChannelDesc => '在作业截止前发出提醒';
 
   @override
-  String get libraryReminderChannelName => '图书馆预约提醒';
+  String get libraryReminderChannelName => '图书馆占座提个醒';
 
   @override
   String get libraryReminderChannelDesc => '在图书馆座位预约开始前发出提醒';
@@ -2337,12 +2435,12 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String hoursCount(String count) {
-    return '$count小时';
+    return '$count点钟';
   }
 
   @override
   String seatNumberNotificationTitle(String time, String seat) {
-    return '$time $seat号座位';
+    return '$time $seat号位子';
   }
 
   @override
@@ -2352,7 +2450,7 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String liveClassStartingTime(String time) {
-    return '$time开课';
+    return '$time上课喽';
   }
 
   @override
@@ -2362,11 +2460,11 @@ class AppLocalizationsGan extends AppLocalizations {
 
   @override
   String liveSeatStartingTime(String time) {
-    return '$time开始';
+    return '$time开场';
   }
 
   @override
-  String get aiApiKeyNotConfigured => '冒配置 API Key，先到「AI 助理设置」中填入 API Key';
+  String get aiApiKeyNotConfigured => '冇配好 API Key，先到「AI 助理设置」里填好 API Key';
 
   @override
   String weeksRange(String weeks) {
@@ -2374,16 +2472,16 @@ class AppLocalizationsGan extends AppLocalizations {
   }
 
   @override
-  String get ruleModeCopy => '复制';
+  String get ruleModeCopy => '抄一份';
 
   @override
-  String get ruleModeSwap => '对调';
+  String get ruleModeSwap => '换过来';
 
   @override
-  String get ruleModeShift => '平移';
+  String get ruleModeShift => '顺延挪';
 
   @override
-  String get uploadImage => '上传图片';
+  String get uploadImage => '传相片';
 
   @override
   String get describeImagePrompt => '请分析或描述简张图片';
@@ -2398,114 +2496,114 @@ class AppLocalizationsGan extends AppLocalizations {
   String get repairsQuickReport => '我要报修';
 
   @override
-  String get repairsQuickReportHint => '按问题类型快速进入原生填报页面';
+  String get repairsQuickReportHint => '照毛病样子赶忙进填报页面';
 
   @override
-  String get repairsMyOrders => '我的工单';
+  String get repairsMyOrders => '我的报修单';
 
   @override
-  String get repairsMyOrdersHint => '报修记录会同步到校园报修平台';
+  String get repairsMyOrdersHint => '报修底细会同步到学校报修平台';
 
   @override
-  String get repairsInProgress => '处理中';
+  String get repairsInProgress => '正在修';
 
   @override
-  String get repairsCompleted => '已完成';
+  String get repairsCompleted => '修好哩';
 
   @override
-  String get repairsHeroTitle => '校园服务，一键报修';
+  String get repairsHeroTitle => '学校服务，随手报修';
 
   @override
-  String get repairsHeroSubtitle => '原生界面填写，工单状态实时同步；请选择最符合问题的服务类型。';
+  String get repairsHeroSubtitle => '原生页面填好，单子状态跟到同步；请挑顶合拍个报修种类。';
 
   @override
-  String get repairsNoCompleted => '暂无已完成工单';
+  String get repairsNoCompleted => '暂且冇修好个单子';
 
   @override
-  String get repairsNoOngoing => '暂无处理中工单';
+  String get repairsNoOngoing => '暂且冇修紧个单子';
 
   @override
-  String get repairsUnnamedOrder => '未命名工单';
+  String get repairsUnnamedOrder => '冇取名个单子';
 
   @override
-  String get repairsEnterValue => '请输入或粘贴平台选项值';
+  String get repairsEnterValue => '请填入或者贴上平台选项值';
 
   @override
   String repairsRequiredField(String field) {
-    return '请填写$field';
+    return '请填好$field';
   }
 
   @override
-  String get repairsSubmitSuccess => '提交成功';
+  String get repairsSubmitSuccess => '递交搞妥喽';
 
   @override
-  String get repairsSubmitSuccessMessage => '工单已提交，处理进度可在“我的工单”中查看。';
+  String get repairsSubmitSuccessMessage => '单子递上去哩，办到哪步可到“我的工单”里望。';
 
   @override
   String get repairsFormHint => '带 * 的字段为必填项。图片附件功能将随平台接口适配逐步开放。';
 
   @override
-  String get repairsSelectValue => '请选择';
+  String get repairsSelectValue => '请挑好';
 
   @override
-  String get repairsSubmit => '提交工单';
+  String get repairsSubmit => '递交报修单';
 
   @override
-  String get repairsSubmitting => '正在提交…';
+  String get repairsSubmitting => '正在递上去…';
 
   @override
-  String get repairsOrderDetail => '工单详情';
+  String get repairsOrderDetail => '报修单细则';
 
   @override
-  String get repairsOrderNumber => '工单编号';
+  String get repairsOrderNumber => '单子号数';
 
   @override
-  String get repairsOrderStatus => '当前状态';
+  String get repairsOrderStatus => '该下状态';
 
   @override
-  String get repairsOrderType => '服务类型';
+  String get repairsOrderType => '报修种类';
 
   @override
-  String get repairsDepartment => '处理部门';
+  String get repairsDepartment => '经办部门';
 
   @override
-  String get repairsCreatedAt => '创建时间';
+  String get repairsCreatedAt => '填单时间';
 
   @override
-  String get repairsDescription => '问题描述';
+  String get repairsDescription => '问题说明';
 
   @override
-  String get repairsNoDescription => '暂无描述';
+  String get repairsNoDescription => '冇甚哩说明';
 
   @override
   String get repairsDrafts => '草稿箱';
 
   @override
-  String get repairsNoDrafts => '暂无草稿';
+  String get repairsNoDrafts => '暂且冇得草稿';
 
   @override
-  String get repairsSaveDraft => '保存草稿';
+  String get repairsSaveDraft => '存草稿';
 
   @override
-  String get repairsSavingDraft => '正在保存…';
+  String get repairsSavingDraft => '正存…';
 
   @override
-  String get repairsSaveDraftSuccess => '已保存到草稿箱';
+  String get repairsSaveDraftSuccess => '存到草稿箱哩';
 
   @override
-  String get repairsCancelOrder => '取消报修';
+  String get repairsCancelOrder => '撤脱报修';
 
   @override
-  String get repairsCancellingOrder => '正在取消…';
+  String get repairsCancellingOrder => '正取消…';
 
   @override
-  String get repairsCancelConfirmTitle => '确认取消报修？';
+  String get repairsCancelConfirmTitle => '准当撤脱报修？';
 
   @override
-  String get repairsCancelConfirmMessage => '取消后该报修工单将停止处理，是否确认取消？';
+  String get repairsCancelConfirmMessage => '取消后箇只报修工单会停下来处理，准定莫修哩？';
 
   @override
-  String get repairsCancelSuccess => '报修工单已成功取消';
+  String get repairsCancelSuccess => '报修工单成功取消哩';
 
   @override
   String get repairsApplicant => '报修人';
@@ -2514,145 +2612,146 @@ class AppLocalizationsGan extends AppLocalizations {
   String get repairsApplicantDepartment => '报修部门';
 
   @override
-  String get repairsPhone => '联系电话';
+  String get repairsPhone => '寻人电话';
 
   @override
-  String get repairsHandler => '处理人员';
+  String get repairsHandler => '经办师傅';
 
   @override
-  String get repairsHandleResult => '处理结果';
+  String get repairsHandleResult => '处置结果';
 
   @override
-  String get repairsUserFeedback => '评价反馈';
+  String get repairsUserFeedback => '评下好坏';
 
   @override
-  String get repairsRating => '评价得分';
+  String get repairsRating => '评几多分';
 
   @override
-  String get repairsSupplement => '补充说明';
+  String get repairsSupplement => '添补说明';
 
   @override
-  String get repairsPriority => '优先级';
+  String get repairsPriority => '急不急';
 
   @override
-  String get repairsCurrentNode => '当前环节';
+  String get repairsCurrentNode => '该下手脚';
 
   @override
-  String get repairsCompletedAt => '办结时间';
+  String get repairsCompletedAt => '办结时辰';
 
   @override
-  String get repairsActivityTimeline => '流转记录';
+  String get repairsActivityTimeline => '流转底细';
 
   @override
-  String get repairsAttachments => '附件照片';
+  String get repairsAttachments => '照个相片';
 
   @override
-  String get repairsNoActivity => '暂无流转记录';
+  String get repairsNoActivity => '暂且冇得流转底细';
 
   @override
-  String get repairsUploadImage => '添加图片';
+  String get repairsUploadImage => '添图片';
 
   @override
-  String get repairsUploading => '正在上传图片…';
+  String get repairsUploading => '正上传图片…';
 
   @override
-  String get repairsUploadFailed => '图片上传失败';
+  String get repairsUploadFailed => '相片传上去冇搞成';
 
   @override
-  String get repairsDeleteImage => '删除图片';
+  String get repairsDeleteImage => '删图片';
 
   @override
-  String get repairsDeleteConfirm => '确认删除此图片？';
+  String get repairsDeleteConfirm => '确认删掉简张图片？';
 
   @override
-  String get repairsSubmitTicket => '填写报修单';
+  String get repairsSubmitTicket => '填报修单';
 
   @override
-  String get repairsSelectCategory => '选择报修类型';
+  String get repairsSelectCategory => '拣报修类型';
 
   @override
-  String get dataSyncSettings => '数据';
+  String get dataSyncSettings => '数据底细';
 
   @override
-  String get dataBackup => '数据导出';
+  String get dataBackup => '导出去备份';
 
   @override
-  String get backupSecurityTip => '备份不含登录密码，含自定义 AI Key，请妥善保管';
+  String get backupSecurityTip => '备份冇包登录密码，包哩自定义 AI Key，请收好';
 
   @override
-  String get backupShareText => '我的自在东湖数据备份';
+  String get backupShareText => '我个自在东湖数据备份';
 
   @override
-  String get backupExportSuccess => '备份已导出，可选择保存或分享';
+  String get backupExportSuccess => '备份导出哩，可拣保存或分享';
 
   @override
   String backupExportFailed(String error) {
-    return '导出失败: $error';
+    return '导出去冇搞成: $error';
   }
 
   @override
-  String get dataImport => '数据导入';
+  String get dataImport => '导进来';
 
   @override
-  String get dataImportConfirmTitle => '确认导入？';
+  String get dataImportConfirmTitle => '准当导进来？';
 
   @override
-  String get dataImportConfirmMessage => '导入将覆盖当前设置与本地资料，是否继续？';
+  String get dataImportConfirmMessage => '导入会覆盖当前设置与本地资料，还要继续吗？';
 
   @override
-  String get dataImportSuccess => '备份已导入';
+  String get dataImportSuccess => '备份导入哩';
 
   @override
   String dataImportFailed(String error) {
-    return '导入失败: $error';
+    return '导进来冇搞成: $error';
   }
 
   @override
-  String get dataImportInvalidFile => '不是有效的备份文件';
+  String get dataImportInvalidFile => '冇是合用个备份文件';
 
   @override
-  String get dataImportVersionTooNew => '备份版本过新，请先升级 App 后再导入';
+  String get dataImportVersionTooNew => '备份版本太新，请先升级 App 再导入';
 
   @override
-  String get cloudBackupAutoSync => '自动同步';
+  String get cloudBackupAutoSync => '自动跟到同步';
 
   @override
-  String get cloudBackupAutoSyncSubtitle => '通过学习通网盘';
+  String get cloudBackupAutoSyncSubtitle => '托学习通网盘';
 
   @override
-  String get cloudSyncPromptTitle => '开启自动同步';
+  String get cloudSyncPromptTitle => '开自动同步';
 
   @override
-  String get cloudSyncPromptMessage => '自动把课表、作业等本地数据同步到学习通网盘，换机也不丢，随时可在设置里关闭。';
+  String get cloudSyncPromptMessage =>
+      '自动把课表、作业等本地数据同步到学习通网盘，换手机也不丢，随时可在设置里关掉。';
 
   @override
-  String get cloudSyncPromptEnable => '立即开启';
+  String get cloudSyncPromptEnable => '即刻开';
 
   @override
-  String get bookSearch => '图书查询';
+  String get bookSearch => '寻书';
 
   @override
-  String get bookSearchSubtitle => '检索馆藏图书与借阅状态';
+  String get bookSearchSubtitle => '寻馆里藏书搭借书情形';
 
   @override
-  String get bookSearchHint => '搜索书名、作者、主题或标准编码...';
+  String get bookSearchHint => '搜书名、作者、主题或者书号...';
 
   @override
   String bookSearchTotalCount(int count) {
-    return '共找到 $count 本图书';
+    return '一共寻着 $count 本图书';
   }
 
   @override
-  String get bookSearchLoading => '正在加载...';
+  String get bookSearchLoading => '正载入...';
 
   @override
-  String get bookSearchEmpty => '未检索到相关图书';
+  String get bookSearchEmpty => '冇寻着相关图书';
 
   @override
-  String get bookDetailTitle => '图书详情';
+  String get bookDetailTitle => '图书细则';
 
   @override
-  String get holdingsTitle => '馆藏信息';
+  String get holdingsTitle => '藏书底细';
 
   @override
   String get barcode => '条码号';
@@ -2661,141 +2760,368 @@ class AppLocalizationsGan extends AppLocalizations {
   String get callNumber => '索书号';
 
   @override
-  String get holdingLocation => '典藏地';
+  String get holdingLocation => '放到哪块';
 
   @override
-  String get holdingStatus => '状态';
+  String get holdingStatus => '情形';
 
   @override
-  String get holdingUnit => '馆藏单位';
+  String get holdingUnit => '藏书屋里';
 
   @override
-  String get copyType => '单册类型';
+  String get copyType => '本子类别';
 
   @override
-  String get accessionNo => '登录号';
+  String get accessionNo => '登记号';
 
   @override
   String get searchTypeTitle => '书名';
 
   @override
-  String get searchTypeAuthor => '作者';
+  String get searchTypeAuthor => '哪个写个';
 
   @override
-  String get searchTypeSubject => '主题';
+  String get searchTypeSubject => '讲甚哩';
 
   @override
-  String get searchTypeIdentifier => '标准编码';
+  String get searchTypeIdentifier => '标准书号';
 
   @override
-  String get statusInLibrary => '在库';
+  String get statusInLibrary => '还在馆里';
 
   @override
-  String get statusBorrowed => '借出';
+  String get statusBorrowed => '借出去哩';
 
   @override
-  String get search => '搜索';
+  String get search => '寻哈';
 
   @override
   String get funcEhall => '办事大厅';
 
   @override
-  String get ehallSubtitle => '线上办事、流程审批与综合服务';
+  String get ehallSubtitle => '在网里办事、审批走单搭杂项服务';
 
   @override
-  String get ehallHotServices => '热门服务';
+  String get ehallHotServices => '顶多人办个服务';
 
   @override
-  String get ehallAllServices => '全部服务';
+  String get ehallAllServices => '一概服务';
 
   @override
   String get ehallCategories => '服务分类';
 
   @override
-  String get ehallDepartments => '服务部门';
+  String get ehallDepartments => '经办部门';
 
   @override
-  String get ehallMyOrders => '我的办件';
+  String get ehallMyOrders => '我个办件';
 
   @override
-  String get ehallSearchHint => '搜索服务名称、部门或描述...';
+  String get ehallSearchHint => '搜服务名字、部门或者说明...';
 
   @override
-  String get ehallNoServicesFound => '未找到匹配的服务';
+  String get ehallNoServicesFound => '冇寻着合拍个服务';
 
   @override
-  String get ehallApplyNow => '我要办理';
+  String get ehallApplyNow => '我要办';
 
   @override
-  String get ehallViewDetail => '查看详情';
+  String get ehallViewDetail => '望详情';
 
   @override
-  String get ehallServiceType => '服务类型';
+  String get ehallServiceType => '办事种类';
 
   @override
   String get ehallDepartment => '主办部门';
 
   @override
-  String get ehallVisits => '访问量';
+  String get ehallVisits => '望过几多回';
 
   @override
-  String get ehallExternalLink => '外部系统跳转';
+  String get ehallExternalLink => '跳到外头系统';
 
   @override
-  String get ehallProcessWorkflow => '线上审批流程';
+  String get ehallProcessWorkflow => '网里审批经过';
 
   @override
-  String get ehallOpenInWeb => '网页版大厅';
+  String get ehallOpenInWeb => '网页大厅';
 
   @override
-  String get ehallOngoing => '进行中';
+  String get ehallOngoing => '正在办';
 
   @override
-  String get ehallCompleted => '已办结';
+  String get ehallCompleted => '办妥哩';
 
   @override
-  String get ehallNoOrders => '暂无办件记录';
+  String get ehallNoOrders => '暂且冇得办件底细';
 
   @override
-  String get ehallFavorites => '我的收藏';
+  String get ehallFavorites => '我个收藏';
 
   @override
-  String get ehallAddToFavorites => '收藏服务';
+  String get ehallAddToFavorites => '存起服务';
 
   @override
-  String get ehallRemoveFromFavorites => '取消收藏';
+  String get ehallRemoveFromFavorites => '撤脱收藏';
 
   @override
-  String get ehallServiceUnavailable => '办事大厅暂时不可用，请稍后重试';
+  String get ehallServiceUnavailable => '办事大厅暂时冇得用，等一下子再试';
 
   @override
-  String get ehallSessionExpired => '办事大厅登录态已过期，请重新登录';
+  String get ehallSessionExpired => '办事大厅登录态过期哩，请重新登录';
 
   @override
-  String get ehallExternalJumpPrompt => '即将跳转至外部服务';
+  String get ehallExternalJumpPrompt => '马上要跳转到外部服务';
 
   @override
-  String get ehallOpenNativeLeave => '在请假小程序中办理';
+  String get ehallOpenNativeLeave => '到告假小程序里办';
 
   @override
-  String get examSchedule => '考试日程';
+  String get examTimePrefix => '考试时辰';
 
   @override
-  String get examTimePrefix => '考试时间';
+  String get clearWebViewCache => '扫除缓存';
 
   @override
-  String get clearWebViewCache => '清理缓存';
+  String get clearWebViewCacheSubtitle => '扫除应用磁盘缓存搭网页脱机数据';
 
   @override
-  String get clearWebViewCacheSubtitle => '清理 InAppWebView 磁盘缓存与网页离线数据';
+  String get clearWebViewCacheSuccess => '清理好缓存哩';
 
   @override
-  String get clearWebViewCacheSuccess => '已清理缓存';
-
-  @override
-  String get clearWebViewCacheConfirmTitle => '确认清理缓存？';
+  String get clearWebViewCacheConfirmTitle => '准当扫除缓存？';
 
   @override
   String get clearWebViewCacheConfirmMessage =>
-      '将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。';
+      '会抹脱应用内网页个本地脱机缓存搭临时数据，不会碍着你个登录状态。';
+
+  @override
+  String get aiFetchModels => '拿模型列表';
+
+  @override
+  String get aiSelectModel => '拣模型';
+
+  @override
+  String get aiSearchModelHint => '搜模型名字…';
+
+  @override
+  String get aiNoModelsFound => '冇寻着合拍个模型';
+
+  @override
+  String get aiTestConnection => '试试连上冇';
+
+  @override
+  String get aiTestingConnection => '正测试连接…';
+
+  @override
+  String aiTestSuccess(int ms) {
+    return '连上哩 (用哩 ${ms}ms)';
+  }
+
+  @override
+  String aiTestFailed(String error) {
+    return '连不上: $error';
+  }
+
+  @override
+  String get aiApiKeyRequired => '先得配好 API Key';
+
+  @override
+  String aiModelSelected(String model) {
+    return '拣好模型: $model';
+  }
+
+  @override
+  String get timetableSubscription => '订课表';
+
+  @override
+  String get timetableSubscriptionSubtitle => '连到日历订阅搭云端自动同步';
+
+  @override
+  String get timetableSubscriptionAutoUpload => '开课表订阅';
+
+  @override
+  String get timetableSubscriptionAutoUploadDesc =>
+      '开了后，从教务系统同步或调整课表后，会自动把调停后个课表上传云端供订阅；关了后云端课表一概删掉';
+
+  @override
+  String get timetableSubscriptionUrl => '日历订阅网址';
+
+  @override
+  String get copySubscriptionUrl => '抄落链接';
+
+  @override
+  String get subscriptionUrlCopied => '订阅链接复制到剪切板哩';
+
+  @override
+  String get openInCalendar => '到日历里订阅';
+
+  @override
+  String get openInCalendarFailed => '叫不起系统日历，请手动复制链接订阅';
+
+  @override
+  String get syncToCloudNow => '即刻同步到云端';
+
+  @override
+  String get syncSuccess => '云端同步搞妥喽';
+
+  @override
+  String syncFailed(String error) {
+    return '云端同步冇搞成: $error';
+  }
+
+  @override
+  String get resetSubscriptionUrl => '重换链接';
+
+  @override
+  String get resetSubscriptionConfirmTitle => '重换订阅链接';
+
+  @override
+  String get resetSubscriptionConfirmMessage =>
+      '重置后旧个订阅链接就会失效，云端旧课表会被删脱，你需要在订阅个设备里重新加上新链接。还要接着搞啵？';
+
+  @override
+  String get subscriptionTutorialTitle => '外头日历订阅指点';
+
+  @override
+  String get subscriptionTutorialContent =>
+      '• Apple 日历 (iPhone / iPad / Mac)：\n点上头「到日历里订阅」，或者到日历应用里拣「添加订阅日历」，贴上链接就好哩。\n\n• Google 日历：\n到网页端点「其他日历」边上个「+」号，拣「通过网址」，贴上链接存好。\n\n• Outlook / 微软日历：\n拣「添加日历」-「从 Web 订阅」，填入链接存好。\n\n• 提个醒：\n订阅链接包齐哩挪课、歇课之后个全部功课，要是教务有变动，订阅源会自家跟到更新。\n';
+
+  @override
+  String get onboardingWelcomeTitle => '欢迎使用 ChillEast';
+
+  @override
+  String get onboardingWelcomeSubtitle => '专为湖南农业大学学子打造的现代化校园生活助手';
+
+  @override
+  String get onboardingSkip => '跳过';
+
+  @override
+  String get onboardingNext => '下一步';
+
+  @override
+  String get onboardingStart => '开始使用';
+
+  @override
+  String get onboardingGoToLogin => '去登录';
+
+  @override
+  String get onboardingGuideTitle => '迎新导览与功能介绍';
+
+  @override
+  String get onboardingGuideSubtitle => '快速了解 ChillEast 的核心功能与使用技巧';
+
+  @override
+  String get onboardingSlide1Tag => '课表与日程';
+
+  @override
+  String get onboardingSlide1Title => '智能课表 · 桌面实况';
+
+  @override
+  String get onboardingSlide1Desc =>
+      '全自动同步教务课表，智能对齐调停补变动。配合桌面实况与小组件，随时随地查看精彩日程。';
+
+  @override
+  String get onboardingSlide2Tag => '学业助手';
+
+  @override
+  String get onboardingSlide2Title => '作业同步 · 智能预警';
+
+  @override
+  String get onboardingSlide2Desc =>
+      '无缝同步超星学习通作业，倒计时清晰直观。支持自定义截止前提醒，告别拖延与作业遗漏。';
+
+  @override
+  String get onboardingSlide3Tag => '校园服务';
+
+  @override
+  String get onboardingSlide3Title => '校园生活 · 一站通办';
+
+  @override
+  String get onboardingSlide3Desc => '图书馆选座到期提醒、一卡通账单余额明细、宿舍电费余量预警，日常校园事务一手掌握。';
+
+  @override
+  String get onboardingSlide4Tag => '多端同步';
+
+  @override
+  String get onboardingSlide4Title => '日历订阅 · 云端备份';
+
+  @override
+  String get onboardingSlide4Desc =>
+      '一键生成 Webcal 日历订阅，无缝连接手机、手表与电脑；云端自动加密备份，多设备漫游换机无忧。';
+
+  @override
+  String postLoginSetupStep(int current, int total) {
+    return '第 $current / $total 步';
+  }
+
+  @override
+  String get postLoginSetupSkip => '跳过';
+
+  @override
+  String get postLoginSetupEnable => '开启';
+
+  @override
+  String get courseReminderPromptMessage => '在课程开始前通知提醒上课教室。';
+
+  @override
+  String get postLoginSetupNext => '开启';
+
+  @override
+  String get postLoginSetupFinish => '开启';
+
+  @override
+  String get postLoginSetupFinishWithoutEnable => '跳过';
+
+  @override
+  String get timetableAutoSyncPromptTitle => '课表自动同步';
+
+  @override
+  String get timetableAutoSyncPromptMessage => '自动拉取教务系统，时刻获取最新课表。';
+
+  @override
+  String get timetableAutoSyncPromptBadge => '推荐开启';
+
+  @override
+  String get homeworkReminderPromptTitle => '作业截止提醒';
+
+  @override
+  String get homeworkReminderPromptMessage => '作业截止前通知提醒，避免错过作业提交。';
+
+  @override
+  String get homeworkReminderPromptBadge => '提前预警';
+
+  @override
+  String get libraryReminderPromptTitle => '图书馆座位提醒';
+
+  @override
+  String get libraryReminderPromptMessage => '预约时段开始前发送通知，防止错过预约';
+
+  @override
+  String get libraryReminderPromptBadge => '提前提醒';
+
+  @override
+  String get timetableSubscriptionPromptTitle => '课表日历订阅';
+
+  @override
+  String get timetableSubscriptionPromptMessage =>
+      '生成 Webcal 订阅，一键导入系统日历与 Google Calendar。';
+
+  @override
+  String get timetableSubscriptionPromptBadge => '全平台日程同步';
+
+  @override
+  String get useLiveActivityPrompt => '使用实时活动';
+
+  @override
+  String get startGuide => '开始引导';
+
+  @override
+  String get postLoginDoneTitle => '大功告成！';
+
+  @override
+  String get postLoginDoneMessage => '欢迎使用「自在东湖」。';
+
+  @override
+  String get postLoginDoneButton => '完成';
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/gestures.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../services/update_service.dart';
 import '../utils/l10n_extension.dart';
@@ -19,11 +19,11 @@ class UpdateScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    
+    final primaryColor = Theme.of(context).primaryColor;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
-        title: Text(context.l10n.versionUpdate),
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
@@ -35,38 +35,29 @@ class UpdateScreen extends StatelessWidget {
         children: [
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 8.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Center(
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            color: Theme.of(context).primaryColor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Icon(
-                            Icons.system_update_rounded,
-                            size: 40,
-                            color: Theme.of(context).primaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          context.l10n.foundNewVersion(version),
-                          style: const TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                  // 纯图标，左对齐
+                  Icon(
+                    Icons.system_update_rounded,
+                    size: 38,
+                    color: primaryColor,
+                  ),
+                  const SizedBox(height: 16),
+
+                  // 发现新版本标题，左对齐
+                  Text(
+                    context.l10n.foundNewVersion(version),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
+
+                  // 更新日志标题
                   Text(
                     context.l10n.releaseNotes,
                     style: TextStyle(
@@ -76,26 +67,54 @@ class UpdateScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark ? Colors.white.withOpacity(0.05) : Colors.grey[50],
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: isDark ? Colors.white.withOpacity(0.1) : Colors.grey[200]!,
+
+                  // 更新日志直接展示，不加外框，支持 Markdown 渲染
+                  MarkdownBody(
+                    data: releaseNotes,
+                    selectable: true,
+                    shrinkWrap: true,
+                    onTapLink: (text, href, title) async {
+                      if (href != null) {
+                        final Uri uri = Uri.parse(href);
+                        if (await canLaunchUrl(uri)) {
+                          await launchUrl(uri, mode: LaunchMode.externalApplication);
+                        }
+                      }
+                    },
+                    styleSheet: MarkdownStyleSheet.fromTheme(Theme.of(context)).copyWith(
+                      p: TextStyle(
+                        fontSize: 14,
+                        height: 1.6,
+                        color: isDark ? const Color(0xFFD0D0D0) : const Color(0xFF3C4043),
                       ),
-                    ),
-                    child: SelectionArea(
-                      child: Text.rich(
-                        _linkify(
-                           releaseNotes,
-                          TextStyle(
-                            fontSize: 14,
-                            color: isDark ? Colors.white60 : Colors.grey[800],
-                            height: 1.6,
-                          ),
-                        ),
+                      h1: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF202124),
+                      ),
+                      h2: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF202124),
+                      ),
+                      h3: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: isDark ? Colors.white : const Color(0xFF202124),
+                      ),
+                      listBullet: TextStyle(
+                        fontSize: 14,
+                        color: isDark ? Colors.white70 : const Color(0xFF5F6368),
+                      ),
+                      a: TextStyle(
+                        color: primaryColor,
+                        decoration: TextDecoration.underline,
+                      ),
+                      code: TextStyle(
+                        fontSize: 12.5,
+                        backgroundColor: isDark ? Colors.white10 : Colors.black.withValues(alpha: 0.06),
+                        color: primaryColor,
+                        fontFamily: 'monospace',
                       ),
                     ),
                   ),
@@ -103,80 +122,41 @@ class UpdateScreen extends StatelessWidget {
               ),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                    UpdateService().startDownload(context, downloadUrl, version);
+          // 底部操作栏：小圆角矩形，右对齐，去掉“以后再说”
+          SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    final nav = Navigator.of(context);
+                    final route = ModalRoute.of(context);
+                    await UpdateService().startDownload(context, downloadUrl, version);
+                    if (route != null && nav.mounted) {
+                      nav.removeRoute(route);
+                    }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Theme.of(context).primaryColor,
+                    backgroundColor: primaryColor,
                     foregroundColor: Colors.white,
-                    minimumSize: const Size(double.infinity, 54),
+                    padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(6),
+                      borderRadius: BorderRadius.circular(8),
                     ),
                     elevation: 0,
                   ),
                   child: Text(
                     context.l10n.updateNow,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: Text(
-                    context.l10n.later,
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ],
       ),
     );
-  }
-
-  TextSpan _linkify(String text, TextStyle style) {
-    final List<InlineSpan> spans = [];
-    final RegExp linkRegExp = RegExp(
-      r'https?://[\w-]+(\.[\w-]+)+([\w.,@?^=%&:/~+#-]*[\w@?^=%&/~+#-])?',
-      caseSensitive: false,
-    );
-
-    int start = 0;
-    for (final match in linkRegExp.allMatches(text)) {
-      if (match.start > start) {
-        spans.add(TextSpan(text: text.substring(start, match.start), style: style));
-      }
-      final String url = match.group(0)!;
-      spans.add(
-        TextSpan(
-          text: url,
-          style: style.copyWith(
-            color: Colors.blue,
-            decoration: TextDecoration.underline,
-          ),
-          recognizer: TapGestureRecognizer()
-            ..onTap = () async {
-              final Uri uri = Uri.parse(url);
-              if (await canLaunchUrl(uri)) {
-                await launchUrl(uri, mode: LaunchMode.externalApplication);
-              }
-            },
-        ),
-      );
-      start = match.end;
-    }
-    if (start < text.length) {
-      spans.add(TextSpan(text: text.substring(start), style: style));
-    }
-
-    return TextSpan(children: spans);
   }
 }

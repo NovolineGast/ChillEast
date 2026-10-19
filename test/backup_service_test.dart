@@ -8,16 +8,26 @@ import 'package:ChillEast/features/profile/services/backup_export_service.dart';
 
 void main() {
   group('BackupExportService.parseBackupJson', () {
-    test('accepts a valid backup payload', () {
-      final raw = jsonEncode({
+    test('accepts valid legacy and modern backup payloads', () {
+      final legacyRaw = jsonEncode({
         'format': 'chilleast-backup',
         'version': 1,
         'settings': {},
         'localData': {},
       });
-      final parsed = BackupExportService.parseBackupJson(raw);
-      expect(parsed['format'], 'chilleast-backup');
-      expect(parsed['version'], 1);
+      final parsedLegacy = BackupExportService.parseBackupJson(legacyRaw);
+      expect(parsedLegacy['format'], 'chilleast-backup');
+      expect(parsedLegacy['version'], 1);
+
+      final modernRaw = jsonEncode({
+        'format': 'chilleast-modern',
+        'version': 1,
+        'settings': {},
+        'localData': {},
+      });
+      final parsedModern = BackupExportService.parseBackupJson(modernRaw);
+      expect(parsedModern['format'], 'chilleast-modern');
+      expect(parsedModern['version'], 1);
     });
 
     test('rejects non-JSON text', () {
@@ -218,6 +228,114 @@ void main() {
       expect(prefs.containsKey('cached_leave_items'), isFalse);
       expect(prefs.containsKey('cached_questionnaire_items'), isFalse);
       expect(prefs.containsKey('cached_ongoing_repair_items'), isFalse);
+    });
+
+    test('buildBackupData includes customCourseColors and manual exams only', () async {
+      SharedPreferences.setMockInitialValues({
+        'custom_course_colors': jsonEncode({'Math': 0xFFD32F2F}),
+      });
+
+      final examFile = io.File('${tempDir.path}/exam_schedule_list.json');
+      final futureDate =
+          DateTime.now().add(const Duration(days: 3)).toIso8601String();
+      final pastDate =
+          DateTime.now().subtract(const Duration(days: 3)).toIso8601String();
+
+      await examFile.writeAsString(jsonEncode([
+        {'id': 'exam_manual_1', 'title': '英语期末考', 'time': futureDate, 'isManual': true},
+        {'id': 'exam_scraped_1', 'title': '高数网课考', 'time': futureDate, 'isManual': false},
+        {'id': 'exam_expired_1', 'title': '历史过期考', 'time': pastDate, 'isManual': true},
+      ]));
+
+      final backup = await BackupExportService.buildBackupData();
+      final settings = backup['settings'] as Map<String, dynamic>;
+      final localData = backup['localData'] as Map<String, dynamic>;
+
+      expect(settings['customCourseColors'], {'Math': 0xFFD32F2F});
+
+      final examList = localData['examList'] as List<dynamic>;
+      expect(examList.length, 1);
+      expect(examList[0]['id'], 'exam_manual_1');
+      expect(examList[0]['isManual'], isTrue);
+    });
+
+    test('applyBackupData merges customCourseColors properly', () async {
+      SharedPreferences.setMockInitialValues({
+        'custom_course_colors': jsonEncode({
+          'English': 0xFFC2185B,
+          'Math': 0xFF388E3C,
+        }),
+      });
+      final prefs = await SharedPreferences.getInstance();
+
+      final cloudBackup = {
+        'format': 'chilleast-backup',
+        'version': 1,
+        'settings': {
+          'customCourseColors': {
+            'Math': 0xFFD32F2F, // 覆盖 Math
+            'Physics': 0xFF1976D2, // 新增 Physics
+          },
+        },
+        'localData': {},
+      };
+
+      await BackupExportService.applyBackupData(cloudBackup);
+
+      final resultRaw = prefs.getString('custom_course_colors');
+      expect(resultRaw, isNotNull);
+      final resultMap = jsonDecode(resultRaw!) as Map<String, dynamic>;
+
+      expect(resultMap['Math'], 0xFFD32F2F);
+      expect(resultMap['English'], 0xFFC2185B);
+      expect(resultMap['Physics'], 0xFF1976D2);
+    });
+
+    test('applyBackupData merges manual exams and preserves scraped exams', () async {
+      SharedPreferences.setMockInitialValues({});
+      final examFile = io.File('${tempDir.path}/exam_schedule_list.json');
+
+      final futureDate =
+          DateTime.now().add(const Duration(days: 5)).toIso8601String();
+      final pastDate =
+          DateTime.now().subtract(const Duration(days: 5)).toIso8601String();
+
+      // 本地初始状态：包含一个本地手动作业和一个爬取作业
+      await examFile.writeAsString(jsonEncode([
+        {'id': 'local_manual_1', 'title': '本地手动原考', 'time': futureDate, 'isManual': true},
+        {'id': 'local_scraped_1', 'title': '本地超星原考', 'time': futureDate, 'isManual': false},
+      ]));
+
+      final cloudBackup = {
+        'format': 'chilleast-backup',
+        'version': 1,
+        'settings': {},
+        'localData': {
+          'examList': [
+            {'id': 'local_manual_1', 'title': '云端覆盖手动考', 'time': futureDate, 'isManual': true},
+            {'id': 'cloud_manual_2', 'title': '云端新增手动考', 'time': futureDate, 'isManual': true},
+            {'id': 'cloud_scraped_2', 'title': '云端爬取考', 'time': futureDate, 'isManual': false}, // 爬取考不应合入
+            {'id': 'cloud_expired_3', 'title': '云端过期手动考', 'time': pastDate, 'isManual': true}, // 过期考应被过滤
+          ],
+        },
+      };
+
+      await BackupExportService.applyBackupData(cloudBackup);
+
+      final content = await examFile.readAsString();
+      final list = jsonDecode(content) as List<dynamic>;
+
+      // 应该保留：覆盖后的 local_manual_1, 新增的 cloud_manual_2, 原有的 local_scraped_1
+      expect(list.length, 3);
+      final ids = list.map((e) => e['id']).toSet();
+      expect(ids.contains('local_manual_1'), isTrue);
+      expect(ids.contains('cloud_manual_2'), isTrue);
+      expect(ids.contains('local_scraped_1'), isTrue);
+      expect(ids.contains('cloud_scraped_2'), isFalse);
+      expect(ids.contains('cloud_expired_3'), isFalse);
+
+      final updatedManual = list.firstWhere((e) => e['id'] == 'local_manual_1');
+      expect(updatedManual['title'], '云端覆盖手动考');
     });
   });
 }

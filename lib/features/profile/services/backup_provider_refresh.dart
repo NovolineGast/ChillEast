@@ -1,10 +1,13 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/ai/ai_provider.dart';
+import '../../../core/ai/providers/ai_memory_provider.dart';
 import '../../../core/services/home_widget_service.dart';
 import '../../../core/state/locale_provider.dart';
 import '../../homework/providers/homework_provider.dart';
 import '../providers/appearance_provider.dart';
 import '../providers/settings_provider.dart';
+import '../../exam/providers/exam_provider.dart';
+import '../../timetable/utils/course_color_utils.dart';
+import '../../timetable/providers/timetable_status_provider.dart';
 import '../../workspace/providers/campus_card_cache_provider.dart';
 import '../../workspace/providers/electricity_cache_provider.dart';
 
@@ -33,7 +36,16 @@ class BackupProviderRefresh {
       await ref.read(aiAssistantProvider.notifier).loadSettings();
     } catch (_) {}
     try {
+      await ref.read(aiMemoryProvider.notifier).reloadFromStorage();
+    } catch (_) {}
+    try {
       await ref.read(homeworkProvider.notifier).reloadFromStorage();
+    } catch (_) {}
+    try {
+      await CourseColorUtils.reload();
+    } catch (_) {}
+    try {
+      await ref.read(examProvider.notifier).reloadFromStorage();
     } catch (_) {}
     try {
       await HomeWidgetService().syncWidgets();
@@ -43,6 +55,9 @@ class BackupProviderRefresh {
     } catch (_) {}
     try {
       await ref.read(campusCardCacheProvider.notifier).refresh();
+    } catch (_) {}
+    try {
+      await ref.read(timetableStatusProvider.notifier).refresh();
     } catch (_) {}
   }
 }

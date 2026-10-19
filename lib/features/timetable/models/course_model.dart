@@ -8,6 +8,10 @@ class CourseModel {
   final int dayOfWeek;       // 1-7 (周一到周日)
   final int startPeriod;     // 起始节次
   final int endPeriod;       // 结束节次
+  final bool _isCustom;
+
+  /// 是否为自定义课程（手动添加课程）
+  bool get isCustom => _isCustom || id.startsWith('custom_');
   
   const CourseModel({
     required this.id,
@@ -19,11 +23,13 @@ class CourseModel {
     required this.dayOfWeek,
     required this.startPeriod,
     required this.endPeriod,
-  });
+    bool isCustom = false,
+  }) : _isCustom = isCustom;
   
   factory CourseModel.fromJson(Map<String, dynamic> json) {
+    final id = json['id'] as String;
     return CourseModel(
-      id: json['id'] as String,
+      id: id,
       name: json['name'] as String,
       teacher: json['teacher'] as String,
       classroom: json['classroom'] as String,
@@ -32,6 +38,7 @@ class CourseModel {
       dayOfWeek: json['dayOfWeek'] as int,
       startPeriod: json['startPeriod'] as int,
       endPeriod: json['endPeriod'] as int,
+      isCustom: (json['isCustom'] as bool?) ?? id.startsWith('custom_'),
     );
   }
   
@@ -45,6 +52,7 @@ class CourseModel {
     'dayOfWeek': dayOfWeek,
     'startPeriod': startPeriod,
     'endPeriod': endPeriod,
+    'isCustom': isCustom,
   };
   
   CourseModel copyWith({
@@ -57,6 +65,7 @@ class CourseModel {
     int? dayOfWeek,
     int? startPeriod,
     int? endPeriod,
+    bool? isCustom,
   }) {
     return CourseModel(
       id: id ?? this.id,
@@ -68,6 +77,7 @@ class CourseModel {
       dayOfWeek: dayOfWeek ?? this.dayOfWeek,
       startPeriod: startPeriod ?? this.startPeriod,
       endPeriod: endPeriod ?? this.endPeriod,
+      isCustom: isCustom ?? this.isCustom,
     );
   }
 

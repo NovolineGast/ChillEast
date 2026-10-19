@@ -10,37 +10,49 @@ class ScoreScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(scoreProvider);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: Text(context.l10n.scoreQuery),
         elevation: 0,
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: theme.scaffoldBackgroundColor,
+        surfaceTintColor: theme.scaffoldBackgroundColor,
+        foregroundColor: isDark ? Colors.white : Colors.black87,
         actions: [
           IconButton(
+            tooltip: context.l10n.refresh,
             icon: const Icon(Icons.refresh_rounded, size: 22),
-            onPressed: () => ref.read(scoreProvider.notifier).fetchInitialData(),
+            onPressed: () => ref.read(scoreProvider.notifier).refresh(),
           ),
         ],
       ),
       body: Column(
         children: [
           // 1. 学期选择栏 (扁平化设计)
-          _buildSemesterPicker(context, ref, state),
+          _buildSemesterPicker(context, ref, state, isDark),
           
-          Divider(height: 1, thickness: 0.5, color: Theme.of(context).dividerColor),
+          Divider(
+            height: 1,
+            thickness: 0.5,
+            color: isDark
+                ? Colors.white.withValues(alpha: 0.12)
+                : const Color(0xFFE0E0E0),
+          ),
           
           // 2. 成绩列表
           Expanded(
-            child: _buildScoreList(context, ref, state),
+            child: _buildScoreList(context, ref, state, isDark),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSemesterPicker(BuildContext context, WidgetRef ref, ScoreState state) {
+  Widget _buildSemesterPicker(
+      BuildContext context, WidgetRef ref, ScoreState state, bool isDark) {
     if (state.semesters.isEmpty && !state.isLoading) return const SizedBox.shrink();
 
     return Container(
@@ -54,13 +66,20 @@ class ScoreScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 14, 
               fontWeight: FontWeight.w600, 
-              color: Theme.of(context).brightness == Brightness.dark ? Colors.white70 : Colors.grey[800],
+              color: isDark ? Colors.white70 : Colors.grey[800],
               letterSpacing: 0.1,
             ),
           ),
           const SizedBox(width: 12),
           if (state.isLoading && state.semesters.isEmpty)
-             const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
+            const SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xFF09C489),
+              ),
+            )
           else
             Expanded(
               child: Align(
@@ -69,8 +88,8 @@ class ScoreScreen extends ConsumerWidget {
                   value: state.selectedSemester,
                   underline: const SizedBox(),
                   icon: Icon(Icons.arrow_drop_down_rounded, color: Colors.grey[600]),
-                  style: TextStyle(
-                    color: Theme.of(context).primaryColor,
+                  style: const TextStyle(
+                    color: Color(0xFF09C489),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -94,9 +113,12 @@ class ScoreScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildScoreList(BuildContext context, WidgetRef ref, ScoreState state) {
+  Widget _buildScoreList(
+      BuildContext context, WidgetRef ref, ScoreState state, bool isDark) {
     if (state.isLoading && state.scores.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFF09C489)),
+      );
     }
 
     if (state.errorMessage != null && state.scores.isEmpty) {
@@ -109,7 +131,7 @@ class ScoreScreen extends ConsumerWidget {
             Text(state.errorMessage!, style: TextStyle(color: Colors.grey[600])),
             const SizedBox(height: 24),
             OutlinedButton(
-              onPressed: () => ref.read(scoreProvider.notifier).fetchInitialData(),
+              onPressed: () => ref.read(scoreProvider.notifier).refresh(),
               style: OutlinedButton.styleFrom(
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
               ),
@@ -125,138 +147,155 @@ class ScoreScreen extends ConsumerWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.assignment_turned_in_outlined, size: 64, color: Colors.grey[100]),
+            Icon(Icons.assignment_turned_in_outlined,
+                size: 64, color: isDark ? Colors.white24 : Colors.grey[300]),
             const SizedBox(height: 16),
-            Text(context.l10n.noScoreData, style: TextStyle(color: Colors.grey[400])),
+            Text(
+              context.l10n.noScoreData,
+              style: TextStyle(
+                fontSize: 14,
+                color: isDark ? Colors.white38 : Colors.grey,
+              ),
+            ),
           ],
         ),
       );
     }
 
-    return Stack(
-      children: [
-        ListView.separated(
-          padding: EdgeInsets.zero,
-          itemCount: state.scores.length,
-          separatorBuilder: (context, index) => Divider(
-            height: 1, 
-            thickness: 0.5, 
-            indent: 72,
-            color: Theme.of(context).dividerColor,
+    return RefreshIndicator(
+      color: const Color(0xFF09C489),
+      onRefresh: () => ref.read(scoreProvider.notifier).refresh(),
+      child: Stack(
+        children: [
+          ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 40),
+            itemCount: state.scores.length,
+            itemBuilder: (context, index) {
+              final score = state.scores[index];
+              return _buildScoreCard(context, score, isDark);
+            },
           ),
-          itemBuilder: (context, index) {
-            final score = state.scores[index];
-            return _buildScoreItem(context, score);
-          },
-        ),
-        if (state.isLoading)
-          const Positioned(
-            top: 0, left: 0, right: 0,
-            child: LinearProgressIndicator(minHeight: 2),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildScoreItem(BuildContext context, ScoreModel score) {
-    final bool isExcellent = _isExcellent(score.score);
-    final bool isFailed = _isFailed(score.score);
-
-    Color scoreColor = Theme.of(context).primaryColor;
-    if (isFailed) scoreColor = Colors.red[700]!;
-    if (isExcellent) scoreColor = Colors.orange[700]!;
-
-    return InkWell(
-      onTap: () {}, // 预留详情点击
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-        child: Row(
-          children: [
-            // 左侧图标/标识 (MD2 风格圆框)
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: scoreColor.withOpacity(0.08),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                isFailed ? Icons.warning_amber_rounded : Icons.menu_book_rounded,
-                size: 20,
-                color: scoreColor,
+          if (state.isLoading)
+            const Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: LinearProgressIndicator(
+                minHeight: 2,
+                color: Color(0xFF09C489),
               ),
             ),
-            const SizedBox(width: 16),
-            
-            // 中间信息
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    score.courseName,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Theme.of(context).brightness == Brightness.dark ? Colors.white : const Color(0xFF202124),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  DefaultTextStyle(
-                    style: TextStyle(fontSize: 13, color: Colors.grey[600]),
-                    child: Row(
-                      children: [
-                        Text(context.l10n.scoreCredit(score.credit ?? "N/A")),
-                        const SizedBox(width: 12),
-                        const Text('•'),
-                        const SizedBox(width: 12),
-                        Text(score.examType ?? context.l10n.normalExam),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            // 右侧分数
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  score.score,
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: scoreColor,
-                    fontFamily: 'monospace',
-                  ),
-                ),
-                if (isExcellent || isFailed)
-                  Text(
-                    isExcellent ? context.l10n.gradeExcellent : context.l10n.gradeFailed,
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: scoreColor.withOpacity(0.8),
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
+        ],
       ),
     );
   }
 
-  bool _isExcellent(String score) {
-    final val = double.tryParse(score);
-    if (val != null) return val >= 90;
-    return score == '优秀';
-  }
+  Widget _buildScoreCard(BuildContext context, ScoreModel score, bool isDark) {
+    final primaryTextColor = isDark ? Colors.white : const Color(0xFF222222);
 
-  bool _isFailed(String score) {
-    final val = double.tryParse(score);
-    if (val != null) return val < 60;
-    return score == '不及格';
+    final courseNatureParts = [
+      if (score.courseNature != null && score.courseNature!.trim().isNotEmpty)
+        score.courseNature!.trim(),
+      if (score.courseCode != null && score.courseCode!.trim().isNotEmpty)
+        score.courseCode!.trim(),
+    ];
+    final bool hasCourseNature = courseNatureParts.isNotEmpty;
+    final String secondaryText = hasCourseNature
+        ? courseNatureParts.join(' · ')
+        : (score.credit != null && score.credit!.trim().isNotEmpty
+            ? context.l10n.scoreCredit(score.credit!.trim())
+            : '');
+    final bool showCreditInWrap = hasCourseNature;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.12)
+              : const Color(0xFFE0E0E0),
+          width: 1,
+        ),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Text(
+                  score.courseName,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: primaryTextColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                score.score,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: primaryTextColor,
+                  fontFamily: 'monospace',
+                ),
+              ),
+            ],
+          ),
+          if (secondaryText.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              secondaryText,
+              style: TextStyle(
+                fontSize: 13,
+                color: isDark ? Colors.white60 : Colors.black54,
+              ),
+            ),
+          ],
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 12,
+            runSpacing: 4,
+            children: [
+              if (showCreditInWrap &&
+                  score.credit != null &&
+                  score.credit!.trim().isNotEmpty)
+                Text(
+                  context.l10n.scoreCredit(score.credit!.trim()),
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white38 : Colors.grey[600],
+                  ),
+                ),
+              Text(
+                score.examType ?? context.l10n.normalExam,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: isDark ? Colors.white38 : Colors.grey[600],
+                ),
+              ),
+              if (score.dailyScore != null &&
+                  score.dailyScore!.trim().isNotEmpty)
+                Text(
+                  '平时: ${score.dailyScore!.trim()}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isDark ? Colors.white38 : Colors.grey[600],
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }
+
+

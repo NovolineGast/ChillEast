@@ -69,6 +69,7 @@ ios/Runner/GeneratedPluginRegistrant.m
 
 # debug
 debug
+.tmp
 
 # Android signing material (never commit)
 /android/key.properties
@@ -84,6 +85,7 @@ debug
 .env.json
 
 # Cloudflare Worker (relay)
+.wrangler/
 worker/node_modules/
 worker/.dev.vars
 worker/.wrangler/

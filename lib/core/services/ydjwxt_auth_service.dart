@@ -37,17 +37,27 @@ class YdjwxtAuthService {
     }
   }
 
+  int _tokenGeneration = 0;
+
   /// 清除缓存的 Token
   void clearToken() {
+    _tokenGeneration++;
     _cachedToken = null;
     _tokenExpiry = null;
+    _ongoingAuthFuture = null;
   }
 
   Future<String> _performAuth({bool forceRefresh = false}) async {
+    final gen = _tokenGeneration;
     _logger.i('🔑 Acquiring YDJWXT token (forceRefresh: $forceRefresh)...');
     final token = await _authenticate();
     if (token == null || token.isEmpty) {
       throw Exception('身份验证失败，未能获取移动教务系统 Token。请确保已登录。');
+    }
+
+    if (gen != _tokenGeneration) {
+      _logger.w('🔑 YDJWXT auth completed after clearToken/logout, discarding token');
+      return '';
     }
 
     _cachedToken = token;

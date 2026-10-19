@@ -21,8 +21,23 @@ class ElectricityService {
 
   CampusCardService get _cardService => _ref.read(campusCardServiceProvider);
 
+  Future<String?>? _pendingAuthFuture;
+
   /// 初始化电费环境 (确保 OpenID 和 Cookie)
   Future<String?> _ensureAuthenticated({bool force = false}) async {
+    if (_pendingAuthFuture != null && !force) {
+      return _pendingAuthFuture!;
+    }
+    final future = _ensureAuthenticatedInternal(force: force);
+    _pendingAuthFuture = future;
+    try {
+      return await future;
+    } finally {
+      _pendingAuthFuture = null;
+    }
+  }
+
+  Future<String?> _ensureAuthenticatedInternal({bool force = false}) async {
     if (force || _cardService.openid == null || _cardService.cachedInfo == null) {
       await _cardService.fetchRechargeInfo(isRetry: force);
     }
@@ -219,6 +234,7 @@ class ElectricityService {
     required String buildingName,
     required String roomId,
     required String mertype,
+    int? slot,
   }) async {
     if (_cardService.openid == null) {
       await _ensureAuthenticated();
@@ -255,7 +271,9 @@ class ElectricityService {
           throw Exception('Unexpected response format for getBalance: $data');
         }
         final balanceInfo = ElectricityBalanceInfo.fromJson(result);
-        saveSavedBalance(balanceInfo);
+        if (slot != null) {
+          await saveSavedBalance(balanceInfo, slot: slot);
+        }
         return balanceInfo;
       }
       throw Exception('无法获取余额数据');
@@ -273,6 +291,7 @@ class ElectricityService {
     String? roomName,
     required String mertype,
     required double amount,
+    int? slot,
   }) async {
     if (_cardService.openid == null || _cardService.cachedInfo == null) {
       await _cardService.fetchRechargeInfo();
@@ -323,8 +342,18 @@ class ElectricityService {
         _logger.i('⚡ recharge evaluated success: $success');
         if (success) {
           String effectiveRoomName = (roomName != null && roomName.isNotEmpty) ? roomName : '';
+          int targetSlot = slot ?? 0;
+          if (slot == null) {
+            final r0 = await getSavedRoom(slot: 0);
+            final r1 = await getSavedRoom(slot: 1);
+            if (r1 != null && r1.roomId == roomId) {
+              targetSlot = 1;
+            } else if (r0 != null && r0.roomId == roomId) {
+              targetSlot = 0;
+            }
+          }
           if (effectiveRoomName.isEmpty) {
-            final oldSaved = await getSavedRoom();
+            final oldSaved = await getSavedRoom(slot: targetSlot);
             if (oldSaved != null && oldSaved.roomId == roomId && oldSaved.roomName.isNotEmpty && oldSaved.roomName != roomId) {
               effectiveRoomName = oldSaved.roomName;
             } else {
@@ -339,6 +368,7 @@ class ElectricityService {
               roomName: effectiveRoomName,
               mertype: mertype,
             ),
+            slot: targetSlot,
           );
         } else {
           final msg = data['message'] ?? data['msg'];
@@ -356,13 +386,17 @@ class ElectricityService {
     }
   }
 
-  static const String _savedRoomKey = 'saved_electricity_room';
+  static String _roomKeyForSlot(int slot) =>
+      slot == 0 ? 'saved_electricity_room' : 'saved_electricity_room_${slot + 1}';
 
-  /// 获取上次保存/选择的宿舍房间
-  Future<SavedElectricityRoom?> getSavedRoom() async {
+  static String _balanceKeyForSlot(int slot) =>
+      slot == 0 ? 'saved_electricity_balance_info' : 'saved_electricity_balance_info_${slot + 1}';
+
+  /// 获取指定槽位上次保存/选择的宿舍房间（slot 默认为 0）
+  Future<SavedElectricityRoom?> getSavedRoom({int slot = 0}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_savedRoomKey);
+      final raw = prefs.getString(_roomKeyForSlot(slot));
       if (raw != null && raw.isNotEmpty) {
         final data = jsonDecode(raw);
         if (data is Map<String, dynamic>) {
@@ -372,42 +406,57 @@ class ElectricityService {
         }
       }
     } catch (e) {
-      _logger.w('Failed to get saved electricity room: $e');
+      _logger.w('Failed to get saved electricity room for slot $slot: $e');
     }
     return null;
   }
 
-  /// 保存当前选择的宿舍房间
-  Future<void> saveSavedRoom(SavedElectricityRoom room) async {
+  /// 获取所有已保存的宿舍房间列表（默认最多 2 个卡片槽位）
+  Future<List<SavedElectricityRoom?>> getSavedRooms({int maxSlots = 2}) async {
+    final results = <SavedElectricityRoom?>[];
+    for (int i = 0; i < maxSlots; i++) {
+      results.add(await getSavedRoom(slot: i));
+    }
+    return results;
+  }
+
+  /// 保存当前选择的宿舍房间到指定槽位
+  Future<void> saveSavedRoom(SavedElectricityRoom room, {int slot = 0}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_savedRoomKey, jsonEncode(room.toJson()));
+      await prefs.setString(_roomKeyForSlot(slot), jsonEncode(room.toJson()));
       CloudBackupManager.instance.markDirty();
-      _logger.d('💾 Saved electricity room: ${room.areaName} - ${room.buildingName} - ${room.roomName}');
+      _logger.d('💾 Saved electricity room (slot $slot): ${room.areaName} - ${room.buildingName} - ${room.roomName}');
     } catch (e) {
       _logger.w('Failed to save electricity room: $e');
     }
   }
 
-  /// 清除保存的宿舍房间 (例如退出登录时)
-  Future<void> clearSavedRoom() async {
+  /// 清除指定槽位保存的宿舍房间和余额
+  Future<void> clearSavedRoom({int slot = 0}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_savedRoomKey);
-      await prefs.remove(_savedBalanceKey);
-      _logger.d('🧹 Cleared saved electricity room and balance');
+      await prefs.remove(_roomKeyForSlot(slot));
+      await prefs.remove(_balanceKeyForSlot(slot));
+      CloudBackupManager.instance.markDirty();
+      _logger.d('🧹 Cleared saved electricity room and balance for slot $slot');
     } catch (e) {
       _logger.w('Failed to clear saved electricity room: $e');
     }
   }
 
-  static const String _savedBalanceKey = 'saved_electricity_balance_info';
+  /// 清除所有保存的宿舍房间与余额
+  Future<void> clearAllSavedRooms({int maxSlots = 2}) async {
+    for (int i = 0; i < maxSlots; i++) {
+      await clearSavedRoom(slot: i);
+    }
+  }
 
-  /// 获取上次保存的宿舍电费余额信息
-  Future<ElectricityBalanceInfo?> getSavedBalance() async {
+  /// 获取指定槽位保存的宿舍电费余额信息
+  Future<ElectricityBalanceInfo?> getSavedBalance({int slot = 0}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final raw = prefs.getString(_savedBalanceKey);
+      final raw = prefs.getString(_balanceKeyForSlot(slot));
       if (raw != null && raw.isNotEmpty) {
         final data = jsonDecode(raw);
         if (data is Map<String, dynamic>) {
@@ -417,29 +466,38 @@ class ElectricityService {
         }
       }
     } catch (e) {
-      _logger.w('Failed to get saved electricity balance: $e');
+      _logger.w('Failed to get saved electricity balance for slot $slot: $e');
     }
     return null;
   }
 
-  /// 保存当前宿舍的电费余额信息
-  Future<void> saveSavedBalance(ElectricityBalanceInfo info) async {
+  /// 获取所有槽位保存的宿舍电费余额列表
+  Future<List<ElectricityBalanceInfo?>> getSavedBalances({int maxSlots = 2}) async {
+    final results = <ElectricityBalanceInfo?>[];
+    for (int i = 0; i < maxSlots; i++) {
+      results.add(await getSavedBalance(slot: i));
+    }
+    return results;
+  }
+
+  /// 保存指定槽位宿舍的电费余额信息
+  Future<void> saveSavedBalance(ElectricityBalanceInfo info, {int slot = 0}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_savedBalanceKey, jsonEncode(info.toJson()));
-      _logger.d('💾 Saved electricity balance: ${info.balance}');
+      await prefs.setString(_balanceKeyForSlot(slot), jsonEncode(info.toJson()));
+      _logger.d('💾 Saved electricity balance (slot $slot): ${info.balance}');
     } catch (e) {
       _logger.w('Failed to save electricity balance: $e');
     }
   }
 
-  /// 清除保存的宿舍电费余额
-  Future<void> clearSavedBalance() async {
+  /// 清除指定槽位保存的宿舍电费余额
+  Future<void> clearSavedBalance({int slot = 0}) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(_savedBalanceKey);
+      await prefs.remove(_balanceKeyForSlot(slot));
     } catch (e) {
-      _logger.w('Failed to clear saved electricity balance: $e');
+      _logger.w('Failed to clear saved electricity balance for slot $slot: $e');
     }
   }
 }

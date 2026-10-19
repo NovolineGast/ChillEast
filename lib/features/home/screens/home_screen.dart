@@ -18,6 +18,7 @@ import '../../../core/state/auth_state.dart';
 import '../../auth/screens/login_screen.dart';
 import '../../timetable/services/timetable_storage.dart';
 import '../../timetable/utils/ics_parser.dart';
+import '../../timetable/providers/timetable_status_provider.dart';
 import '../../timetable/models/course_model.dart';
 import '../../timetable/utils/date_calculator.dart';
 import '../../timetable/utils/week_parser.dart';
@@ -25,6 +26,8 @@ import '../../homework/providers/homework_provider.dart';
 import '../../homework/models/homework_model.dart';
 import '../../exam/providers/exam_provider.dart';
 import '../../exam/models/exam_schedule_model.dart';
+import '../../exam/services/exam_storage.dart';
+import '../../exam/screens/exam_screen.dart';
 import '../../../core/utils/location_helper.dart';
 import 'package:intl/intl.dart';
 import '../../../core/constants/app_constants.dart';
@@ -52,6 +55,10 @@ import '../../library/models/library_models.dart';
 import '../../library/providers/library_provider.dart';
 import '../../library/screens/library_home_screen.dart';
 import '../../campus_bus/screens/campus_bus_map_screen.dart';
+import '../../../core/utils/date_format_utils.dart';
+import '../../../core/network/cookie_manager.dart';
+import '../utils/feed_sorter.dart';
+import '../../../core/widgets/embedded_detail_pane.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   final Function(int)? onNavigateToTab;
@@ -72,6 +79,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _quickPageIndex = 0;
   // 小组件同步节流
   DateTime _lastWidgetSync = DateTime.fromMillisecondsSinceEpoch(0);
+  Widget? _embeddedScreen;
+  String? _selectedActionId;
+  bool _isTransitioningToRoute = false;
+
+  bool _canSplitScreen(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final orientation = MediaQuery.orientationOf(context);
+    final isTabletOrLandscape = size.width >= 600 ||
+        (orientation == Orientation.landscape && size.width >= 500);
+    final pageWidth = isTabletOrLandscape ? (size.width - 76.0) : size.width;
+    return pageWidth >= 600;
+  }
+
+  void _safeNavigate(BuildContext context, Widget screen, {String? id}) {
+    if (_canSplitScreen(context)) {
+      setState(() {
+        _embeddedScreen = screen;
+        _selectedActionId = id;
+      });
+      return;
+    }
+
+    Navigator.push(context, createSlideHorizontalRoute(screen));
+  }
 
   @override
   void initState() {
@@ -107,7 +138,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
       if (hasTimetable) {
         final icsContent = await storage.readTimetable();
-        final metadata = await storage.readMetadata();
 
         if (icsContent != null) {
           final allCourses = IcsParser.parse(icsContent);
@@ -121,13 +151,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           final dayOfWeek = targetDate.weekday; // 1=周一, 7=周日
 
           // 计算目标周次
-          int targetWeek = 0;
-          if (metadata != null && metadata['firstWeekMonday'] != null) {
-            final firstWeekMonday =
-                DateTime.parse(metadata['firstWeekMonday'] as String);
-            targetWeek = DateCalculator.getCurrentWeekNumber(
-                firstWeekMonday, targetDate);
-          }
+          final firstWeekMonday = await storage.resolveFirstWeekMonday();
+          final targetWeek = DateCalculator.getCurrentWeekNumber(
+              firstWeekMonday, targetDate);
 
           // 筛选课程
           final previewCourses = allCourses.where((course) {
@@ -165,20 +191,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           upcomingCourses
               .sort((a, b) => a.startPeriod.compareTo(b.startPeriod));
 
+          if (!mounted) return;
           setState(() {
             _todayCourses = upcomingCourses;
             _isShowingTomorrow = isAfter10PM;
             _previewDate =
                 DateTime(targetDate.year, targetDate.month, targetDate.day);
           });
+        } else {
+          if (mounted) {
+            setState(() {
+              _todayCourses = [];
+            });
+          }
+        }
+      } else {
+        if (mounted) {
+          setState(() {
+            _todayCourses = [];
+          });
         }
       }
     } catch (e) {
       // 静默失败
     } finally {
-      setState(() {
-        _isLoadingTimetable = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoadingTimetable = false;
+        });
+      }
       _syncWidgetsDebounced();
     }
   }
@@ -195,6 +236,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
 
+    // 监听全局课表状态刷新（云备份恢复/后台同步完成），立即重载预览课程
+    ref.listen(timetableStatusProvider, (_, __) {
+      if (mounted) {
+        _loadPreviewCourses();
+      }
+    });
+
     // 作业后到时也同步一次小组件（与课表加载时的同步共用 30 秒节流）
     ref.listen(homeworkProvider, (previous, next) {
       next.whenData((list) {
@@ -204,41 +252,251 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       });
     });
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 8),
-                  // 信息流区块（顺序与显隐来自外观设置，可配置）
-                  for (final section in ref
-                      .watch(appearanceProvider)
-                      .feedItems
-                      .where((e) => e.isVisible))
-                    switch (section.id) {
-                      'feed_quick' => _buildQuickActions(context, authState),
-                      'feed_library' => _buildLibrarySeatCard(context),
-                      'feed_agenda' => _buildTodayTimetablePreview(context),
-                      'feed_questionnaire' =>
-                        _buildPendingQuestionnaires(context),
-                      'feed_leave' => _buildOngoingLeaves(context),
-                      'feed_repair' => _buildOngoingRepairs(context),
-                      'feed_balance' => _buildBalanceSection(context),
-                      _ => const SizedBox.shrink(),
-                    },
-                  const SizedBox(height: 24),
-                ],
+    final orderedSectionIds = () {
+      final appearance = ref.watch(appearanceProvider);
+      if (!appearance.feedAutoSort) {
+        return appearance.feedItems
+            .where((e) => e.isVisible)
+            .map((e) => e.id)
+            .toList();
+      }
+
+      final reserves =
+          ref.watch(cachedLibraryReserveProvider).valueOrNull ?? [];
+      final hasLibraryP0 =
+          FeedSorter.checkLibraryP0(reserves: reserves);
+
+      final leaves = ref.watch(leaveCacheProvider).valueOrNull ?? [];
+      final hasLeaveP1 = FeedSorter.checkLeaveP1(leaves: leaves);
+
+      final exams = ref.watch(examProvider).valueOrNull ?? [];
+      final hasAgendaP2 = FeedSorter.checkAgendaP2(
+        courses: _todayCourses,
+        exams: exams,
+        previewDate: _previewDate,
+      );
+
+      final homeworks =
+          ref.watch(homeworkProvider).valueOrNull ?? [];
+      final hasHomeworkP3 =
+          FeedSorter.checkHomeworkP3(homeworks: homeworks);
+
+      final eleState = ref.watch(electricityCacheProvider);
+      final hasBalanceP4 = FeedSorter.checkBalanceP4(
+        balances: eleState.balances,
+        balanceInfo: eleState.balanceInfo,
+      );
+
+      return FeedSorter.sortFeedItems(
+        autoSort: true,
+        manualOrder: appearance.feedItems
+            .where((e) => e.isVisible)
+            .map((e) => e.id)
+            .toList(),
+        hasLibraryP0: hasLibraryP0,
+        hasLeaveP1: hasLeaveP1,
+        hasAgendaP2: hasAgendaP2,
+        hasHomeworkP3: hasHomeworkP3,
+        hasBalanceP4: hasBalanceP4,
+      );
+    }();
+
+    final builtWidgets = <Widget>[];
+    for (final sectionId in orderedSectionIds) {
+      final widget = _buildFeedSection(sectionId, context, authState);
+      if (_isNonEmptyWidget(widget)) {
+        builtWidgets.add(widget);
+      }
+    }
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMultiColumn = constraints.maxWidth >= 600;
+
+        if (!isMultiColumn && _embeddedScreen != null && !_isTransitioningToRoute) {
+          _isTransitioningToRoute = true;
+          final screenToOpen = _embeddedScreen!;
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (!mounted) return;
+            setState(() {
+              _embeddedScreen = null;
+              _selectedActionId = null;
+              _isTransitioningToRoute = false;
+            });
+            Navigator.of(context).push(
+              createSlideHorizontalRoute(screenToOpen),
+            );
+          });
+        }
+
+          if (isMultiColumn) {
+            if (_embeddedScreen != null) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              return PopScope(
+                canPop: false,
+                onPopInvokedWithResult: (didPop, result) {
+                  if (didPop) return;
+                  setState(() {
+                    _embeddedScreen = null;
+                    _selectedActionId = null;
+                  });
+                },
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 8),
+                              for (final w in builtWidgets) ...[
+                                w,
+                                const SizedBox(height: 16),
+                              ],
+                              const SizedBox(height: 24),
+                            ],
+                          ),
+                        ),
+                      ),
+                      VerticalDivider(
+                        width: 16,
+                        thickness: 0.5,
+                        color: isDark
+                            ? Colors.white.withValues(alpha: 0.08)
+                            : const Color(0x1A000000),
+                      ),
+                      Expanded(
+                        child: EmbeddedDetailPane(
+                          key: ValueKey(
+                              _selectedActionId ?? _embeddedScreen.runtimeType),
+                          onClose: () {
+                            setState(() {
+                              _embeddedScreen = null;
+                              _selectedActionId = null;
+                            });
+                            ref.read(campusCardCacheProvider.notifier).refresh();
+                            ref.read(electricityCacheProvider.notifier).refresh();
+                            ref.read(leaveCacheProvider.notifier).refresh();
+                            ref.read(repairCacheProvider.notifier).refresh();
+                            ref.read(questionnaireCacheProvider.notifier).refresh();
+                          },
+                          child: _embeddedScreen!,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+
+            final leftItems = <Widget>[];
+            final rightItems = <Widget>[];
+            for (int i = 0; i < builtWidgets.length; i++) {
+              if (i.isEven) {
+                leftItems.add(builtWidgets[i]);
+              } else {
+                rightItems.add(builtWidgets[i]);
+              }
+            }
+
+            return SingleChildScrollView(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (final w in leftItems) ...[
+                                w,
+                                const SizedBox(height: 16),
+                              ],
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              for (final w in rightItems) ...[
+                                w,
+                                const SizedBox(height: 16),
+                              ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                  ],
+                ),
               ),
+            );
+          }
+
+          return SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const SizedBox(height: 8),
+                      for (final w in builtWidgets) ...[
+                        w,
+                        const SizedBox(height: 16),
+                      ],
+                      const SizedBox(height: 24),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          );
+        },
+      );
+  }
+
+  Widget _buildFeedSection(
+      String sectionId, BuildContext context, AuthState authState) {
+    switch (sectionId) {
+      case 'feed_quick':
+        return _buildQuickActions(context, authState);
+      case 'feed_library':
+        return _buildLibrarySeatCard(context);
+      case 'feed_agenda':
+        return _buildTodayTimetablePreview(context);
+      case 'feed_homework':
+        return _buildHomeworkSection(context);
+      case 'feed_questionnaire':
+        return _buildPendingQuestionnaires(context);
+      case 'feed_leave':
+        return _buildOngoingLeaves(context);
+      case 'feed_repair':
+        return _buildOngoingRepairs(context);
+      case 'feed_balance':
+        return _buildBalanceSection(context);
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  bool _isNonEmptyWidget(Widget widget) {
+    if (widget is SizedBox && widget.child == null) {
+      return false;
+    }
+    return true;
   }
 
   Widget _buildQuickActions(BuildContext context, AuthState authState) {
@@ -385,11 +643,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       itemBuilder: (context, index) {
         if (index < items.length) {
           final item = items[index];
+          final isSelected = _selectedActionId == item.id;
           return _buildQuickActionCard(
             context,
             icon: item.icon,
             label: item.getLocalizedTitle(context),
             iconColor: item.color,
+            isSelected: isSelected,
             isDark: isDark,
             onTap: () => _handleActionTap(context, item.id, isLoggedIn),
           );
@@ -412,95 +672,90 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     switch (id) {
       case 'payment_code':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const PaymentCodeScreen()))
+            ? _safeNavigate(context, const PaymentCodeScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'recharge':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const CampusCardRechargeScreen()))
+            ? _safeNavigate(context, const CampusCardRechargeScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'ele_recharge':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const ElectricityRechargeScreen()))
+            ? _safeNavigate(context, const ElectricityRechargeScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'library':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const LibraryHomeScreen()))
+            ? _safeNavigate(context, const LibraryHomeScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'empty_classroom':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const ClassroomInquiryScreen()))
+            ? _safeNavigate(context, const ClassroomInquiryScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'xgxt':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcXgxt,
                   url: AppConstants.xgxtWapUrl,
                   showAppBar: false,
                   showWebBack: false,
                   appBarColor: const Color(0xFF3C8DBC),
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'sunshine':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const SunshineScreen()))
+            ? _safeNavigate(context, const SunshineScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'questionnaire':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const QuestionnaireListScreen()))
+            ? _safeNavigate(context, const QuestionnaireListScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'leave':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const LeaveListScreen()))
+            ? _safeNavigate(context, const LeaveListScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'repairs':
         isLoggedIn
-            ? Navigator.push(context, createSlideUpRoute(const RepairScreen()))
+            ? _safeNavigate(context, const RepairScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'dormitory':
         isLoggedIn
-            ? Navigator.push(
-                context, createSlideUpRoute(const DormitoryScreen()))
+            ? _safeNavigate(context, const DormitoryScreen(), id: id)
             : _showLoginDialog(context);
         break;
       case 'ehall':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcEhall,
                   url: AppConstants.ehallUrl,
                   userAgent: AppConstants.ehallUA,
                   showAppBar: false,
                   showWebBack: false,
                   appBarColor: const Color(0xFF1E88E5),
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'info_portal':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcInfoPortal,
                   url: AppConstants.infoPortalUrl,
                   homeUrl: AppConstants.infoPortalUrl,
@@ -509,40 +764,49 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   showWebBack: false,
                   appBarColor: Colors.white,
                   allowExternalLinks: true,
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'gym':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcGym,
                   url: AppConstants.gymReservationUrl,
                   showWebBack: true,
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'teaching_eval':
         isLoggedIn
-            ? Navigator.push(
+            ? _safeNavigate(
                 context,
-                createSlideUpRoute(WebViewDetailScreen(
+                WebViewDetailScreen(
                   title: context.l10n.funcTeachingEval,
                   url: AppConstants.teachingEvalUrl,
                   showAppBar: false,
                   showWebBack: false,
                   appBarColor: Colors.white,
-                )))
+                ),
+                id: id,
+              )
             : _showLoginDialog(context);
         break;
       case 'score':
         isLoggedIn
-            ? Navigator.push(context, createSlideUpRoute(const ScoreScreen()))
+            ? _safeNavigate(context, const ScoreScreen(), id: id)
             : _showLoginDialog(context);
         break;
+      case 'exam':
+        _safeNavigate(context, const ExamScreen(), id: id);
+        break;
       case 'vpn':
-        Navigator.push(context, createSlideUpRoute(const VpnConverterScreen()));
+        _safeNavigate(context, const VpnConverterScreen(), id: id);
         break;
       case 'campus_card':
         if (isLoggedIn) {
@@ -552,43 +816,43 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           final url = service.getCampusCardHomeUrl();
 
           if (!context.mounted) return;
-          Navigator.push(
-              context,
-              createSlideUpRoute(
-                WebViewDetailScreen(
-                  title: context.l10n.funcCampusCard,
-                  url: url,
-                  userAgent: AppConstants.campusCardUA,
-                  showWebBack: false,
-                  showAppBar: false,
-                  appBarColor: const Color(0xFF008268),
-                ),
-              ));
+          _safeNavigate(
+            context,
+            WebViewDetailScreen(
+              title: context.l10n.funcCampusCard,
+              url: url,
+              userAgent: AppConstants.campusCardUA,
+              showWebBack: false,
+              showAppBar: false,
+              appBarColor: const Color(0xFF008268),
+            ),
+            id: id,
+          );
         } else {
           _showLoginDialog(context);
         }
         break;
       case 'bus':
-        Navigator.push(context, createSlideUpRoute(const BusTrackingScreen()));
+        _safeNavigate(context, const BusTrackingScreen(), id: id);
         break;
       case 'campus_bus_route':
-        Navigator.push(context, createSlideUpRoute(const CampusBusMapScreen()));
+        _safeNavigate(context, const CampusBusMapScreen(), id: id);
         break;
       case 'cs_bus':
         final hasPermission = await LocationHelper.requestPermission();
         if (hasPermission) {
           if (!context.mounted) return;
-          Navigator.push(
-              context,
-              createSlideUpRoute(
-                WebViewDetailScreen(
-                  title: context.l10n.funcCsBus,
-                  url: AppConstants.changshaBusUrl,
-                  showWebBack: true,
-                  showAppBar: true,
-                  appBarColor: const Color(0xFFF4F4F4),
-                ),
-              ));
+          _safeNavigate(
+            context,
+            WebViewDetailScreen(
+              title: context.l10n.funcCsBus,
+              url: AppConstants.changshaBusUrl,
+              showWebBack: true,
+              showAppBar: true,
+              appBarColor: const Color(0xFFF4F4F4),
+            ),
+            id: id,
+          );
         } else {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -608,18 +872,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required IconData icon,
     required String label,
     required Color iconColor,
+    bool isSelected = false,
     required bool isDark,
     required VoidCallback onTap,
   }) {
+    const activeColor = Color(0xFF09C489);
+
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        color: isSelected
+            ? (isDark
+                ? activeColor.withValues(alpha: 0.15)
+                : activeColor.withValues(alpha: 0.08))
+            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : const Color(0xFFE0E0E0),
-          width: 1,
+          color: isSelected
+              ? activeColor
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : const Color(0xFFE0E0E0)),
+          width: isSelected ? 1.5 : 1,
         ),
       ),
       child: Material(
@@ -644,8 +917,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: isDark ? Colors.white : Colors.black87,
+                      fontWeight:
+                          isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? activeColor
+                          : (isDark ? Colors.white : Colors.black87),
                     ),
                   ),
                 ),
@@ -659,7 +935,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildLibrarySeatCard(BuildContext context) {
     final cachedReservesAsync = ref.watch(cachedLibraryReserveProvider);
-    final reserves = cachedReservesAsync.value ?? [];
+    final reserves = cachedReservesAsync.valueOrNull ?? [];
     if (reserves.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -723,8 +999,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         child: InkWell(
           borderRadius: BorderRadius.circular(6),
           onTap: () {
-            Navigator.push(
-                context, createSlideUpRoute(const LibraryHomeScreen()));
+            _safeNavigate(
+                context, const LibraryHomeScreen(), id: 'library');
           },
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
@@ -1066,7 +1342,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       data: (list) {
         final items = list
             .where((e) =>
-                e.isCurrentSemester() &&
+                !ExamStorage.isManualExamExpired(e) &&
+                (e.isCurrentSemester() || e.isManual) &&
                 e.time.year == _previewDate.year &&
                 e.time.month == _previewDate.month &&
                 e.time.day == _previewDate.day)
@@ -1077,23 +1354,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       orElse: () => <ExamScheduleModel>[],
     );
 
-    // 当天待办作业（截止时间为预览日期），排在课程前面，日程页同款
-    final homeworkAsync = ref.watch(homeworkProvider);
-    final dayHomework = homeworkAsync.maybeWhen(
-      data: (list) {
-        final items = list
-            .where((h) =>
-                h.status == HomeworkStatus.pending &&
-                h.endTime != null &&
-                h.endTime!.year == _previewDate.year &&
-                h.endTime!.month == _previewDate.month &&
-                h.endTime!.day == _previewDate.day)
-            .toList();
-        items.sort((a, b) => a.endTime!.compareTo(b.endTime!));
-        return items;
-      },
-      orElse: () => <HomeworkModel>[],
-    );
+    if (!_isLoadingTimetable &&
+        _todayCourses.isEmpty &&
+        dayExams.isEmpty) {
+      return const SizedBox.shrink();
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1134,43 +1399,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: CircularProgressIndicator(),
             ),
           )
-        else if (_todayCourses.isEmpty && dayHomework.isEmpty && dayExams.isEmpty)
-          Container(
-            padding: const EdgeInsets.all(16),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? const Color(0xFF1E1E1E)
-                  : Colors.grey[50],
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Center(
-              child: Text(
-                _isShowingTomorrow
-                    ? context.l10n.noCoursesTomorrow
-                    : context.l10n.noCoursesToday,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey,
-                ),
-              ),
-            ),
-          )
         else
           Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               for (int i = 0; i < dayExams.length; i++) ...[
-                if (i > 0) const SizedBox(height: 12),
+                if (i > 0) const SizedBox(height: 4),
                 _buildExamTask(dayExams[i]),
               ],
-              for (int i = 0; i < dayHomework.length; i++) ...[
-                if (i > 0 || dayExams.isNotEmpty) const SizedBox(height: 12),
-                _buildHomeworkTask(dayHomework[i]),
-              ],
               for (int i = 0; i < _todayCourses.length; i++) ...[
-                if (i > 0 || dayHomework.isNotEmpty || dayExams.isNotEmpty)
-                  const SizedBox(height: 12),
+                if (i > 0 || dayExams.isNotEmpty)
+                  const SizedBox(height: 4),
                 _buildCourseItem(_todayCourses[i]),
               ],
             ],
@@ -1179,10 +1418,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 考试卡片（红色底 + 考试时间，严格显示第一个出现的时间）
+  /// 考试卡片（红色底 + 考试时间与地点，严格显示第一个出现的时间）
   Widget _buildExamTask(ExamScheduleModel item) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final timeStr = DateFormat('HH:mm').format(item.time);
+    final location = item.location?.trim() ?? '';
+    final timeLocation = location.isNotEmpty ? '$timeStr @ $location' : timeStr;
+
+    final title = item.title.trim();
+    final course = item.courseName.trim();
+    final displayTitle = course.isNotEmpty
+        ? (title.isNotEmpty && title != course ? '$course · $title' : course)
+        : title;
+
+    final showStatus = item.status.isNotEmpty &&
+        item.status != '待考' &&
+        item.status != context.l10n.examStatusPending;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -1190,8 +1441,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         if (item.detailUrl.isNotEmpty) {
           Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => WebViewDetailScreen(
+            createSlideHorizontalRoute(
+              WebViewDetailScreen(
                 url: item.detailUrl,
                 title: item.title,
               ),
@@ -1206,7 +1457,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           color: isDark ? const Color(0xFF382326) : const Color(0xFFFFEBEE),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: const Color(0xFFE53935).withOpacity(isDark ? 0.3 : 0.2),
+            color: const Color(0xFFE53935).withValues(alpha: isDark ? 0.3 : 0.2),
             width: 1,
           ),
         ),
@@ -1226,7 +1477,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     children: [
                       Expanded(
                         child: Text(
-                          item.title,
+                          displayTitle,
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.bold,
@@ -1237,13 +1488,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      if (item.status.isNotEmpty) ...[
+                      if (showStatus) ...[
                         const SizedBox(width: 6),
                         Container(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 6, vertical: 2),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFE53935).withOpacity(0.12),
+                            color: const Color(0xFFE53935).withValues(alpha: 0.12),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -1260,7 +1511,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${context.l10n.examTimePrefix} $timeStr',
+                    timeLocation,
                     style: TextStyle(
                       fontSize: 12,
                       color: isDark
@@ -1277,54 +1528,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  /// 日程页同款作业卡片（黄色底 + 截止时间）
-  Widget _buildHomeworkTask(HomeworkModel item) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF3D3D29) : const Color(0xFFFFF9E6),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Row(
-        children: [
-          const Icon(Icons.assignment_late_outlined,
-              size: 22, color: Color(0xFFF39C12)),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  item.title,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    height: 1.2,
-                    color: isDark ? Colors.white : const Color(0xFF2D3436),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '${item.courseName} · ${context.l10n.deadlinePrefix} ${item.endTime != null ? DateFormat('HH:mm').format(item.endTime!) : context.l10n.noDeadline}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    height: 1.2,
-                    color: isDark ? Colors.white70 : const Color(0xFF7F8C8D),
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildCourseItem(CourseModel course) {
     final baseColor = CourseColorUtils.getColorForCourse(course.name);
@@ -1376,6 +1579,87 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildHomeworkSection(BuildContext context) {
+    final homeworkAsync = ref.watch(homeworkProvider);
+    final pending = homeworkAsync.maybeWhen(
+      data: (list) {
+        final items = list
+            .where((h) => h.status == HomeworkStatus.pending)
+            .toList();
+        items.sort((a, b) {
+          if (a.endTime == null && b.endTime == null) return 0;
+          if (a.endTime == null) return 1;
+          if (b.endTime == null) return -1;
+          return a.endTime!.compareTo(b.endTime!);
+        });
+        return items;
+      },
+      orElse: () => <HomeworkModel>[],
+    );
+
+    if (pending.isEmpty) return const SizedBox.shrink();
+
+    // 首页最多展示 3 条，其余进作业页看
+    final display = pending.take(3).toList();
+    final locale = Localizations.localeOf(context).toString();
+
+    return _buildMergedSection(
+      title: context.l10n.tabHomework,
+      onMore: () => _navigateToTab(context, 2),
+      items: display.map((item) {
+        final String deadlineStr = item.endTime != null
+            ? '${context.l10n.deadlinePrefix} ${formatMMMdHm(item.endTime!, locale)}'
+            : context.l10n.noDeadline;
+        final String timeInfo = item.courseName.isNotEmpty
+            ? '${item.courseName} · $deadlineStr'
+            : deadlineStr;
+
+        return _buildSectionItem(
+          onTap: () => _openHomeworkItem(context, item),
+          child: _buildSectionRow(
+            icon: Icons.assignment_outlined,
+            iconColor: const Color(0xFFF39C12),
+            title: item.title,
+            time: timeInfo,
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Future<void> _openHomeworkItem(
+      BuildContext context, HomeworkModel item) async {
+    if (item.isManual) {
+      _navigateToTab(context, 2);
+    } else if (item.dataUrl.isNotEmpty) {
+      final auth = ref.read(authStateProvider);
+      if (auth.status == AuthStatus.authenticating) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.homeworkLoggingInWait),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+        return;
+      }
+
+      await AppCookieManager().injectAllChaoxingCookies();
+      if (context.mounted) {
+        Navigator.push(
+          context,
+          createSlideHorizontalRoute(WebViewDetailScreen(
+            title: context.l10n.homeworkDetail,
+            url: item.dataUrl,
+          )),
+        );
+      }
+    } else {
+      _navigateToTab(context, 2);
+    }
   }
 
   /// 首页通用合并大卡片区块：标题 + > + 一张大卡（条目无分割线）
@@ -1522,7 +1806,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildPendingQuestionnaires(BuildContext context) {
     final cachedAsync = ref.watch(questionnaireCacheProvider);
-    final pending = (cachedAsync.value ?? [])
+    final pending = (cachedAsync.valueOrNull ?? [])
         .where((q) => !q.isSubmitted && !q.isExpired)
         .toList();
     if (pending.isEmpty) return const SizedBox.shrink();
@@ -1534,8 +1818,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return _buildMergedSection(
       title: context.l10n.pendingQuestionnaires,
       onMore: () {
-        Navigator.push(
-            context, createSlideUpRoute(const QuestionnaireListScreen()));
+        _safeNavigate(
+            context, const QuestionnaireListScreen(), id: 'questionnaire');
       },
       items: display
           .map((item) => _buildSectionItem(
@@ -1557,9 +1841,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _openQuestionnaireDetail(
       BuildContext context, QuestionnaireItem item) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        QuestionnaireDetailScreen(item: item),
+        id: 'questionnaire_${item.hashCode}',
+      );
+      return;
+    }
     final changed = await Navigator.push<bool>(
       context,
-      createSlideUpRoute(QuestionnaireDetailScreen(item: item)),
+      createSlideHorizontalRoute(QuestionnaireDetailScreen(item: item)),
     );
     if (changed == true && context.mounted) {
       ref.read(questionnaireCacheProvider.notifier).refresh();
@@ -1619,7 +1911,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildOngoingLeaves(BuildContext context) {
     final cachedAsync = ref.watch(leaveCacheProvider);
-    final leaves = (cachedAsync.value ?? []).where(_shouldDisplayLeave).toList()
+    final leaves = (cachedAsync.valueOrNull ?? []).where(_shouldDisplayLeave).toList()
       ..sort((a, b) => a.startTime.compareTo(b.startTime));
     if (leaves.isEmpty) return const SizedBox.shrink();
 
@@ -1628,8 +1920,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return _buildMergedSection(
       title: context.l10n.funcLeave,
       onMore: () {
-        Navigator.push(
-            context, createSlideUpRoute(const LeaveListScreen()));
+        _safeNavigate(context, const LeaveListScreen(), id: 'leave');
       },
       items: display.map((record) {
         final duration = record.getLocalizedDuration(context);
@@ -1654,9 +1945,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _openLeaveDetail(
       BuildContext context, LeaveRecord record) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        LeaveDetailScreen(item: record),
+        id: 'leave_${record.hashCode}',
+      );
+      return;
+    }
     final changed = await Navigator.push<bool>(
       context,
-      createSlideUpRoute(LeaveDetailScreen(item: record)),
+      createSlideHorizontalRoute(LeaveDetailScreen(item: record)),
     );
     if (changed == true && context.mounted) {
       ref.read(leaveCacheProvider.notifier).refresh();
@@ -1673,7 +1972,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildOngoingRepairs(BuildContext context) {
     final cachedAsync = ref.watch(repairCacheProvider);
-    final ongoing = cachedAsync.value ?? [];
+    final ongoing = cachedAsync.valueOrNull ?? [];
     if (ongoing.isEmpty) return const SizedBox.shrink();
 
     final display = ongoing.take(3).toList();
@@ -1681,7 +1980,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     return _buildMergedSection(
       title: context.l10n.repairWorkOrders,
       onMore: () {
-        Navigator.push(context, createSlideUpRoute(const RepairScreen()));
+        _safeNavigate(context, const RepairScreen(), id: 'repairs');
       },
       items: display
           .map((order) => _buildSectionItem(
@@ -1702,9 +2001,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Future<void> _openRepairDetail(
       BuildContext context, RepairOrder order) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        RepairDetailScreen(order: order),
+        id: 'repair_${order.id}',
+      );
+      return;
+    }
     await Navigator.push(
       context,
-      createSlideUpRoute(RepairDetailScreen(order: order)),
+      createSlideHorizontalRoute(RepairDetailScreen(order: order)),
     );
     if (context.mounted) {
       ref.read(repairCacheProvider.notifier).refresh();
@@ -1720,17 +2027,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     required Color balanceColor,
     required VoidCallback onTap,
     required bool isDark,
+    bool isSelected = false,
   }) {
+    final theme = Theme.of(context);
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        color: isSelected
+            ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.08)
+            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
         borderRadius: BorderRadius.circular(6),
         border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.12)
-              : const Color(0xFFE0E0E0),
-          width: 1,
+          color: isSelected
+              ? theme.colorScheme.primary
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : const Color(0xFFE0E0E0)),
+          width: isSelected ? 1.5 : 1,
         ),
       ),
       child: Material(
@@ -1793,24 +2106,234 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+  String _formatElectricityBalance(String rawBalance) {
+    final val = double.tryParse(rawBalance);
+    if (val != null) {
+      return val.toStringAsFixed(2);
+    }
+    return rawBalance;
+  }
+
+  Widget _buildMergedElectricityCard({
+    required BuildContext context,
+    required List<int> roomSlots,
+    required DormitoryElectricityState eleState,
+    required bool isDark,
+    bool isSelected = false,
+  }) {
+    final theme = Theme.of(context);
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isSelected
+            ? theme.colorScheme.primary.withValues(alpha: isDark ? 0.2 : 0.08)
+            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isSelected
+              ? theme.colorScheme.primary
+              : (isDark
+                  ? Colors.white.withValues(alpha: 0.12)
+                  : const Color(0xFFE0E0E0)),
+          width: isSelected ? 1.5 : 1,
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(6),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              for (int idx = 0; idx < roomSlots.length; idx++) ...[
+                if (idx > 0) const SizedBox(height: 12),
+                () {
+                  final slot = roomSlots[idx];
+                  final room = eleState.rooms[slot]!;
+                  final roomDisplayName =
+                      room.roomName.isNotEmpty ? room.roomName : room.roomId;
+                  final eleTitle = room.areaName.isNotEmpty
+                      ? room.areaName
+                      : context.l10n.dormitoryElectricity;
+                  final String eleSubtitle;
+                  if (room.buildingName.isNotEmpty) {
+                    eleSubtitle = room.buildingName.endsWith(roomDisplayName)
+                        ? room.buildingName
+                        : '${room.buildingName} $roomDisplayName';
+                  } else {
+                    eleSubtitle = roomDisplayName;
+                  }
+
+                  final balanceInfo = (slot < eleState.balances.length)
+                      ? eleState.balances[slot]
+                      : null;
+                  final balanceText = balanceInfo != null
+                      ? '¥${_formatElectricityBalance(balanceInfo.balance)}'
+                      : (eleState.isLoading ? '...' : '¥--');
+
+                  final double? eleBal = balanceInfo != null
+                      ? double.tryParse(balanceInfo.balance)
+                      : null;
+                  final bool isLowBalance = eleBal != null && eleBal <= 10.0;
+                  final Color eleBalanceColor = isLowBalance
+                      ? const Color(0xFFE53935)
+                      : (isDark ? Colors.white : const Color(0xFF202124));
+
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () => _openElectricity(context, initialSlot: slot),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (idx == 0)
+                            const Icon(
+                              Icons.bolt_outlined,
+                              size: 22,
+                              color: Color(0xFFFF9800),
+                            )
+                          else
+                            const SizedBox(width: 22),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  eleTitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF222222),
+                                  ),
+                                ),
+                                if (eleSubtitle.isNotEmpty) ...[
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    eleSubtitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: isDark
+                                          ? Colors.white60
+                                          : Colors.black54,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            balanceText,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: eleBalanceColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }(),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildBalanceSection(BuildContext context) {
     final cachedCardAsync = ref.watch(campusCardCacheProvider);
-    final cardInfo = cachedCardAsync.value;
+    final cardInfo = cachedCardAsync.valueOrNull;
 
     final eleState = ref.watch(electricityCacheProvider);
-    final room = eleState.room;
+    final hasAnyRoom = eleState.rooms.any((r) => r != null);
 
     final authState = ref.watch(authStateProvider);
     final isAuthenticated = authState.status == AuthStatus.authenticated;
 
-    if (cardInfo == null && room == null && !isAuthenticated) {
+    if (cardInfo == null && !hasAnyRoom && !isAuthenticated) {
       return const SizedBox.shrink();
     }
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final List<Widget> cards = [];
 
-    // 1. 校园卡卡片
+    // 1. 宿舍电费卡片（若保存了两个宿舍，合并为一个卡片，且只有一个电的 icon）
+    final validRoomSlots = <int>[];
+    for (int i = 0; i < eleState.rooms.length; i++) {
+      if (eleState.rooms[i] != null) {
+        validRoomSlots.add(i);
+      }
+    }
+
+    if (validRoomSlots.length > 1) {
+      final isEleSelected = validRoomSlots.any(
+        (slot) => _selectedActionId == 'ele_recharge_$slot',
+      );
+      cards.add(
+        _buildMergedElectricityCard(
+          context: context,
+          roomSlots: validRoomSlots,
+          eleState: eleState,
+          isDark: isDark,
+          isSelected: isEleSelected,
+        ),
+      );
+    } else if (validRoomSlots.length == 1) {
+      final i = validRoomSlots.first;
+      final room = eleState.rooms[i]!;
+      final roomDisplayName =
+          room.roomName.isNotEmpty ? room.roomName : room.roomId;
+      final eleTitle =
+          room.areaName.isNotEmpty ? room.areaName : context.l10n.dormitoryElectricity;
+      final String eleSubtitle;
+      if (room.buildingName.isNotEmpty) {
+        eleSubtitle = room.buildingName.endsWith(roomDisplayName)
+            ? room.buildingName
+            : '${room.buildingName} $roomDisplayName';
+      } else {
+        eleSubtitle = roomDisplayName;
+      }
+
+      final balanceInfo = (i < eleState.balances.length) ? eleState.balances[i] : null;
+      final balanceText = balanceInfo != null
+          ? '¥${_formatElectricityBalance(balanceInfo.balance)}'
+          : (eleState.isLoading ? '...' : '¥--');
+
+      final double? eleBal = balanceInfo != null ? double.tryParse(balanceInfo.balance) : null;
+      final bool isLowBalance = eleBal != null && eleBal <= 10.0;
+      final Color eleBalanceColor = isLowBalance
+          ? const Color(0xFFE53935)
+          : (isDark ? Colors.white : const Color(0xFF202124));
+
+      cards.add(
+        _buildBalanceCardItem(
+          icon: Icons.bolt_outlined,
+          iconColor: const Color(0xFFFF9800),
+          title: eleTitle,
+          subtitle: eleSubtitle,
+          balanceText: balanceText,
+          balanceColor: eleBalanceColor,
+          onTap: () => _openElectricity(context, initialSlot: i),
+          isDark: isDark,
+          isSelected: _selectedActionId == 'ele_recharge_$i',
+        ),
+      );
+    }
+
+    // 2. 校园卡卡片
     if (cardInfo != null || isAuthenticated) {
       final String cardSubtitle;
       final String balanceText;
@@ -1835,43 +2358,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           title: context.l10n.funcCampusCard,
           subtitle: cardSubtitle,
           balanceText: balanceText,
-          balanceColor: isDark ? Colors.white : const Color(0xFF1677FF),
+          balanceColor: isDark ? Colors.white : const Color(0xFF202124),
           onTap: () => _openCampusCard(context),
           isDark: isDark,
-        ),
-      );
-    }
-
-    // 2. 宿舍电费卡片（若无保存的房间则不显示）
-    if (room != null) {
-      final roomDisplayName =
-          room.roomName.isNotEmpty ? room.roomName : room.roomId;
-      final eleTitle =
-          room.areaName.isNotEmpty ? room.areaName : context.l10n.dormitoryElectricity;
-      final String eleSubtitle;
-      if (room.buildingName.isNotEmpty) {
-        eleSubtitle = room.buildingName.endsWith(roomDisplayName)
-            ? room.buildingName
-            : '${room.buildingName} $roomDisplayName';
-      } else {
-        eleSubtitle = roomDisplayName;
-      }
-
-      final balanceInfo = eleState.balanceInfo;
-      final balanceText = balanceInfo != null
-          ? '¥${balanceInfo.balance}'
-          : (eleState.isLoading ? '...' : '¥--');
-
-      cards.add(
-        _buildBalanceCardItem(
-          icon: Icons.bolt_outlined,
-          iconColor: const Color(0xFFFF9800),
-          title: eleTitle,
-          subtitle: eleSubtitle,
-          balanceText: balanceText,
-          balanceColor: isDark ? Colors.white : const Color(0xFFFF9800),
-          onTap: () => _openElectricity(context),
-          isDark: isDark,
+          isSelected: _selectedActionId == 'campus_card',
         ),
       );
     }
@@ -1899,19 +2389,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 
   Future<void> _openCampusCard(BuildContext context) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        const CampusCardRechargeScreen(),
+        id: 'campus_card',
+      );
+      return;
+    }
     await Navigator.push(
       context,
-      createSlideUpRoute(const CampusCardRechargeScreen()),
+      createSlideHorizontalRoute(const CampusCardRechargeScreen()),
     );
     if (context.mounted) {
       ref.read(campusCardCacheProvider.notifier).refresh();
     }
   }
 
-  Future<void> _openElectricity(BuildContext context) async {
+  Future<void> _openElectricity(BuildContext context, {int initialSlot = 0}) async {
+    if (_canSplitScreen(context)) {
+      _safeNavigate(
+        context,
+        ElectricityRechargeScreen(initialSlot: initialSlot),
+        id: 'ele_recharge_$initialSlot',
+      );
+      return;
+    }
     await Navigator.push(
       context,
-      createSlideUpRoute(const ElectricityRechargeScreen()),
+      createSlideHorizontalRoute(ElectricityRechargeScreen(initialSlot: initialSlot)),
     );
     if (context.mounted) {
       ref.read(electricityCacheProvider.notifier).refresh();
