@@ -979,6 +979,10 @@
   "useLiveActivityPrompt": "Usar actividades en directo",
   "startGuide": "Iniciar asistente",
   "postLoginDoneTitle": "¡Todo listo!",
-  "postLoginDoneMessage": "Te damos la bienvenida a «ChillEast».",
-  "postLoginDoneButton": "Finalizar"
+  "postLoginDoneMessage": "¡Te damos la bienvenida a ChillEast! Para más opciones, visita «Ajustes».",
+  "postLoginDoneButton": "Listo",
+  "analyticsAnonymousTitle": "Permitir estadísticas anónimas",
+  "analyticsAnonymousSubtitle": "Recopila la versión de la app de forma totalmente anónima.",
+  "analyticsPromptTitle": "Permitir estadísticas anónimas",
+  "analyticsPromptSubtitle": "Recopila la versión de la app de forma totalmente anónima."
 }

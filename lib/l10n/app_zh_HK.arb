@@ -972,8 +972,12 @@
   "useLiveActivityPrompt": "使用實時活動",
   "startGuide": "開始導覽",
   "postLoginDoneTitle": "大功告成！",
-  "postLoginDoneMessage": "歡迎使用「自在東湖」。",
+  "postLoginDoneMessage": "歡迎使用「自在東湖」，更多選項請前往「設定」。",
   "postLoginDoneButton": "完成",
+  "analyticsAnonymousTitle": "允許匿名統計",
+  "analyticsAnonymousSubtitle": "僅使用絕對匿名方式，統計您的使用版本。",
+  "analyticsPromptTitle": "允許匿名統計",
+  "analyticsPromptSubtitle": "僅使用絕對匿名方式，統計您的使用版本。",
   "@repairsRequiredField": {
     "placeholders": {
       "field": {

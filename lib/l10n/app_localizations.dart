@@ -5964,7 +5964,7 @@ abstract class AppLocalizations {
   /// No description provided for @postLoginDoneMessage.
   ///
   /// In zh, this message translates to:
-  /// **'欢迎使用「自在东湖」。'**
+  /// **'欢迎使用「自在东湖」，更多选项请访问「设置」。'**
   String get postLoginDoneMessage;
 
   /// No description provided for @postLoginDoneButton.
@@ -5972,6 +5972,30 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'完成'**
   String get postLoginDoneButton;
+
+  /// No description provided for @analyticsAnonymousTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'允许匿名统计'**
+  String get analyticsAnonymousTitle;
+
+  /// No description provided for @analyticsAnonymousSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅使用绝对匿名方式，统计您的使用版本。'**
+  String get analyticsAnonymousSubtitle;
+
+  /// No description provided for @analyticsPromptTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'允许匿名统计'**
+  String get analyticsPromptTitle;
+
+  /// No description provided for @analyticsPromptSubtitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'仅使用绝对匿名方式，统计您的使用版本。'**
+  String get analyticsPromptSubtitle;
 }
 
 class _AppLocalizationsDelegate

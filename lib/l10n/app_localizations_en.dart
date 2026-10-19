@@ -3222,8 +3222,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get postLoginDoneTitle => 'All Set!';
 
   @override
-  String get postLoginDoneMessage => 'Welcome to ChillEast.';
+  String get postLoginDoneMessage =>
+      'Welcome to ChillEast. For more options, please visit Settings.';
 
   @override
   String get postLoginDoneButton => 'Finish';
+
+  @override
+  String get analyticsAnonymousTitle => 'Allow Anonymous Statistics';
+
+  @override
+  String get analyticsAnonymousSubtitle =>
+      'Counts your app version using an absolutely anonymous method.';
+
+  @override
+  String get analyticsPromptTitle => 'Allow Anonymous Statistics';
+
+  @override
+  String get analyticsPromptSubtitle =>
+      'Counts your app version using an absolutely anonymous method.';
 }

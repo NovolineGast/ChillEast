@@ -10,6 +10,7 @@ import 'features/home/screens/main_scaffold.dart';
 import 'features/onboarding/screens/onboarding_screen.dart';
 import 'core/state/auth_state.dart';
 import 'core/services/notification_service.dart';
+import 'core/services/analytics_service.dart';
 import 'core/services/app_navigator.dart';
 import 'core/services/background_worker.dart';
 import 'core/services/live_scheduler.dart';
@@ -65,6 +66,8 @@ Future<void> _initializeAfterFirstFrame() async {
   unawaited(UpdateService.cleanHistoricalApks());
   // 自动轻量维护并清理 WebView 磁盘缓存
   unawaited(WebViewCacheService.autoPruneCacheOnStartup());
+  // 匿名活跃度打点（每次启动在用户同意下向 analysis.soilzhu.su 叮一下）
+  unawaited(AnalyticsService.ping());
   // 实时卡：前台 tick + 原生闹钟编排（内部自带 try/catch，不阻塞启动）
   try {
     LiveScheduler().start();

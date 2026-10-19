@@ -264,7 +264,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('大功告成！'), findsOneWidget);
-      expect(find.text('欢迎使用「自在东湖」。'), findsOneWidget);
+      expect(find.text('欢迎使用「自在东湖」，更多选项请访问「设置」。'), findsOneWidget);
+      expect(find.text('允许匿名统计'), findsOneWidget);
+      expect(find.text('仅使用绝对匿名方式，统计您的使用版本。'), findsOneWidget);
       expect(find.text('完成'), findsOneWidget);
       expect(find.text('跳过'), findsNothing);
 

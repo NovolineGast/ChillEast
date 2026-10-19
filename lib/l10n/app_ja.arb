@@ -1002,7 +1002,11 @@
   "timetableSubscriptionPromptBadge": "全端末カレンダー同期",
   "useLiveActivityPrompt": "ライブアクティビティを使用",
   "startGuide": "ガイドを開始",
-  "postLoginDoneTitle": "準備が完了しました！",
-  "postLoginDoneMessage": "「自在東湖」へようこそ。快適なキャンパスライフをお楽しみください。",
-  "postLoginDoneButton": "完了"
+  "postLoginDoneTitle": "準備完了！",
+  "postLoginDoneMessage": "ChillEast へようこそ。その他のオプションは「設定」をご確認ください。",
+  "postLoginDoneButton": "完了",
+  "analyticsAnonymousTitle": "匿名統計を許可",
+  "analyticsAnonymousSubtitle": "完全に匿名化された方法でのみ、ご利用のアプリバージョンを集計します。",
+  "analyticsPromptTitle": "匿名統計を許可",
+  "analyticsPromptSubtitle": "完全に匿名化された方法でのみ、ご利用のアプリバージョンを集計します。"
 }

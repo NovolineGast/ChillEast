@@ -1,13 +1,14 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/services/analytics_service.dart';
+import '../../../core/services/webview_cache_service.dart';
 import '../../../core/utils/l10n_extension.dart';
 import '../../../core/widgets/brand_switch.dart';
 import '../../cloudisk/services/cloud_backup_manager.dart';
 import '../providers/settings_provider.dart';
 import '../services/backup_export_service.dart';
 import '../services/backup_provider_refresh.dart';
-import '../../../core/services/webview_cache_service.dart';
 
 /// 数据同步页：云备份自动同步开关 + 手动备份导出 + 备份导入。
 class DataSyncSettingsScreen extends ConsumerStatefulWidget {
@@ -23,6 +24,15 @@ class _DataSyncSettingsScreenState
   bool _exporting = false;
   bool _importing = false;
   bool _clearingCache = false;
+  bool _analyticsEnabled = true;
+
+  @override
+  void initState() {
+    super.initState();
+    AnalyticsService.isEnabled().then((val) {
+      if (mounted) setState(() => _analyticsEnabled = val);
+    });
+  }
 
   Future<void> _handleClearWebViewCache() async {
     if (_clearingCache) return;
@@ -301,6 +311,17 @@ class _DataSyncSettingsScreenState
                   );
                 }
               }
+            },
+          ),
+          _buildSwitchItem(
+            context,
+            icon: Icons.analytics_outlined,
+            title: l10n.analyticsAnonymousTitle,
+            subtitle: l10n.analyticsAnonymousSubtitle,
+            value: _analyticsEnabled,
+            onChanged: (v) async {
+              setState(() => _analyticsEnabled = v);
+              await AnalyticsService.setEnabled(v);
             },
           ),
           _buildSettingItem(
