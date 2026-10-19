@@ -20,6 +20,8 @@ class TimetableSettingsScreen extends ConsumerWidget {
     final l10n = context.l10n;
     final autoSyncEnabled =
         ref.watch(settingsProvider).timetableAutoSyncEnabled;
+    final showEndTime =
+        ref.watch(settingsProvider.select((s) => s.timetableShowEndTime));
     final manualIso =
         ref.watch(settingsProvider.select((s) => s.manualFirstWeekMondayIso));
     final manualMonday =
@@ -52,6 +54,15 @@ class TimetableSettingsScreen extends ConsumerWidget {
             title: l10n.timetableAutoSync,
             value: autoSyncEnabled,
             onChanged: (v) => _onAutoSyncToggle(context, ref, v),
+          ),
+          _buildSwitchItem(
+            context,
+            icon: Icons.schedule_rounded,
+            title: l10n.timetableShowEndTime,
+            value: showEndTime,
+            onChanged: (v) => ref
+                .read(settingsProvider.notifier)
+                .setTimetableShowEndTime(v),
           ),
           InkWell(
             onTap: () {

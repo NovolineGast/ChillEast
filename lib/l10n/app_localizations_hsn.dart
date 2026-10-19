@@ -873,6 +873,9 @@ class AppLocalizationsHsn extends AppLocalizations {
   String get timetableAutoSync => '自个同步堂课表';
 
   @override
+  String get timetableShowEndTime => '周视图里头显示下课时间';
+
+  @override
   String get disableAutoSyncTitle => '关脱自动同步啵？';
 
   @override

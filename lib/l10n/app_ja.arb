@@ -278,6 +278,7 @@
   "timetableSettings": "時間割設定",
   "notSet": "未設定",
   "timetableAutoSync": "時間割を自動同期",
+  "timetableShowEndTime": "週間表示で授業終了時刻を表示",
   "disableAutoSyncTitle": "自動同期をオフにしますか？",
   "disableAutoSyncMessage": "オフにすると端末内の時間割は削除されます（振替・休講などの設定は残ります）。時間割を表示するには、時間割画面の右上にある更新ボタンから手動で同期してください。",
   "localTimetableDeleted": "端末内の時間割を削除しました",

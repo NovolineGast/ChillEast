@@ -873,6 +873,9 @@ class AppLocalizationsYue extends AppLocalizations {
   String get timetableAutoSync => '自动同步上堂表';
 
   @override
+  String get timetableShowEndTime => '喺周視圖顯示落堂時間';
+
+  @override
   String get disableAutoSyncTitle => '关咗自动同步？';
 
   @override

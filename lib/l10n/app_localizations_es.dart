@@ -906,6 +906,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get timetableAutoSync => 'Sincronización automática del horario';
 
   @override
+  String get timetableShowEndTime =>
+      'Mostrar hora de finalización en vista semanal';
+
+  @override
   String get disableAutoSyncTitle => '¿Desactivar sincronización automática?';
 
   @override

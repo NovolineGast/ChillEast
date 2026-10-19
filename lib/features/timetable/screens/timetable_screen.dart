@@ -656,6 +656,9 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
     // 如果没有课程但是有元数据（已同步过），则继续渲染（为了展示作业）
     if (_firstWeekMonday == null) return _buildMetadataMissingState();
 
+    final showEndTime =
+        ref.watch(settingsProvider.select((s) => s.timetableShowEndTime));
+
     return TabBarView(
       controller: _tabController,
       children: [
@@ -665,6 +668,7 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
             key: _weeklyKey,
             courses: _courses,
             firstWeekMonday: _firstWeekMonday!,
+            showEndTime: showEndTime,
             onCourseColorChanged: () {
               setState(() {});
             },

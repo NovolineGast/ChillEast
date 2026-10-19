@@ -476,6 +476,7 @@
   "timetableSettings": "课表设定",
   "notSet": "未设定",
   "timetableAutoSync": "课表自家同步",
+  "timetableShowEndTime": "周视图里显下课时间",
   "disableAutoSyncTitle": "关掉自家同步？",
   "disableAutoSyncMessage": "关闭后将弄掉本地课表（调课、停课等规则会保留），如需瞅瞅课表，可点击课表页右上角刷哈子按钮手动同步。",
   "localTimetableDeleted": "本地课表已弄掉",

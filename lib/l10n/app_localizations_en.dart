@@ -892,6 +892,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timetableAutoSync => 'Auto-sync timetable';
 
   @override
+  String get timetableShowEndTime => 'Show class end times in week view';
+
+  @override
   String get disableAutoSyncTitle => 'Turn off auto-sync?';
 
   @override

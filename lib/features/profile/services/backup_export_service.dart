@@ -81,6 +81,8 @@ class BackupExportService {
         'flymeLiveEnabled': prefs.getBool('flyme_live_enabled') ?? false,
         'timetableAutoSyncEnabled':
             prefs.getBool('timetable_auto_sync_enabled') ?? true,
+        'timetableShowEndTime':
+            prefs.getBool('timetable_show_end_time') ?? false,
         'timetableSubscription': {
           'enabled': prefs.getBool('timetable_subscription_enabled') ?? false,
           'uuid': prefs.getString('timetable_subscription_uuid'),
@@ -217,6 +219,8 @@ class BackupExportService {
         prefs, 'flyme_live_enabled', settings, 'flymeLiveEnabled');
     await _writeBool(prefs, 'timetable_auto_sync_enabled', settings,
         'timetableAutoSyncEnabled');
+    await _writeBool(prefs, 'timetable_show_end_time', settings,
+        'timetableShowEndTime');
     if (settings.containsKey('manualFirstWeekMonday')) {
       final v = _asStringOrNull(settings['manualFirstWeekMonday']);
       if (v != null && v.isNotEmpty) {

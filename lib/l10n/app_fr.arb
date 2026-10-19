@@ -278,6 +278,7 @@
   "timetableSettings": "Emploi du temps",
   "notSet": "Non défini",
   "timetableAutoSync": "Synchronisation automatique de l'emploi du temps",
+  "timetableShowEndTime": "Afficher l'heure de fin en vue hebdomadaire",
   "disableAutoSyncTitle": "Désactiver la synchronisation automatique ?",
   "disableAutoSyncMessage": "La désactivation supprimera l'emploi du temps local (les règles de report ou d'annulation seront conservées). Pour afficher vos cours, appuyez sur le bouton d'actualisation en haut à droite pour synchroniser manuellement.",
   "localTimetableDeleted": "Emploi du temps local supprimé",

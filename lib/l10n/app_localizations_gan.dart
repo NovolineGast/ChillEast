@@ -873,6 +873,9 @@ class AppLocalizationsGan extends AppLocalizations {
   String get timetableAutoSync => '自动跟到同步课表';
 
   @override
+  String get timetableShowEndTime => '周视图里显示下课时间';
+
+  @override
   String get disableAutoSyncTitle => '关掉自动同步？';
 
   @override

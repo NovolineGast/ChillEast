@@ -874,6 +874,9 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get timetableAutoSync => '自动同步课程表';
 
   @override
+  String get timetableShowEndTime => '周视图里显示下课时间';
+
+  @override
   String get disableAutoSyncTitle => '关脱自动同步伐？';
 
   @override

@@ -881,6 +881,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get timetableAutoSync => '時間割を自動同期';
 
   @override
+  String get timetableShowEndTime => '週間表示で授業終了時刻を表示';
+
+  @override
   String get disableAutoSyncTitle => '自動同期をオフにしますか？';
 
   @override

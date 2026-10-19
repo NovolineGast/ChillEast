@@ -278,6 +278,7 @@
   "timetableSettings": "Configurações da grade horária",
   "notSet": "Não configurado",
   "timetableAutoSync": "Sincronização automática da grade horária",
+  "timetableShowEndTime": "Mostrar horário de término na visualização semanal",
   "disableAutoSyncTitle": "Desativar sincronização automática?",
   "disableAutoSyncMessage": "Ao desativar, a grade horária local será excluída (as regras de remarcação e suspensão serão mantidas). Para visualizar seus horários, toque no botão de atualizar na página da grade para sincronizar manualmente.",
   "localTimetableDeleted": "Grade horária local excluída",

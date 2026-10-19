@@ -9,14 +9,16 @@ import '../../../core/utils/l10n_extension.dart';
 class WeeklyCalendarView extends StatefulWidget {
   final List<CourseModel> courses;
   final DateTime firstWeekMonday;
+  final bool showEndTime;
   final VoidCallback? onCourseColorChanged;
   
   const WeeklyCalendarView({
-    Key? key,
+    super.key,
     required this.courses,
     required this.firstWeekMonday,
+    this.showEndTime = false,
     this.onCourseColorChanged,
-  }) : super(key: key);
+  });
 
   @override
   WeeklyCalendarViewState createState() => WeeklyCalendarViewState();
@@ -48,7 +50,9 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
   @override
   void didUpdateWidget(WeeklyCalendarView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.courses != widget.courses || oldWidget.firstWeekMonday != widget.firstWeekMonday) {
+    if (oldWidget.courses != widget.courses ||
+        oldWidget.firstWeekMonday != widget.firstWeekMonday ||
+        oldWidget.showEndTime != widget.showEndTime) {
       CourseColorUtils.syncCourses(widget.courses.map((c) => c.name));
       setState(() {});
     }
@@ -202,9 +206,31 @@ class WeeklyCalendarViewState extends State<WeeklyCalendarView> {
           margin: EdgeInsets.only(bottom: gap),
           padding: const EdgeInsets.symmetric(vertical: 4),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisAlignment: widget.showEndTime
+                ? MainAxisAlignment.spaceBetween
+                : MainAxisAlignment.start,
             children: [
-              Text(times[index][0], style: TextStyle(fontSize: 11, color: Theme.of(context).brightness == Brightness.dark ? Colors.white54 : const Color(0xFF636E72), fontWeight: FontWeight.w500)),
+              Text(
+                times[index][0],
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Theme.of(context).brightness == Brightness.dark
+                      ? Colors.white54
+                      : const Color(0xFF636E72),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              if (widget.showEndTime)
+                Text(
+                  times[index][1],
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white38
+                        : const Color(0xFF9E9E9E),
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
             ],
           ),
         );

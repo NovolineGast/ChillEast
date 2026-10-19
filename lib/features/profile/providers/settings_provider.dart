@@ -23,6 +23,7 @@ class SettingsState {
   final bool timetableSubscriptionEnabled; // 课表云端订阅自动上传开关（默认关）
   final String? timetableSubscriptionUuid; // 课表云端订阅 UUID（无则 null）
   final String? manualFirstWeekMondayIso; // 手动指定的本学期第一周周一（ISO 日期，无则 null）
+  final bool timetableShowEndTime; // 周视图中显示下课时间（默认关）
 
   SettingsState({
     required this.reminderMinutes,
@@ -35,6 +36,7 @@ class SettingsState {
     this.timetableSubscriptionEnabled = false,
     this.timetableSubscriptionUuid,
     this.manualFirstWeekMondayIso,
+    this.timetableShowEndTime = false,
   });
 
   SettingsState copyWith({
@@ -48,6 +50,7 @@ class SettingsState {
     bool? timetableSubscriptionEnabled,
     String? timetableSubscriptionUuid,
     String? manualFirstWeekMondayIso,
+    bool? timetableShowEndTime,
   }) {
     return SettingsState(
       reminderMinutes: reminderMinutes ?? this.reminderMinutes,
@@ -67,6 +70,8 @@ class SettingsState {
           timetableSubscriptionUuid ?? this.timetableSubscriptionUuid,
       manualFirstWeekMondayIso:
           manualFirstWeekMondayIso ?? this.manualFirstWeekMondayIso,
+      timetableShowEndTime:
+          timetableShowEndTime ?? this.timetableShowEndTime,
     );
   }
 }
@@ -97,6 +102,9 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
   /// 与 CloudBackupManager.toggleKey 同值，单源以 SharedPreferences 为准。
   static const String cloudBackupAutoSyncKey = CloudBackupManager.toggleKey;
 
+  /// 周视图中显示下课时间的持久化 key（默认关）。
+  static const String timetableShowEndTimeKey = 'timetable_show_end_time';
+
   SettingsNotifier([Ref? _])
       : super(SettingsState(
           reminderMinutes: 0,
@@ -117,6 +125,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     final autoSyncEnabled = prefs.getBool(timetableAutoSyncKey) ?? true;
     final cloudBackupEnabled =
         prefs.getBool(cloudBackupAutoSyncKey) ?? false;
+    final showEndTime = prefs.getBool(timetableShowEndTimeKey) ?? false;
     final subEnabled =
         prefs.getBool(TimetableSubscriptionService.subscriptionEnabledKey) ??
             false;
@@ -137,6 +146,7 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
       timetableSubscriptionEnabled: subEnabled,
       timetableSubscriptionUuid: subUuid,
       manualFirstWeekMondayIso: manualMonday?.toIso8601String(),
+      timetableShowEndTime: showEndTime,
     );
 
     // 初始化时也尝试安排一次通知
@@ -243,6 +253,15 @@ class SettingsNotifier extends StateNotifier<SettingsState> {
     state = state.copyWith(
       manualFirstWeekMondayIso: saved?.toIso8601String(),
     );
+    CloudBackupManager.instance.markDirty();
+  }
+
+  /// 设置是否在周视图中显示下课时间（默认关）。
+  Future<void> setTimetableShowEndTime(bool value) async {
+    _settingsRevision++;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(timetableShowEndTimeKey, value);
+    state = state.copyWith(timetableShowEndTime: value);
     CloudBackupManager.instance.markDirty();
   }
 
