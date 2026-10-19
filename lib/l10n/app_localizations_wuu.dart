@@ -87,10 +87,10 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get tabFunctions => '用处';
 
   @override
-  String get cancel => '消脱';
+  String get cancel => '算数';
 
   @override
-  String get confirm => '认定';
+  String get confirm => '定牢';
 
   @override
   String get loggingInWait => '勒登录，请等歇……';
@@ -120,16 +120,16 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get logoutConfirmTitle => '认定退出去伐？';
 
   @override
-  String get logoutConfirmContent => '退出去后头，侬个本地凭证会清脱，数据连接也会断脱。';
+  String get logoutConfirmContent => '退出去后头，唔俚个本地凭证会清脱，数据连接也会断脱。';
 
   @override
-  String get checkUpdate => '望望有新版本弗曾';
+  String get checkUpdate => '望望有新版本勿曾';
 
   @override
   String get openSourceLicenses => '开源说明';
 
   @override
-  String get visitWebsite => '访问官网';
+  String get visitWebsite => '上官网望望';
 
   @override
   String get sendEmail => '发电邮';
@@ -156,16 +156,16 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get passwordHint => '请填入密码';
 
   @override
-  String get loginButton => '登录';
+  String get loginButton => '登入';
 
   @override
-  String get funcSunshine => '阳光服务';
+  String get funcSunshine => '阳光热线服务';
 
   @override
   String get funcQuestionnaire => '学工问卷';
 
   @override
-  String get funcLeave => '请假申请';
+  String get funcLeave => '告假申请';
 
   @override
   String get funcPaymentCode => '付钱码';
@@ -174,13 +174,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get funcRecharge => '校园卡充铜钿';
 
   @override
-  String get funcLibrary => '图书馆';
+  String get funcLibrary => '藏书楼';
 
   @override
   String get funcEmptyClassroom => '空个教室';
 
   @override
-  String get funcInfoPortal => '更多小程序';
+  String get funcInfoPortal => '还有小程序';
 
   @override
   String get funcXgxt => '学工个系统';
@@ -192,22 +192,22 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get repairWorkOrders => '报修个工单';
 
   @override
-  String get feedBalance => '余额';
+  String get feedBalance => '剩底铜钿';
 
   @override
   String get campusCardBalance => '校园卡还剩几许';
 
   @override
-  String get dormitoryElectricity => '宿舍电费';
+  String get dormitoryElectricity => '宿舍电钿';
 
   @override
-  String get noSavedDormitory => '暂未保存宿舍房间';
+  String get noSavedDormitory => '朆存好宿舍房间屋子';
 
   @override
-  String get clickToSelectDormitory => '点击前往选择房间或充值';
+  String get clickToSelectDormitory => '按一记去挑房间或者充铜钿';
 
   @override
-  String get quickActions => '快捷功能';
+  String get quickActions => '便捷用场';
 
   @override
   String get funcGym => '场馆预订';
@@ -222,7 +222,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get funcVpn => 'VPN 转换';
 
   @override
-  String get funcCampusCard => '校园卡';
+  String get funcCampusCard => '校园一卡通';
 
   @override
   String get funcEleRecharge => '电费充铜钿';
@@ -240,94 +240,94 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get funcDormitory => '我个宿舍';
 
   @override
-  String get funcExamSchedule => '考试安排';
+  String get funcExamSchedule => '考试排期';
 
   @override
-  String get examSchedule => '考试安排';
+  String get examSchedule => '考试排期';
 
   @override
-  String get addExam => '添加考试';
+  String get addExam => '添一只考试';
 
   @override
-  String get examTitle => '考试名称';
+  String get examTitle => '考试名字';
 
   @override
-  String get inputExamTitleHint => '输入考试名称（如期末考试）';
+  String get inputExamTitleHint => '输入考试名字（譬如期末大考）';
 
   @override
-  String get examCourse => '所属课程';
+  String get examCourse => '所属功课';
 
   @override
-  String get inputExamCourseHint => '输入课程名称（可选）';
+  String get inputExamCourseHint => '输入功课名字（随喜）';
 
   @override
-  String get examTime => '考试时间';
+  String get examTime => '考试辰光';
 
   @override
-  String get selectExamTimeHint => '选择考试日期和时间';
+  String get selectExamTimeHint => '挑选考试日脚搭辰光';
 
   @override
-  String get examLocation => '考场地点';
+  String get examLocation => '考场地方';
 
   @override
-  String get inputExamLocationHint => '输入考场或教室（可选）';
+  String get inputExamLocationHint => '输入考场或者上课间（随喜）';
 
   @override
-  String get examRemarks => '备注';
+  String get examRemarks => '顺便交代';
 
   @override
-  String get inputExamRemarksHint => '输入备注或准备事项（可选）';
+  String get inputExamRemarksHint => '输入交代或准备事体（随喜）';
 
   @override
-  String get noCurrentSemesterExams => '本学期暂无考试安排';
+  String get noCurrentSemesterExams => '该学期暂时呒不考试排期';
 
   @override
-  String get manualExamTag => '手动添加';
+  String get manualExamTag => '自家添加';
 
   @override
-  String get delete => '删除';
+  String get delete => '删脱';
 
   @override
-  String get deleteExamConfirm => '确定要删除此考试吗？';
+  String get deleteExamConfirm => '真正要拿该场考试删脱伐？';
 
   @override
-  String get examDeleted => '已删除考试';
+  String get examDeleted => '已经删脱考试';
 
   @override
-  String get examAdded => '已成功添加考试';
+  String get examAdded => '添好考试哉';
 
   @override
-  String get examStatusPending => '待考';
+  String get examStatusPending => '等牢考';
 
   @override
-  String get examStatusEnded => '已结束';
+  String get examStatusEnded => '考好哉';
 
   @override
-  String get examDetails => '考试详情';
+  String get examDetails => '考试细底';
 
   @override
-  String get openInChaoXing => '在学习通中查看';
+  String get openInChaoXing => '在学习通里向望望';
 
   @override
-  String get dormitoryBuilding => '宿舍楼';
+  String get dormitoryBuilding => '宿舍楼面';
 
   @override
-  String get dormitoryUnit => '单元';
+  String get dormitoryUnit => '单元门号';
 
   @override
-  String get dormitoryFloor => '楼层';
+  String get dormitoryFloor => '几楼';
 
   @override
-  String get dormitoryRoom => '宿舍';
+  String get dormitoryRoom => '宿舍房间';
 
   @override
-  String get dormitoryBed => '床号';
+  String get dormitoryBed => '榻号头';
 
   @override
-  String get dormitoryAcademicYear => '学年';
+  String get dormitoryAcademicYear => '学年纪';
 
   @override
-  String get dormitoryTerm => '学期';
+  String get dormitoryTerm => '学期程';
 
   @override
   String get dormitoryNotAssigned => '未排床位';
@@ -339,7 +339,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get dormitoryOpenWeb => '学生公寓平台';
 
   @override
-  String get dormitoryDetail => '宿舍详情';
+  String get dormitoryDetail => '宿舍细底';
 
   @override
   String get dormitoryBedPrompt => '好去学生公寓平台办查寝签到或者床位业务';
@@ -357,25 +357,25 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get functionsButtonsSetting => '功能排序搭隐藏';
 
   @override
-  String get functionsButtonsTitle => '功能排序';
+  String get functionsButtonsTitle => '用场排次序';
 
   @override
-  String get groupPayment => '支付';
+  String get groupPayment => '付铜钿';
 
   @override
-  String get groupStudy => '学习';
+  String get groupStudy => '念书';
 
   @override
-  String get groupLife => '生活';
+  String get groupLife => '过日脚';
 
   @override
-  String get groupTravel => '出行';
+  String get groupTravel => '出门';
 
   @override
-  String get groupTools => '工具';
+  String get groupTools => '家生';
 
   @override
-  String get groupMiniApps => '小程序';
+  String get groupMiniApps => '小软件';
 
   @override
   String get feedButtonsSetting => '信息流排序搭隐藏';
@@ -384,49 +384,49 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get feedButtonsTitle => '信息流设定';
 
   @override
-  String get feedAutoSort => '自动排序';
+  String get feedAutoSort => '自动排次序';
 
   @override
-  String get feedAutoSortSubtitle => '开启后忽视手动排序和显隐，按智能规则动态排序';
+  String get feedAutoSortSubtitle => '开牢后勿管手动排次序搭显隐，按灵巧规矩动态排次序';
 
   @override
   String get visibleFunctions => '显示出来个用处';
 
   @override
-  String get hiddenFunctions => '藏脱个用处（拖到搿搭隐藏）';
+  String get hiddenFunctions => '藏脱个用处（拖到格块隐藏）';
 
   @override
-  String get dragToReorderTip => '长按拖图标，搬到不同区域来显示或隐藏用处';
+  String get dragToReorderTip => '长按拖图标，搬到勿同区域来显示或藏脱用场';
 
   @override
-  String get widgetSettings => '小组件';
+  String get widgetSettings => '小组件设定';
 
   @override
-  String get widgetQuickTitle => '快捷功能（选择 4 个）';
+  String get widgetQuickTitle => '便捷用场（挑 4 只）';
 
   @override
-  String get widgetQuickHint => '小组件的快捷入口独立于首页，可单独配置';
+  String get widgetQuickHint => '小组件个便捷入口同头一页独立，好单独配好';
 
   @override
-  String get widgetHowToAdd => '回到手机桌面，长按空白处添加「今日日程」「快捷功能」「日程 + 快捷」小组件';
+  String get widgetHowToAdd => '回到手机台面，长按空档地方添「今日日脚行程」「便捷用场」「行程 + 便捷」小组件';
 
   @override
-  String get widgetNeedFour => '请选择 4 个功能';
+  String get widgetNeedFour => '请挑选 4 只用场';
 
   @override
-  String get widgetSaved => '已保存，小组件将自动刷新';
+  String get widgetSaved => '存好哉，小组件会得自家翻新';
 
   @override
-  String get widgetRefreshed => '小组件数据已刷新';
+  String get widgetRefreshed => '小组件数据已经翻新哉';
 
   @override
-  String get widgetRefresh => '立即刷新小组件';
+  String get widgetRefresh => '立即翻新小组件';
 
   @override
   String get loginRequiredTitle => '要登录才好望内容';
 
   @override
-  String get loginRequiredMessage => '登录后就好望侬个课表、功课搭成绩消息';
+  String get loginRequiredMessage => '登录后就好望唔俚个课表、功课搭成绩消息';
 
   @override
   String get noticeTitle => '通告';
@@ -435,22 +435,22 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get noticeLoginTitle => '要登录好接收通告';
 
   @override
-  String get noticeLoginMessage => '登录后就好向侬推送学校个最新通告';
+  String get noticeLoginMessage => '登录后就好向唔俚推送学校个最新通告';
 
   @override
   String get loadingNotices => '勒加载通告……';
 
   @override
-  String get loadFailed => '加载弗成功';
+  String get loadFailed => '装不上';
 
   @override
   String get retry => '再试一记';
 
   @override
-  String get noNotices => '暂时呒有通告';
+  String get noNotices => '暂时呒不通告';
 
   @override
-  String get noNoticesSubtitle => '有新消息时会在搿搭显示';
+  String get noNoticesSubtitle => '有新消息时会在格块显示';
 
   @override
   String get loadingMore => '勒加载多些……';
@@ -462,7 +462,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get homeworkLoginTitle => '要登录好同步功课';
 
   @override
-  String get homeworkLoginMessage => '登录后就好从超星平台实时同步侬个课程功课，也好点右下角手动添上';
+  String get homeworkLoginMessage => '登录后就好从超星平台实时同步唔俚个课程功课，也好点右下角手动添上';
 
   @override
   String get homeworkTabArchived => '存档个';
@@ -484,7 +484,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String homeworkLoadFailed(String error) {
-    return '功课加载弗成功：$error';
+    return '功课加载勿成功：$error';
   }
 
   @override
@@ -494,7 +494,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get currentSemester => '现今学期';
 
   @override
-  String get noScoreData => '本学期暂时呒有成绩数据';
+  String get noScoreData => '本学期暂时呒不成绩数据';
 
   @override
   String scoreCredit(String credit) {
@@ -508,7 +508,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get gradeExcellent => '交关好';
 
   @override
-  String get gradeFailed => '弗及格';
+  String get gradeFailed => '勿及格';
 
   @override
   String get courseReminder => '上课个提醒';
@@ -529,7 +529,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get libraryReminderTime => '图书馆预约提醒辰光';
 
   @override
-  String get notifDurationNone => '弗通告';
+  String get notifDurationNone => '勿通告';
 
   @override
   String notifMinutesBefore(int minutes) {
@@ -548,18 +548,18 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String setNotificationFailed(String error) {
-    return '设定通告弗成功：$error';
+    return '设定通告勿成功：$error';
   }
 
   @override
   String get liveUpdatesNotSupported =>
-      '现勒设备弗支持 Live Updates（需要 Android 16 及以上）';
+      '现勒设备勿支持 Live Updates（需要 Android 16 及以上）';
 
   @override
   String get needNotificationPermission => '要先允许通告权限';
 
   @override
-  String get liveActivity => '实时活动';
+  String get liveActivity => '实时动静';
 
   @override
   String get liveActivitySubtitle => '用 Live Updates API 提醒';
@@ -604,7 +604,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get testSent => '测试已经发出';
 
   @override
-  String get sendFailedCheckPermission => '发送弗成功：请望望通告权限';
+  String get sendFailedCheckPermission => '发送勿成功：请望望通告权限';
 
   @override
   String get aiSettingsSaved => '✅ Agent 设定已经存落来';
@@ -616,13 +616,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get aiApiUrl => 'API 接口个地址（Base URL）';
 
   @override
-  String get aiApiUrlHint => '默认中转服务';
+  String get aiApiUrlHint => '照默认中转服务';
 
   @override
   String get aiModelName => '模型个名称（Model Name）';
 
   @override
-  String get aiModelNameHint => '默认 soilzhu-latest';
+  String get aiModelNameHint => '照默认 soilzhu-latest';
 
   @override
   String get aiApiKeyCustom => 'API Key（已经用自定义）';
@@ -631,7 +631,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get aiApiKeyDefault => 'API Key（用默认）';
 
   @override
-  String get aiApiKeyHint => '留空以使用默认 Key，或填入侬个 Key（sk-…）';
+  String get aiApiKeyHint => '留空以使用默认 Key，或填入唔俚个 Key（sk-…）';
 
   @override
   String get paste => '贴上去';
@@ -652,17 +652,17 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get libraryReservation => '图书馆预订';
 
   @override
-  String get signIn => '签到';
+  String get signIn => '到场';
 
   @override
-  String get signBack => '退座';
+  String get signBack => '退位子';
 
   @override
-  String get signInSuccess => '签到成功！祝侬学习愉快。';
+  String get signInSuccess => '签到成功！祝唔俚学习愉快。';
 
   @override
   String signInFailed(String error) {
-    return '签到弗成功：$error';
+    return '签到勿成功：$error';
   }
 
   @override
@@ -684,7 +684,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String signBackFailed(String error) {
-    return '退座弗成功：$error';
+    return '退座勿成功：$error';
   }
 
   @override
@@ -699,11 +699,11 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get confirmCancel => '认定消脱';
 
   @override
-  String get reserveCancelledSuccess => '已经成功消脱搿个预订';
+  String get reserveCancelledSuccess => '已经成功消脱格个预订';
 
   @override
   String cancelFailed(String error) {
-    return '消脱弗成功：$error';
+    return '消脱勿成功：$error';
   }
 
   @override
@@ -722,7 +722,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get timetableLoginRequiredTitle => '要登录好望课表';
 
   @override
-  String get timetableLoginRequiredMessage => '登录后就好同步并望侬个个人课表消息';
+  String get timetableLoginRequiredMessage => '登录后就好同步并望唔俚个个人课表消息';
 
   @override
   String get viewAll => '望全数';
@@ -744,11 +744,11 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String getLocationFailed(String error) {
-    return '取定位弗成功：$error';
+    return '取定位勿成功：$error';
   }
 
   @override
-  String get newChat => '新对话';
+  String get newChat => '新闲话';
 
   @override
   String get requestException => '请求出岔子';
@@ -790,7 +790,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get copiedAnswer => '回答内容已经复制';
 
   @override
-  String get copy => '复制';
+  String get copy => '抄一记';
 
   @override
   String get aiThinking => '勒想头...';
@@ -799,13 +799,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get noticeDetail => '通告详细内容';
 
   @override
-  String get selectNoticeHint => '选左面通知看详情';
+  String get selectNoticeHint => '挑左面通告望细底';
 
   @override
   String get noticeNotFound => '寻勿到详细数据';
 
   @override
-  String get noTitle => '呒有标题';
+  String get noTitle => '呒不标题';
 
   @override
   String get senderSystem => '系统发出';
@@ -832,25 +832,25 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String timetableRefreshFailed(String error) {
-    return '重新望弗成功：$error';
+    return '重新望勿成功：$error';
   }
 
   @override
   String get noTimetableToShare => '朆有好分享个课表';
 
   @override
-  String get timetableFileNotFound => '课表文件弗存在';
+  String get timetableFileNotFound => '课表文件勿存在';
 
   @override
   String get shareTimetableText => '我个湖南农业大学课表';
 
   @override
   String shareFailed(String error) {
-    return '分享弗成功：$error';
+    return '分享失败：$error';
   }
 
   @override
-  String get tabAgenda => '日程';
+  String get tabAgenda => '日脚行程';
 
   @override
   String get tabWeek => '礼拜';
@@ -865,38 +865,38 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get refreshTimetable => '重新望课表';
 
   @override
-  String get timetableSettings => '课表';
+  String get timetableSettings => '课程表';
 
   @override
-  String get notSet => '未设置';
+  String get notSet => '朆设定';
 
   @override
-  String get timetableAutoSync => '自动同步课表';
+  String get timetableAutoSync => '自动同步课程表';
 
   @override
-  String get disableAutoSyncTitle => '关闭自动同步？';
+  String get disableAutoSyncTitle => '关脱自动同步伐？';
 
   @override
   String get disableAutoSyncMessage =>
-      '关闭后将删除本地课表（调课、停课等规则会保留），如需查看课表，可点击课表页右上角刷新按钮手动同步。';
+      '关脱后会拿本地课程表删脱（调堂、停课规矩会留牢），假使要看，好按课程表页右上角刷新按钮自家手动同步。';
 
   @override
-  String get localTimetableDeleted => '本地课表已删除';
+  String get localTimetableDeleted => '本地课程表已经删脱哉';
 
   @override
-  String get noLocalTimetable => '暂无本地课表';
+  String get noLocalTimetable => '暂时呒不本地课程表';
 
   @override
-  String get tapRefreshButtonToSync => '点击右上角刷新按钮手动同步';
+  String get tapRefreshButtonToSync => '按右上角刷新按钮手动同步';
 
   @override
   String get shareTimetable => '分享课程表';
 
   @override
-  String get noCoursesThisSemester => '现今学期暂时呒有课程搭功课安排';
+  String get noCoursesThisSemester => '现今学期暂时呒不课程搭功课安排';
 
   @override
-  String get timetableInfoIncomplete => '课表消息弗全';
+  String get timetableInfoIncomplete => '课表消息勿全';
 
   @override
   String get pleaseReDownloadTimetable => '请再下载课表';
@@ -968,10 +968,10 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get fetchTimetable => '取课表';
 
   @override
-  String get syncTimetablePrompt => '寻着侬已经登录成功，阿是现勒同步侬个课程安排搭导进日历？';
+  String get syncTimetablePrompt => '寻着唔俚已经登录成功，阿是现勒同步唔俚个课程安排搭导进日历？';
 
   @override
-  String get skip => '跳过';
+  String get skip => '跨过去';
 
   @override
   String get syncNow => '即刻同步';
@@ -996,14 +996,14 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String importFailed(String error) {
-    return '导进弗成功：$error';
+    return '导进勿成功：$error';
   }
 
   @override
   String get timetableSyncing => '课表勒同步';
 
   @override
-  String get timetableSyncingDesc => '系统勒拨侬全自动取教务课表，请等歇一歇...';
+  String get timetableSyncingDesc => '系统勒拨唔俚全自动取教务课表，请等歇一歇...';
 
   @override
   String get noTimetableFound => '还朆取到课表';
@@ -1029,27 +1029,27 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get timeLabel => '辰光';
 
   @override
-  String get courseColor => '课程颜色';
+  String get courseColor => '课程个颜色';
 
   @override
-  String get changeColor => '修改颜色';
+  String get changeColor => '换个颜色';
 
   @override
-  String get selectCourseColor => '选择课程颜色';
+  String get selectCourseColor => '挑选课程颜色';
 
   @override
   String colorSwappedNotice(String course) {
-    return '已与「$course」互换课程颜色';
+    return '已经跟「$course」互换课程颜色哉';
   }
 
   @override
-  String get materialColorNotice => '仅支持从高对比度 Material UI 色板中选取';
+  String get materialColorNotice => '仅支持从高对比度 Material UI 色板里向挑选';
 
   @override
   String get close => '关脱';
 
   @override
-  String get unknown => '弗晓得';
+  String get unknown => '勿晓得';
 
   @override
   String get reschedule => '调一调课';
@@ -1070,7 +1070,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get rescheduleWholeDay => '调一日个课';
 
   @override
-  String get noCoursesSyncFirst => '暂时呒有课程，请先同步课表';
+  String get noCoursesSyncFirst => '暂时呒不课程，请先同步课表';
 
   @override
   String get courseLabel => '课';
@@ -1082,11 +1082,11 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get originalWeek => '原来礼拜';
 
   @override
-  String get currentWeekSuffix => '（搿礼拜）';
+  String get currentWeekSuffix => '（格礼拜）';
 
   @override
   String noClassInWeek(int week) {
-    return '第$week周朆有搿节课';
+    return '第$week周朆有格节课';
   }
 
   @override
@@ -1117,19 +1117,19 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get noCoursesOnDay => '当天朆有课';
 
   @override
-  String get noCoursesOnDayCannotReschedule => '搿日呒课，弗好调课';
+  String get noCoursesOnDayCannotReschedule => '格日呒课，勿好调课';
 
   @override
   String get rescheduleMethod => '调课个办法';
 
   @override
-  String get rescheduleCopy => '复制';
+  String get rescheduleCopy => '抄一记';
 
   @override
-  String get rescheduleShift => '平移';
+  String get rescheduleShift => '平移过去';
 
   @override
-  String get rescheduleSwap => '对调';
+  String get rescheduleSwap => '对调一记';
 
   @override
   String get rescheduleCopyDesc => '保留原日期课程，目标日期原有课程要被覆盖';
@@ -1138,7 +1138,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get rescheduleSwapDesc => '两天个课程互相交换';
 
   @override
-  String get rescheduleShiftDesc => '仅要课程移至目标日期，原日期不保留课程；目标日期原有课程要被覆盖';
+  String get rescheduleShiftDesc => '仅要课程移至目标日期，原日期勿留课程；目标日期原有课程要被覆盖';
 
   @override
   String get selectCourseFirst => '请先挑课程';
@@ -1218,7 +1218,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get ruleTypeRescheduleDay => '整日调课';
 
   @override
-  String get ruleTypeSuspension => '停课';
+  String get ruleTypeSuspension => '停脱课';
 
   @override
   String get ruleTypeAddCourse => '添上课程';
@@ -1239,7 +1239,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get cleared => '已经清脱';
 
   @override
-  String get clearAll => '清脱全数';
+  String get clearAll => '通通清脱';
 
   @override
   String get keepOriginalPeriod => '保留原来节数';
@@ -1330,7 +1330,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get inputCourseHint => '填入所属个课程';
 
   @override
-  String get remark => '注记';
+  String get remark => '交代';
 
   @override
   String get addRemarkHint => '添注记消息';
@@ -1348,7 +1348,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get whatsNewHint => '有啥新鲜事？';
 
   @override
-  String get enableClassReminderHere => '勒搿搭开上课提醒';
+  String get enableClassReminderHere => '勒格块开上课提醒';
 
   @override
   String get systemNotice => '系统通告';
@@ -1360,7 +1360,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get scoreGradeExcellent => '交关好';
 
   @override
-  String get scoreGradeFail => '弗及格';
+  String get scoreGradeFail => '勿及格';
 
   @override
   String get feedbackEmailSubject => '自在东湖 App 个反馈';
@@ -1378,7 +1378,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get endDateMustBeAfterStartDate => '截止辰光要大过开头辰光';
 
   @override
-  String get endDateCannotBeInFuture => '截止辰光弗好大过现勒辰光';
+  String get endDateCannotBeInFuture => '截止辰光勿好大过现勒辰光';
 
   @override
   String get dateRangeMaxOneMonth => '日脚区间顶多一个月！';
@@ -1390,7 +1390,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get endDate => '截止日脚';
 
   @override
-  String get pleaseSelect => '请挑';
+  String get pleaseSelect => '请挑选';
 
   @override
   String get type => '类别';
@@ -1408,7 +1408,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get transactionTransfer => '划账';
 
   @override
-  String get noTransactions => '暂时呒有账单';
+  String get noTransactions => '暂时呒不账单';
 
   @override
   String get pleaseEnterValidAmountRange => '请填入1-1000之间个整数金额';
@@ -1432,7 +1432,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String amountYuan(String amount) {
-    return '$amount元';
+    return '$amount块';
   }
 
   @override
@@ -1451,7 +1451,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get paymentProcessingAlipayHint => '暂时查勿到到账，请到支付宝里做毕付钞票后等歇再试一记';
 
   @override
-  String get rechargeCardSuccessElectricityFailed => '校园卡充铜钿成功，电费充铜钿弗成功';
+  String get rechargeCardSuccessElectricityFailed => '校园卡充铜钿成功，电费充铜钿勿成功';
 
   @override
   String get paymentSuccess => '付钞票成功哉';
@@ -1469,11 +1469,11 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String paymentFailedWithReason(String reason) {
-    return '支付弗成功：$reason';
+    return '支付勿成功：$reason';
   }
 
   @override
-  String get pleaseWaitDoNotClose => '请等歇，勿要关脱页面';
+  String get pleaseWaitDoNotClose => '请等歇，覅关脱页面';
 
   @override
   String get completePaymentInWechat => '请到跳转后个微信里做毕付钞票';
@@ -1491,7 +1491,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get classroomInquiry => '空教室查望';
 
   @override
-  String get building => '教学楼';
+  String get building => '上课楼';
 
   @override
   String get periodSlot => '第几节';
@@ -1502,7 +1502,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   }
 
   @override
-  String get loadListFailedRetry => '列表加载弗成功，请再试一记';
+  String get loadListFailedRetry => '列表加载勿成功，请再试一记';
 
   @override
   String get pleaseSelectCompleteRoom => '请挑全个房间消息';
@@ -1511,19 +1511,19 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get payElectricityCampusCard => '缴电费（校园卡付钞票）';
 
   @override
-  String get payElectricity => '缴电费';
+  String get payElectricity => '缴电钿';
 
   @override
-  String get rechargeFailedRetry => '充铜钿弗成功，请再试一记';
+  String get rechargeFailedRetry => '充铜钿勿成功，请再试一记';
 
   @override
   String rechargeFailedWithReason(String reason) {
-    return '充铜钿弗成功：$reason';
+    return '充铜钿勿成功：$reason';
   }
 
   @override
   String fetchCardInfoFailed(String reason) {
-    return '取校园卡消息弗成功：$reason';
+    return '取校园卡消息勿成功：$reason';
   }
 
   @override
@@ -1535,7 +1535,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get electricityRechargeSuccess => '电费充铜钿成功';
 
   @override
-  String get electricityRechargeFailed => '电费充铜钿弗成功';
+  String get electricityRechargeFailed => '电费充铜钿勿成功';
 
   @override
   String get electricityRechargeTitle => '电费充铜钿';
@@ -1556,7 +1556,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get electricityBalance => '电费还剩几许';
 
   @override
-  String get fetchFailedClickRetry => '取弗到，请点一记再试';
+  String get fetchFailedClickRetry => '取勿到，请点一记再试';
 
   @override
   String get campusArea => '校园区';
@@ -1565,7 +1565,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get dormBuilding => '哪幢楼';
 
   @override
-  String get dormRoom => '房间';
+  String get dormRoom => '房间屋子';
 
   @override
   String get campusCardPayment => '校园卡付钞票';
@@ -1574,7 +1574,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get alipayPayment => '支付宝付钞票';
 
   @override
-  String get paymentFailed => '支付弗成功';
+  String get paymentFailed => '支付勿成功';
 
   @override
   String get campusCard => '校园卡';
@@ -1604,14 +1604,14 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String conversionFailed(String reason) {
-    return '转换弗成功：$reason';
+    return '转换勿成功：$reason';
   }
 
   @override
-  String get openBrowserFailed => '开浏览器弗成功';
+  String get openBrowserFailed => '开浏览器勿成功';
 
   @override
-  String get webVpnConverter => 'WebVPN 转换器';
+  String get webVpnConverter => 'WebVPN 转换家生';
 
   @override
   String get webVpnDescription => '要普通校内链接转换为 WebVPN 链接，以便在校外直接访问。';
@@ -1642,7 +1642,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String loadFailedWithReason(String reason) {
-    return '加载弗成功：$reason';
+    return '加载勿成功：$reason';
   }
 
   @override
@@ -1675,13 +1675,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get workspace => '做事台';
 
   @override
-  String get sunshineService => '阳光服务';
+  String get sunshineService => '阳光热线服务';
 
   @override
   String get recentPublicAppeals => '近来公开个诉求';
 
   @override
-  String get noPublicAppeals => '暂时呒有符合条件个公开诉求';
+  String get noPublicAppeals => '暂时呒不符合条件个公开诉求';
 
   @override
   String get writeAppeal => '填诉求';
@@ -1696,7 +1696,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get submitter => '递交人';
 
   @override
-  String get anonymous => '匿名';
+  String get anonymous => '隐脱名字';
 
   @override
   String get expectedDepartment => '想要受理个部门';
@@ -1717,7 +1717,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get appealContent => '诉求个内容';
 
   @override
-  String get noDescriptionAvailable => '（暂时呒有详细问题说明）';
+  String get noDescriptionAvailable => '（暂时呒不详细问题说明）';
 
   @override
   String get processingResult => '办理个结果';
@@ -1727,7 +1727,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String get sunshineNotice =>
-      '欢迎为学校建设搭发展建言献策。带 * 个栏目为必填项。\n一般问题 1–3 个工作日办复，复杂问题最长不超过 7 个工作日（以平台说明为准）。相同内容勿要重复提交或一信多投。';
+      '欢迎为学校建设搭发展建言献策。带 * 个栏目为必填项。\n一般问题 1–3 个工作日办复，复杂问题最长勿超过 7 个工作日（以平台说明为准）。相同内容覅重复提交或一信多投。';
 
   @override
   String get confirmSubmitAppeal => '认定递交诉求';
@@ -1735,7 +1735,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   @override
   String confirmSubmitAppealMessage(
       String identity, String department, String type, String title) {
-    return '要以 $identity 个身份向“$department”提交$type：\n\n$title\n\n请确认内容真实准确，相同内容勿要重复提交。';
+    return '要以 $identity 个身份向“$department”提交$type：\n\n$title\n\n请确认内容真实准确，相同内容覅重复提交。';
   }
 
   @override
@@ -1751,20 +1751,20 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get appealTypeSuggestion => '提议';
 
   @override
-  String get appealTypeComplaint => '投诉';
+  String get appealTypeComplaint => '投诉告状';
 
   @override
   String get appealTypePraise => '称赞';
 
   @override
-  String get appealSubmitSuccessMsg => '侬个诉求已受理，感谢侬对学校工作个支持。';
+  String get appealSubmitSuccessMsg => '唔俚个诉求已受理，感谢唔俚对学校工作个支持。';
 
   @override
   String get appealSubmitPhoneCodeInvalidMsg =>
-      '平台提示手机号或验证码弗正确。请核对手机号；若要验证码，请在阳光服务官网完成验证。';
+      '平台提示手机号或验证码勿正确。请核对手机号；若要验证码，请在阳光服务官网完成验证。';
 
   @override
-  String get appealSubmitDuplicateMsg => '该类型问题已经递交且勒处理，勿要重复提交。';
+  String get appealSubmitDuplicateMsg => '该类型问题已经递交且勒处理，覅重复提交。';
 
   @override
   String get appealSubmitUnknownMsg =>
@@ -1789,13 +1789,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get pleaseSelectHandlingDepartment => '请挑受理单位';
 
   @override
-  String get subjectRequired => '主题 *';
+  String get subjectRequired => '题头 *';
 
   @override
-  String get contentRequired => '内容 *';
+  String get contentRequired => '里向内容 *';
 
   @override
-  String get appealContentHint => '请描述具体情况及侬个诉求';
+  String get appealContentHint => '请描述具体情况及唔俚个诉求';
 
   @override
   String get nameRequired => '名字 *';
@@ -1822,16 +1822,16 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get readNoticeAgreement => '已经读过填报须知，认定内容真实准确';
 
   @override
-  String get fieldCannotBeEmpty => '搿项弗能空脱';
+  String get fieldCannotBeEmpty => '格项勿能空脱';
 
   @override
-  String get fetchSunshineDetailFailed => '加载工单详细内容弗成功，请再试一记';
+  String get fetchSunshineDetailFailed => '加载工单详细内容勿成功，请再试一记';
 
   @override
-  String get loadSunshineFormFailed => '加载填报消息弗成功，请检查网络后再试一记';
+  String get loadSunshineFormFailed => '加载填报消息勿成功，请检查网络后再试一记';
 
   @override
-  String get loadFailedCheckNetwork => '加载弗成功，请检查网络后再试一记';
+  String get loadFailedCheckNetwork => '加载勿成功，请检查网络后再试一记';
 
   @override
   String get statusInProgress => '勒办';
@@ -1840,13 +1840,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get statusResolved => '已经办结';
 
   @override
-  String get statusUnknown => '状态弗晓得';
+  String get statusUnknown => '状态勿晓得';
 
   @override
-  String get sunshineServiceUnavailable => '阳光服务暂时弗好用，请等歇再试一记';
+  String get sunshineServiceUnavailable => '阳光服务暂时勿好用，请等歇再试一记';
 
   @override
-  String get sunshineDataReadFailed => '弗能读取阳光服务数据，请检查登录状态后再试一记';
+  String get sunshineDataReadFailed => '勿能读取阳光服务数据，请检查登录状态后再试一记';
 
   @override
   String get sunshineDataFormatError => '阳光服务返回个数据格式出岔子';
@@ -1864,16 +1864,16 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get sunshineSessionExpired => '阳光服务登录已失效，请返回自家中心再登录后再试一记';
 
   @override
-  String get noDepartmentsAvailable => '暂时呒有好用受理单位，请等歇再试一记';
+  String get noDepartmentsAvailable => '暂时呒不好用受理单位，请等歇再试一记';
 
   @override
-  String get reload => '重新加载';
+  String get reload => '重翻一趟';
 
   @override
   String get submit => '递交';
 
   @override
-  String get studentWorkQuestionnaire => '学工问卷';
+  String get studentWorkQuestionnaire => '学工调查问卷';
 
   @override
   String get pendingQuestionnaires => '待完成个问卷';
@@ -1896,10 +1896,10 @@ class AppLocalizationsWuu extends AppLocalizations {
   }
 
   @override
-  String get questionnaireCannotBeSubmitted => '搿份问卷现勒弗好递交';
+  String get questionnaireCannotBeSubmitted => '格份问卷现勒勿好递交';
 
   @override
-  String get submitFailedRetry => '递交弗成功，请等歇再试一记';
+  String get submitFailedRetry => '递交勿成功，请等歇再试一记';
 
   @override
   String get pleaseSelectDate => '请挑日脚';
@@ -1911,7 +1911,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get pleaseEnter => '请填入';
 
   @override
-  String get noQuestionnairesFound => '暂时呒有符合条件个问卷';
+  String get noQuestionnairesFound => '暂时呒不符合条件个问卷';
 
   @override
   String get unnamedQuestionnaire => '朆起名个问卷';
@@ -1920,22 +1920,22 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get studentSystemSessionExpired => '学工系统登录失效，请转到自家中心重新登录后再试';
 
   @override
-  String get readQuestionnaireDataFailed => '读问卷数据弗成功，请望望登录状态后再试';
+  String get readQuestionnaireDataFailed => '读问卷数据勿成功，请望望登录状态后再试';
 
   @override
   String get questionnaireListFormatError => '问卷列表数据格式出岔子';
 
   @override
-  String get questionnaireMissingTaskId => '搿份问卷缺任务标识，弗好打开';
+  String get questionnaireMissingTaskId => '格份问卷缺任务标识，勿好打开';
 
   @override
-  String get leaveApplication => '请假申请';
+  String get leaveApplication => '告假申请';
 
   @override
   String get pleaseFillRemark => '请填注记';
 
   @override
-  String get leaveType => '请假个类别';
+  String get leaveType => '告假门类';
 
   @override
   String get startTime => '开头辰光';
@@ -1950,7 +1950,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get calculatingDuration => '（试算勒…）';
 
   @override
-  String get leaveReason => '请假个缘故';
+  String get leaveReason => '告假缘故';
 
   @override
   String get emergencyContact => '紧急联络人';
@@ -1974,13 +1974,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get leaveDestination => '离校到啥搭';
 
   @override
-  String get province => '省';
+  String get province => '省份';
 
   @override
-  String get city => '市';
+  String get city => '市区';
 
   @override
-  String get districtCounty => '区/县';
+  String get districtCounty => '区县地段';
 
   @override
   String get detailedAddress => '详细个地址';
@@ -1992,7 +1992,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get leaveCity => '出市区';
 
   @override
-  String get leaveProvince => '出省';
+  String get leaveProvince => '出省外';
 
   @override
   String get leaveMaterials => '请假个材料';
@@ -2022,7 +2022,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get endTimeMustBeAfterStartTime => '结束辰光应大过开始辰光！';
 
   @override
-  String get durationCalculateFailedReselect => '时长计算弗成功，请再挑选起止辰光';
+  String get durationCalculateFailedReselect => '时长计算勿成功，请再挑选起止辰光';
 
   @override
   String get durationMustBeInteger => '请假时长请填入整数！';
@@ -2040,7 +2040,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get pleaseFillEmergencyContactPhone => '请填紧急联络人电话';
 
   @override
-  String get invalidEmergencyContactPhone => '紧急联系人电话格式弗正确';
+  String get invalidEmergencyContactPhone => '紧急联系人电话格式勿正确';
 
   @override
   String get pleaseSelectLeaveDestination => '请挑离校去向';
@@ -2052,7 +2052,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get cancelLeavePromptTitle => '收转请假伐？';
 
   @override
-  String get cancelLeavePromptContent => '确定撤销搿条请假申请伐？';
+  String get cancelLeavePromptContent => '确定撤销格条请假申请伐？';
 
   @override
   String get revoke => '收转';
@@ -2061,17 +2061,17 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get revokedSuccess => '已经收转';
 
   @override
-  String get revokeFailedRetry => '收转弗成功，请等歇再试一记';
+  String get revokeFailedRetry => '收转勿成功，请等歇再试一记';
 
   @override
   String get yes => '是个';
 
   @override
-  String get no => '弗是';
+  String get no => '勿是';
 
   @override
   String durationDays(String days) {
-    return '$days天';
+    return '$days日';
   }
 
   @override
@@ -2089,7 +2089,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get practiceInstructor => '实践指导先生';
 
   @override
-  String get attachment => '附件';
+  String get attachment => '附送材料';
 
   @override
   String get auditStatus => '审核个状态';
@@ -2115,7 +2115,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get statusAudited => '已经审核好';
 
   @override
-  String get noLeaveRecordsFound => '暂时呒有符合条件个请假记录';
+  String get noLeaveRecordsFound => '暂时呒不符合条件个请假记录';
 
   @override
   String confirmRevokeLeaveItem(String type, String timeRange) {
@@ -2123,7 +2123,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   }
 
   @override
-  String get library => '图书馆';
+  String get library => '藏书楼';
 
   @override
   String get libraryStatusPendingCheckIn => '等签到';
@@ -2144,11 +2144,11 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get libraryStatusCancelled => '已经消脱';
 
   @override
-  String get checkInSuccessEnjoy => '签到成功！祝侬学习愉快。';
+  String get checkInSuccessEnjoy => '签到成功！祝唔俚学习愉快。';
 
   @override
   String checkInFailedWithReason(String reason) {
-    return '签到弗成功：$reason';
+    return '签到勿成功：$reason';
   }
 
   @override
@@ -2167,7 +2167,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String checkOutFailedWithReason(String reason) {
-    return '退座弗成功：$reason';
+    return '退座勿成功：$reason';
   }
 
   @override
@@ -2179,11 +2179,11 @@ class AppLocalizationsWuu extends AppLocalizations {
   }
 
   @override
-  String get reservationCancelledSuccess => '已经成功消脱搿个预订';
+  String get reservationCancelledSuccess => '已经成功消脱格个预订';
 
   @override
   String cancelReservationFailedWithReason(String reason) {
-    return '消脱弗成功：$reason';
+    return '消脱勿成功：$reason';
   }
 
   @override
@@ -2216,7 +2216,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get reservationNotice => '请勒规定辰光里做毕签到，超时还朆签到就算违规。';
 
   @override
-  String get reservationFailed => '预订弗成功';
+  String get reservationFailed => '预订勿成功';
 
   @override
   String get iUnderstand => '我晓得哉';
@@ -2230,10 +2230,10 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get cancelReservation => '消脱预订';
 
   @override
-  String get checkIn => '签到';
+  String get checkIn => '到场';
 
   @override
-  String get checkOut => '退座';
+  String get checkOut => '退位子';
 
   @override
   String get reserveSeat => '预订选座';
@@ -2242,7 +2242,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get recentReservations => '近来预订记录';
 
   @override
-  String get noReservationRecords => '暂时呒有历史预订记录';
+  String get noReservationRecords => '暂时呒不历史预订记录';
 
   @override
   String get reserve => '预订';
@@ -2251,7 +2251,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get selectReadingRoom => '挑阅览室';
 
   @override
-  String get noRoomsFound => '暂时呒有符合条件个阅览室';
+  String get noRoomsFound => '暂时呒不符合条件个阅览室';
 
   @override
   String totalSeats(String capacity) {
@@ -2276,7 +2276,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get seatSelected => '已经挑好';
 
   @override
-  String get seatOccupied => '占用／弗好挑';
+  String get seatOccupied => '占用／勿好挑';
 
   @override
   String get loadingSeatMap => '勒加载座位分布图...';
@@ -2288,23 +2288,23 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get quickReserve => '快当预订';
 
   @override
-  String get quickReserveTip => '系统将根据您设置的时间与位置偏好自动匹配空闲座位，助您快速锁定。';
+  String get quickReserveTip => '系统会照唔俚设定个辰光搭地段偏好自家配对空位子，帮唔俚快当锁牢。';
 
   @override
-  String get startMatchingSeats => '开始匹配座位';
+  String get startMatchingSeats => '开始配对空位子';
 
   @override
-  String get matchingSeats => '正在匹配座位...';
+  String get matchingSeats => '勒配对空位子紧...';
 
   @override
-  String get matchedSeatSuccess => '已为您分配推荐座位';
+  String get matchedSeatSuccess => '已经帮唔俚挑好推荐位子哉';
 
   @override
-  String get changeAnotherSeat => '换一个';
+  String get changeAnotherSeat => '换一只';
 
   @override
   String changeAnotherSeatWithCooldown(int seconds) {
-    return '换一个 (${seconds}s)';
+    return '换一只 (${seconds}s)';
   }
 
   @override
@@ -2323,13 +2323,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get optionalLabel => '可选';
 
   @override
-  String get floorLabel => '楼层';
+  String get floorLabel => '几楼';
 
   @override
   String get roomLabel => '阅览室';
 
   @override
-  String get noMatchedSeatFound => '暂无符合条件的空闲座位，请调整时段或位置后重试';
+  String get noMatchedSeatFound => '暂时呒不符合条件的空闲座位，请调整时段或位置后重试';
 
   @override
   String get adjustFilters => '修改筛选条件';
@@ -2338,7 +2338,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get selectDate => '挑日脚';
 
   @override
-  String get noAvailableSlotsForDate => '搿日朆有好用预订时段，请挑另外个日脚。';
+  String get noAvailableSlotsForDate => '格日朆有好用预订时段，请挑另外个日脚。';
 
   @override
   String confirmReservationPeriod(String day, String start, String end) {
@@ -2382,7 +2382,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String checkUpdateFailed(String error) {
-    return '望望有新版本弗曾弗成功：$error';
+    return '望望有新版本勿曾勿成功：$error';
   }
 
   @override
@@ -2395,7 +2395,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String downloadFailedWithReason(String error) {
-    return '下载弗成功：$error';
+    return '下载勿成功：$error';
   }
 
   @override
@@ -2418,7 +2418,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String homeworkDueInLessThan(String time) {
-    return '功课要勒不到$time后截止';
+    return '功课要勒勿到$time后截止';
   }
 
   @override
@@ -2479,105 +2479,105 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get ruleModeShift => '平移过去';
 
   @override
-  String get uploadImage => '上传图片';
+  String get uploadImage => '传相片';
 
   @override
-  String get describeImagePrompt => '请分析或描述搿张图片';
+  String get describeImagePrompt => '请分析或描述格张图片';
 
   @override
-  String get removeImage => '移除图片';
+  String get removeImage => '拿相片删脱';
 
   @override
   String get repairsTitle => '报修平台';
 
   @override
-  String get repairsQuickReport => '我要报修';
+  String get repairsQuickReport => '我想要报修';
 
   @override
-  String get repairsQuickReportHint => '按问题类型快速进入原生填报页面';
+  String get repairsQuickReportHint => '按毛病门类快当进到原生填报页面';
 
   @override
-  String get repairsMyOrders => '我的工单';
+  String get repairsMyOrders => '我个单子';
 
   @override
   String get repairsMyOrdersHint => '报修记录会同步到校园报修平台';
 
   @override
-  String get repairsInProgress => '处理中';
+  String get repairsInProgress => '办理紧';
 
   @override
-  String get repairsCompleted => '已完成';
+  String get repairsCompleted => '做好哉';
 
   @override
-  String get repairsHeroTitle => '校园服务，一键报修';
+  String get repairsHeroTitle => '校园服务，一揿报修';
 
   @override
-  String get repairsHeroSubtitle => '原生界面填写，工单状态实时同步；请选择最符合问题的服务类型。';
+  String get repairsHeroSubtitle => '原生界面填表，工单情况实时同步；请挑最对准毛病个服务种类。';
 
   @override
-  String get repairsNoCompleted => '暂无已完成工单';
+  String get repairsNoCompleted => '暂时呒不做好个工单';
 
   @override
-  String get repairsNoOngoing => '暂无处理中工单';
+  String get repairsNoOngoing => '暂时呒不办理紧个工单';
 
   @override
-  String get repairsUnnamedOrder => '未命名工单';
+  String get repairsUnnamedOrder => '朆起名个工单';
 
   @override
-  String get repairsEnterValue => '请输入或粘贴平台选项值';
+  String get repairsEnterValue => '请填入或者贴上平台选项值';
 
   @override
   String repairsRequiredField(String field) {
-    return '请填写$field';
+    return '请填好$field';
   }
 
   @override
-  String get repairsSubmitSuccess => '提交成功';
+  String get repairsSubmitSuccess => '递交成功';
 
   @override
-  String get repairsSubmitSuccessMessage => '工单已提交，处理进度可在“我的工单”中查看。';
+  String get repairsSubmitSuccessMessage => '工单交上去哉，办理进度好在“我个单子”里向望望。';
 
   @override
   String get repairsFormHint => '带 * 的字段为必填项。图片附件功能将随平台接口适配逐步开放。';
 
   @override
-  String get repairsSelectValue => '请选择';
+  String get repairsSelectValue => '请挑一挑';
 
   @override
-  String get repairsSubmit => '提交工单';
+  String get repairsSubmit => '递交工单';
 
   @override
-  String get repairsSubmitting => '正在提交…';
+  String get repairsSubmitting => '勒交上去紧…';
 
   @override
-  String get repairsOrderDetail => '工单详情';
+  String get repairsOrderDetail => '工单细底';
 
   @override
-  String get repairsOrderNumber => '工单编号';
+  String get repairsOrderNumber => '工单号头';
 
   @override
-  String get repairsOrderStatus => '当前状态';
+  String get repairsOrderStatus => '现勒情况';
 
   @override
-  String get repairsOrderType => '服务类型';
+  String get repairsOrderType => '服务门类';
 
   @override
-  String get repairsDepartment => '处理部门';
+  String get repairsDepartment => '办理科室';
 
   @override
-  String get repairsCreatedAt => '创建时间';
+  String get repairsCreatedAt => '开单辰光';
 
   @override
-  String get repairsDescription => '问题描述';
+  String get repairsDescription => '毛病说明';
 
   @override
-  String get repairsNoDescription => '暂无描述';
+  String get repairsNoDescription => '暂时呒不说明';
 
   @override
-  String get repairsDrafts => '草稿箱';
+  String get repairsDrafts => '草稿匣子';
 
   @override
-  String get repairsNoDrafts => '暂无草稿';
+  String get repairsNoDrafts => '暂时呒不草稿';
 
   @override
   String get repairsSaveDraft => '保存草稿';
@@ -2604,10 +2604,10 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get repairsCancelSuccess => '报修工单已成功取消';
 
   @override
-  String get repairsApplicant => '报修人';
+  String get repairsApplicant => '报修个人';
 
   @override
-  String get repairsApplicantDepartment => '报修部门';
+  String get repairsApplicantDepartment => '报修科室';
 
   @override
   String get repairsPhone => '联系电话';
@@ -2616,16 +2616,16 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get repairsHandler => '处理人员';
 
   @override
-  String get repairsHandleResult => '处理结果';
+  String get repairsHandleResult => '办理结果';
 
   @override
-  String get repairsUserFeedback => '评价反馈';
+  String get repairsUserFeedback => '评价说说';
 
   @override
-  String get repairsRating => '评价得分';
+  String get repairsRating => '评定打分';
 
   @override
-  String get repairsSupplement => '补充说明';
+  String get repairsSupplement => '再添点说明';
 
   @override
   String get repairsPriority => '优先级';
@@ -2637,13 +2637,13 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get repairsCompletedAt => '办结时间';
 
   @override
-  String get repairsActivityTimeline => '流转记录';
+  String get repairsActivityTimeline => '流转记账';
 
   @override
-  String get repairsAttachments => '附件照片';
+  String get repairsAttachments => '附送相片';
 
   @override
-  String get repairsNoActivity => '暂无流转记录';
+  String get repairsNoActivity => '暂时呒不流转记录';
 
   @override
   String get repairsUploadImage => '添加图片';
@@ -2673,7 +2673,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get dataBackup => '数据导出';
 
   @override
-  String get backupSecurityTip => '备份不含登录密码，含自定义 AI Key，请妥善保管';
+  String get backupSecurityTip => '备份勿含登录密码，含自定义 AI Key，请妥善保管';
 
   @override
   String get backupShareText => '我的自在东湖数据备份';
@@ -2693,7 +2693,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get dataImportConfirmTitle => '确认导入？';
 
   @override
-  String get dataImportConfirmMessage => '导入将覆盖当前设置与本地资料，是否继续？';
+  String get dataImportConfirmMessage => '导入将覆盖当前设定与本地资料，是否继续？';
 
   @override
   String get dataImportSuccess => '备份已导入';
@@ -2704,28 +2704,29 @@ class AppLocalizationsWuu extends AppLocalizations {
   }
 
   @override
-  String get dataImportInvalidFile => '不是有效的备份文件';
+  String get dataImportInvalidFile => '勿是有效的备份文件';
 
   @override
   String get dataImportVersionTooNew => '备份版本过新，请先升级 App 后再导入';
 
   @override
-  String get cloudBackupAutoSync => '自动同步';
+  String get cloudBackupAutoSync => '自动同步到云端';
 
   @override
-  String get cloudBackupAutoSyncSubtitle => '通过学习通网盘';
+  String get cloudBackupAutoSyncSubtitle => '走学习通网盘';
 
   @override
   String get cloudSyncPromptTitle => '开启自动同步';
 
   @override
-  String get cloudSyncPromptMessage => '自动把课表、作业等本地数据同步到学习通网盘，换机也不丢，随时可在设置里关闭。';
+  String get cloudSyncPromptMessage =>
+      '自动把课表、功课等本地数据同步到学习通网盘，换手机也勿会丢脱，随时好在设定里关脱。';
 
   @override
   String get cloudSyncPromptEnable => '立即开启';
 
   @override
-  String get bookSearch => '图书查询';
+  String get bookSearch => '寻书本';
 
   @override
   String get bookSearchSubtitle => '检索馆藏图书与借阅状态';
@@ -2751,46 +2752,46 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get holdingsTitle => '馆藏信息';
 
   @override
-  String get barcode => '条码号';
+  String get barcode => '条码号头';
 
   @override
-  String get callNumber => '索书号';
+  String get callNumber => '索书号头';
 
   @override
-  String get holdingLocation => '典藏地';
+  String get holdingLocation => '藏书地段';
 
   @override
-  String get holdingStatus => '状态';
+  String get holdingStatus => '现下情形';
 
   @override
-  String get holdingUnit => '馆藏单位';
+  String get holdingUnit => '藏书单位';
 
   @override
   String get copyType => '单册类型';
 
   @override
-  String get accessionNo => '登录号';
+  String get accessionNo => '入库号头';
 
   @override
-  String get searchTypeTitle => '书名';
+  String get searchTypeTitle => '书名字';
 
   @override
-  String get searchTypeAuthor => '作者';
+  String get searchTypeAuthor => '写书人';
 
   @override
-  String get searchTypeSubject => '主题';
+  String get searchTypeSubject => '主题内容';
 
   @override
-  String get searchTypeIdentifier => '标准编码';
+  String get searchTypeIdentifier => '标准代码';
 
   @override
-  String get statusInLibrary => '在库';
+  String get statusInLibrary => '勒库里';
 
   @override
   String get statusBorrowed => '借出';
 
   @override
-  String get search => '搜索';
+  String get search => '寻一寻';
 
   @override
   String get funcEhall => '办事大厅';
@@ -2799,16 +2800,16 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get ehallSubtitle => '线上办事、流程审批与综合服务';
 
   @override
-  String get ehallHotServices => '热门服务';
+  String get ehallHotServices => '顶闹热服务';
 
   @override
   String get ehallAllServices => '全部服务';
 
   @override
-  String get ehallCategories => '服务分类';
+  String get ehallCategories => '服务门类';
 
   @override
-  String get ehallDepartments => '服务部门';
+  String get ehallDepartments => '服务科室';
 
   @override
   String get ehallMyOrders => '我的办件';
@@ -2823,25 +2824,25 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get ehallApplyNow => '我要办理';
 
   @override
-  String get ehallViewDetail => '查看详情';
+  String get ehallViewDetail => '望望详情';
 
   @override
   String get ehallServiceType => '服务类型';
 
   @override
-  String get ehallDepartment => '主办部门';
+  String get ehallDepartment => '主办科室';
 
   @override
-  String get ehallVisits => '访问量';
+  String get ehallVisits => '看个人数';
 
   @override
-  String get ehallExternalLink => '外部系统跳转';
+  String get ehallExternalLink => '转去外头系统';
 
   @override
   String get ehallProcessWorkflow => '线上审批流程';
 
   @override
-  String get ehallOpenInWeb => '网页版大厅';
+  String get ehallOpenInWeb => '在网页里开大厅';
 
   @override
   String get ehallOngoing => '进行中';
@@ -2850,19 +2851,19 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get ehallCompleted => '已办结';
 
   @override
-  String get ehallNoOrders => '暂无办件记录';
+  String get ehallNoOrders => '暂时呒不办件记录';
 
   @override
   String get ehallFavorites => '我的收藏';
 
   @override
-  String get ehallAddToFavorites => '收藏服务';
+  String get ehallAddToFavorites => '收进常用';
 
   @override
   String get ehallRemoveFromFavorites => '取消收藏';
 
   @override
-  String get ehallServiceUnavailable => '办事大厅暂时不可用，请稍后重试';
+  String get ehallServiceUnavailable => '办事大厅暂时勿可用，请稍后重试';
 
   @override
   String get ehallSessionExpired => '办事大厅登录态已过期，请重新登录';
@@ -2877,7 +2878,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get examTimePrefix => '考试时间';
 
   @override
-  String get clearWebViewCache => '清理缓存';
+  String get clearWebViewCache => '清脱缓存';
 
   @override
   String get clearWebViewCacheSubtitle => '清理 InAppWebView 磁盘缓存与网页离线数据';
@@ -2890,7 +2891,7 @@ class AppLocalizationsWuu extends AppLocalizations {
 
   @override
   String get clearWebViewCacheConfirmMessage =>
-      '将清除应用内网页的本地离线缓存与临时数据，不会影响您的登录状态。';
+      '将清除应用内网页的本地离线缓存与临时数据，勿会影响您的登录状态。';
 
   @override
   String get aiFetchModels => '获取模型列表';
@@ -2905,7 +2906,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get aiNoModelsFound => '未找到匹配的模型';
 
   @override
-  String get aiTestConnection => '测试连接';
+  String get aiTestConnection => '测测搭牢伐';
 
   @override
   String get aiTestingConnection => '正在测试连接…';
@@ -2921,7 +2922,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   }
 
   @override
-  String get aiApiKeyRequired => '请先配置 API Key';
+  String get aiApiKeyRequired => '请先设好 API Key';
 
   @override
   String aiModelSelected(String model) {
@@ -2929,7 +2930,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   }
 
   @override
-  String get timetableSubscription => '课表订阅';
+  String get timetableSubscription => '课程表订阅';
 
   @override
   String get timetableSubscriptionSubtitle => '在线日历订阅与云端自动同步';
@@ -2942,10 +2943,10 @@ class AppLocalizationsWuu extends AppLocalizations {
       '开启后，从教务系统同步或调整课表后，将自动把调停后的课表上传云端供订阅；关闭后云端课表一并删除';
 
   @override
-  String get timetableSubscriptionUrl => '日历订阅链接';
+  String get timetableSubscriptionUrl => '日历订阅个链接';
 
   @override
-  String get copySubscriptionUrl => '复制链接';
+  String get copySubscriptionUrl => '抄下链接';
 
   @override
   String get subscriptionUrlCopied => '订阅链接已复制到剪切板';
@@ -2960,7 +2961,7 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get syncToCloudNow => '立即同步到云端';
 
   @override
-  String get syncSuccess => '云端同步成功';
+  String get syncSuccess => '云端同步弄好哉';
 
   @override
   String syncFailed(String error) {
@@ -2978,9 +2979,147 @@ class AppLocalizationsWuu extends AppLocalizations {
       '重置后旧的订阅链接将立即失效，云端旧课表将被删除，您需要在订阅的设备中重新添加新链接。是否继续？';
 
   @override
-  String get subscriptionTutorialTitle => '第三方日历订阅指南';
+  String get subscriptionTutorialTitle => '第三方日历订阅引路';
 
   @override
   String get subscriptionTutorialContent =>
       '• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，粘贴链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，粘贴链接并保存。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并保存。\n\n• 提示：\n订阅链接包含调停后的全部课程，若有调课或教务更新，订阅源会自动保持最新。';
+
+  @override
+  String get onboardingWelcomeTitle => '欢迎使用 ChillEast';
+
+  @override
+  String get onboardingWelcomeSubtitle => '专为湖南农业大学学子打造的现代化校园生活助手';
+
+  @override
+  String get onboardingSkip => '跳过';
+
+  @override
+  String get onboardingNext => '下一步';
+
+  @override
+  String get onboardingStart => '开始使用';
+
+  @override
+  String get onboardingGoToLogin => '去登录';
+
+  @override
+  String get onboardingGuideTitle => '迎新导览与功能介绍';
+
+  @override
+  String get onboardingGuideSubtitle => '快速了解 ChillEast 的核心功能与使用技巧';
+
+  @override
+  String get onboardingSlide1Tag => '课表与日程';
+
+  @override
+  String get onboardingSlide1Title => '智能课表 · 桌面实况';
+
+  @override
+  String get onboardingSlide1Desc =>
+      '全自动同步教务课表，智能对齐调停补变动。配合桌面实况与小组件，随时随地查看精彩日程。';
+
+  @override
+  String get onboardingSlide2Tag => '学业助手';
+
+  @override
+  String get onboardingSlide2Title => '作业同步 · 智能预警';
+
+  @override
+  String get onboardingSlide2Desc =>
+      '无缝同步超星学习通作业，倒计时清晰直观。支持自定义截止前提醒，告别拖延与作业遗漏。';
+
+  @override
+  String get onboardingSlide3Tag => '校园服务';
+
+  @override
+  String get onboardingSlide3Title => '校园生活 · 一站通办';
+
+  @override
+  String get onboardingSlide3Desc => '图书馆选座到期提醒、一卡通账单余额明细、宿舍电费余量预警，日常校园事务一手掌握。';
+
+  @override
+  String get onboardingSlide4Tag => '多端同步';
+
+  @override
+  String get onboardingSlide4Title => '日历订阅 · 云端备份';
+
+  @override
+  String get onboardingSlide4Desc =>
+      '一键生成 Webcal 日历订阅，无缝连接手机、手表与电脑；云端自动加密备份，多设备漫游换机无忧。';
+
+  @override
+  String postLoginSetupStep(int current, int total) {
+    return '第 $current / $total 步';
+  }
+
+  @override
+  String get postLoginSetupSkip => '跳过';
+
+  @override
+  String get postLoginSetupEnable => '开启';
+
+  @override
+  String get courseReminderPromptMessage => '在课程开始前通知提醒上课教室。';
+
+  @override
+  String get postLoginSetupNext => '开启';
+
+  @override
+  String get postLoginSetupFinish => '开启';
+
+  @override
+  String get postLoginSetupFinishWithoutEnable => '跳过';
+
+  @override
+  String get timetableAutoSyncPromptTitle => '课表自动同步';
+
+  @override
+  String get timetableAutoSyncPromptMessage => '自动拉取教务系统，时刻获取最新课表。';
+
+  @override
+  String get timetableAutoSyncPromptBadge => '推荐开启';
+
+  @override
+  String get homeworkReminderPromptTitle => '作业截止提醒';
+
+  @override
+  String get homeworkReminderPromptMessage => '作业截止前通知提醒，避免错过作业提交。';
+
+  @override
+  String get homeworkReminderPromptBadge => '提前预警';
+
+  @override
+  String get libraryReminderPromptTitle => '图书馆座位提醒';
+
+  @override
+  String get libraryReminderPromptMessage => '预约时段开始前发送通知，防止错过预约';
+
+  @override
+  String get libraryReminderPromptBadge => '提前提醒';
+
+  @override
+  String get timetableSubscriptionPromptTitle => '课表日历订阅';
+
+  @override
+  String get timetableSubscriptionPromptMessage =>
+      '生成 Webcal 订阅，一键导入系统日历与 Google Calendar。';
+
+  @override
+  String get timetableSubscriptionPromptBadge => '全平台日程同步';
+
+  @override
+  String get useLiveActivityPrompt => '使用实时活动';
+
+  @override
+  String get startGuide => '开始引导';
+
+  @override
+  String get postLoginDoneTitle => '大功告成！';
+
+  @override
+  String get postLoginDoneMessage => '欢迎使用「自在东湖」。';
+
+  @override
+  String get postLoginDoneButton => '完成';
 }

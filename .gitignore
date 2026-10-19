@@ -69,6 +69,7 @@ ios/Runner/GeneratedPluginRegistrant.m
 
 # debug
 debug
+.tmp
 
 # Android signing material (never commit)
 /android/key.properties

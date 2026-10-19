@@ -18,9 +18,6 @@ import '../../homework/screens/homework_screen.dart';
 import '../../notice/screens/notice_list_screen.dart';
 import '../../workspace/screens/functions_screen.dart';
 import '../../profile/screens/profile_screen.dart';
-import '../../timetable/providers/timetable_status_provider.dart';
-import '../../timetable/providers/reminder_trigger_provider.dart';
-import '../../../core/widgets/triangle_painter.dart';
 import '../widgets/ai_response_card.dart';
 import '../../../core/ai/ai_provider.dart';
 import '../../profile/providers/settings_provider.dart';
@@ -85,7 +82,6 @@ class MainScaffold extends ConsumerStatefulWidget {
 class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProviderStateMixin, WidgetsBindingObserver {
   late TabController _tabController;
   late AnimationController _aiAnimController;
-  bool _hasSeenReminder = false;
   DateTime _lastReschedule = DateTime.fromMillisecondsSinceEpoch(0);
 
   // AI 助理交互状态
@@ -120,8 +116,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     _aiInputController.addListener(() {
       setState(() {});
     });
-
-    _loadReminderState();
 
     // 桌面小组件点进来时，取原生暂存的动作并路由
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -295,26 +289,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     ref.read(aiAssistantProvider.notifier).sendMessage(query, imagePath: imagePath);
   }
 
-  Future<void> _loadReminderState() async {
-    final prefs = await SharedPreferences.getInstance();
-    if (mounted) {
-      setState(() {
-        _hasSeenReminder = prefs.getBool('has_seen_class_reminder') ?? false;
-      });
-    }
-  }
-
-  Future<void> _dismissReminder() async {
-    if (_hasSeenReminder) return;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('has_seen_class_reminder', true);
-    if (mounted) {
-      setState(() {
-        _hasSeenReminder = true;
-      });
-    }
-  }
-
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -403,18 +377,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authStateProvider);
-    final hasTimetable = ref.watch(timetableStatusProvider);
     final aiState = ref.watch(aiAssistantProvider);
     final hasChat = aiState.displayMessages.isNotEmpty ||
         aiState.isLoading ||
         aiState.errorMessage != null;
-    
-    // 监听强制触发器，当课表导入完成时，重置状态并展示提醒
-    ref.listen(classReminderTriggerProvider, (previous, next) {
-      if (next > 0) {
-        _loadReminderState();
-      }
-    });
 
     // 桌面小组件点击动作（原生侧透出一次，消费后清空）
     ref.listen<String?>(widgetActionProvider, (previous, next) {
@@ -432,13 +398,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
         if (pending != null && pending.isNotEmpty && mounted) {
           _handleWidgetAction(pending);
         }
-      }
-    });
-
-    // 监听课表状态变化（针对删除等操作）
-    ref.listen(timetableStatusProvider, (previous, next) {
-      if (next == true) {
-        _loadReminderState();
       }
     });
 
@@ -475,7 +434,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
               return Scaffold(
                 appBar: isTabletOrLandscape
                     ? null
-                    : _buildGlobalTopBar(context, authState, hasTimetable),
+                    : _buildGlobalTopBar(context, authState),
                 drawer: Drawer(
                   backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                   child: Column(
@@ -502,7 +461,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                 body: Row(
                   children: [
                     if (isTabletOrLandscape)
-                      _buildLeftRail(context, authState, hasTimetable, isDark),
+                      _buildLeftRail(context, authState, isDark),
                     Expanded(
                       child: Column(
                         children: [
@@ -753,7 +712,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   }
 
   Widget _buildLeftRail(BuildContext context, AuthState authState,
-      bool hasTimetable, bool isDark) {
+      bool isDark) {
     final navItems = [
       (
         icon: Icons.home_outlined,
@@ -846,7 +805,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
               ),
             ),
             const SizedBox(height: 8),
-            _buildAvatar(context, authState, hasTimetable, isDark),
+            _buildAvatar(context, authState, isDark),
             const SizedBox(height: 16),
           ],
         ),
@@ -926,7 +885,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   }
 
   PreferredSizeWidget _buildGlobalTopBar(
-      BuildContext context, AuthState authState, bool hasTimetable) {
+      BuildContext context, AuthState authState) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     // 一言只在主页 tab 显示。controller 在点击帧就同步翻 index，
     // listener 无条件重绘，所以这里与页面翻页是同一帧，并行动画。
@@ -1026,7 +985,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
                 width: 40,
                 height: 40,
                 child:
-                    _buildAvatar(context, authState, hasTimetable, isDark),
+                    _buildAvatar(context, authState, isDark),
               ),
             ],
           ),
@@ -1226,9 +1185,9 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
     );
   }
 
-  /// 头像（含登录状态圆环、提醒气泡）， plain 顶栏与卡片顶栏共用
+  /// 头像（含登录状态圆环）， plain 顶栏与卡片顶栏共用
   Widget _buildAvatar(
-      BuildContext context, AuthState authState, bool hasTimetable, bool isDark,
+      BuildContext context, AuthState authState, bool isDark,
       {Key? key}) {
     return Stack(
       key: key,
@@ -1237,7 +1196,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       children: [
         GestureDetector(
           onTap: () {
-            _dismissReminder(); // 点击后标记为已看
             Navigator.push(
               context,
               createSlideHorizontalRoute(const ProfileScreen()),
@@ -1302,43 +1260,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
             ),
           ),
         ),
-        if (hasTimetable &&
-            !_hasSeenReminder &&
-            authState.status == AuthStatus.authenticated)
-          Positioned(
-            top: 42,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CustomPaint(
-                  size: const Size(10, 6),
-                  painter: TrianglePainter(
-                    color: isDark
-                        ? Colors.grey.withOpacity(0.4)
-                        : Colors.black54,
-                  ),
-                ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.grey.withOpacity(0.4)
-                        : Colors.black54,
-                    borderRadius: BorderRadius.circular(6),
-                  ),
-                  child: Text(
-                    context.l10n.enableClassReminderHere,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
       ],
     );
   }

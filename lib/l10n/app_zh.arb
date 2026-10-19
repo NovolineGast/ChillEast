@@ -1780,5 +1780,59 @@
   "resetSubscriptionConfirmTitle": "重置订阅链接",
   "resetSubscriptionConfirmMessage": "重置后旧的订阅链接将立即失效，云端旧课表将被删除，您需要在订阅的设备中重新添加新链接。是否继续？",
   "subscriptionTutorialTitle": "第三方日历订阅指南",
-  "subscriptionTutorialContent": "• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，粘贴链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，粘贴链接并保存。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并保存。\n\n• 提示：\n订阅链接包含调停后的全部课程，若有调课或教务更新，订阅源会自动保持最新。"
+  "subscriptionTutorialContent": "• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，粘贴链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，粘贴链接并保存。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并保存。\n\n• 提示：\n订阅链接包含调停后的全部课程，若有调课或教务更新，订阅源会自动保持最新。",
+  "onboardingWelcomeTitle": "欢迎使用 ChillEast",
+  "onboardingWelcomeSubtitle": "专为湖南农业大学学子打造的现代化校园生活助手",
+  "onboardingSkip": "跳过",
+  "onboardingNext": "下一步",
+  "onboardingStart": "开始使用",
+  "onboardingGoToLogin": "去登录",
+  "onboardingGuideTitle": "迎新导览与功能介绍",
+  "onboardingGuideSubtitle": "快速了解 ChillEast 的核心功能与使用技巧",
+  "onboardingSlide1Tag": "课表与日程",
+  "onboardingSlide1Title": "智能课表 · 桌面实况",
+  "onboardingSlide1Desc": "全自动同步教务课表，智能对齐调停补变动。配合桌面实况与小组件，随时随地查看精彩日程。",
+  "onboardingSlide2Tag": "学业助手",
+  "onboardingSlide2Title": "作业同步 · 智能预警",
+  "onboardingSlide2Desc": "无缝同步超星学习通作业，倒计时清晰直观。支持自定义截止前提醒，告别拖延与作业遗漏。",
+  "onboardingSlide3Tag": "校园服务",
+  "onboardingSlide3Title": "校园生活 · 一站通办",
+  "onboardingSlide3Desc": "图书馆选座到期提醒、一卡通账单余额明细、宿舍电费余量预警，日常校园事务一手掌握。",
+  "onboardingSlide4Tag": "多端同步",
+  "onboardingSlide4Title": "日历订阅 · 云端备份",
+  "onboardingSlide4Desc": "一键生成 Webcal 日历订阅，无缝连接手机、手表与电脑；云端自动加密备份，多设备漫游换机无忧。",
+  "postLoginSetupStep": "第 {current} / {total} 步",
+  "@postLoginSetupStep": {
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "postLoginSetupSkip": "跳过",
+  "postLoginSetupEnable": "开启",
+  "courseReminderPromptMessage": "在课程开始前通知提醒上课教室。",
+  "postLoginSetupNext": "开启",
+  "postLoginSetupFinish": "开启",
+  "postLoginSetupFinishWithoutEnable": "跳过",
+  "timetableAutoSyncPromptTitle": "课表自动同步",
+  "timetableAutoSyncPromptMessage": "自动拉取教务系统，时刻获取最新课表。",
+  "timetableAutoSyncPromptBadge": "推荐开启",
+  "homeworkReminderPromptTitle": "作业截止提醒",
+  "homeworkReminderPromptMessage": "作业截止前通知提醒，避免错过作业提交。",
+  "homeworkReminderPromptBadge": "提前预警",
+  "libraryReminderPromptTitle": "图书馆座位提醒",
+  "libraryReminderPromptMessage": "预约时段开始前发送通知，防止错过预约",
+  "libraryReminderPromptBadge": "提前提醒",
+  "timetableSubscriptionPromptTitle": "课表日历订阅",
+  "timetableSubscriptionPromptMessage": "生成 Webcal 订阅，一键导入系统日历与 Google Calendar。",
+  "timetableSubscriptionPromptBadge": "全平台日程同步",
+  "useLiveActivityPrompt": "使用实时活动",
+  "startGuide": "开始引导",
+  "postLoginDoneTitle": "大功告成！",
+  "postLoginDoneMessage": "欢迎使用「自在东湖」。",
+  "postLoginDoneButton": "完成"
 }

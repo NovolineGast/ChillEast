@@ -13,7 +13,6 @@ import '../utils/date_calculator.dart';
 import '../utils/week_parser.dart';
 import '../utils/course_color_utils.dart';
 import '../providers/timetable_status_provider.dart';
-import '../providers/reminder_trigger_provider.dart';
 import '../widgets/weekly_calendar_view.dart';
 import '../widgets/empty_timetable_state.dart';
 import '../widgets/timetable_rule_dialogs.dart';
@@ -418,9 +417,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
 
       // 刷新全局状态
       ref.read(timetableStatusProvider.notifier).refresh();
-      ref
-          .read(classReminderTriggerProvider.notifier)
-          .update((state) => state + 1);
 
       // 重新安排通知
       final l10n = context.l10n;
@@ -455,9 +451,6 @@ class _TimetableScreenState extends ConsumerState<TimetableScreen>
       onRuleApplied: () async {
         await _loadLocalTimetable();
         ref.read(timetableStatusProvider.notifier).refresh();
-        ref
-            .read(classReminderTriggerProvider.notifier)
-            .update((state) => state + 1);
         await ref.read(settingsProvider.notifier).rescheduleNotifications();
       },
     );

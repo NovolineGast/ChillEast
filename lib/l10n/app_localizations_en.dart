@@ -205,10 +205,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noSavedDormitory => 'No saved dormitory room';
 
   @override
-  String get clickToSelectDormitory => 'Tap to select room or recharge';
+  String get clickToSelectDormitory => 'Tap to select room or top up';
 
   @override
-  String get quickActions => 'Quick actions';
+  String get quickActions => 'Quick Actions';
 
   @override
   String get funcGym => 'Gym Booking';
@@ -280,7 +280,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inputExamRemarksHint => 'Notes or materials needed (Optional)';
 
   @override
-  String get noCurrentSemesterExams => 'No exam arrangements this semester';
+  String get noCurrentSemesterExams => 'No exams scheduled this semester';
 
   @override
   String get manualExamTag => 'Manual';
@@ -301,7 +301,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get examStatusPending => 'Upcoming';
 
   @override
-  String get examStatusEnded => 'Ended';
+  String get examStatusEnded => 'Completed';
 
   @override
   String get examDetails => 'Exam Details';
@@ -337,14 +337,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dormitoryAssigned => 'Bed Assigned';
 
   @override
-  String get dormitoryOpenWeb => 'Apartment Platform';
+  String get dormitoryOpenWeb => 'Student Apartment Platform';
 
   @override
   String get dormitoryDetail => 'Dormitory Details';
 
   @override
   String get dormitoryBedPrompt =>
-      'Visit Student Apartment Platform for dorm check-in and bed operations';
+      'Visit the Student Apartment Platform for dorm check-ins and room assignments';
 
   @override
   String get more => 'More';
@@ -377,7 +377,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupTools => 'Tools';
 
   @override
-  String get groupMiniApps => 'Mini apps';
+  String get groupMiniApps => 'Mini Programs';
 
   @override
   String get feedButtonsSetting => 'Feed Layout & Visibility';
@@ -406,7 +406,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get widgetSettings => 'Widget Settings';
 
   @override
-  String get widgetQuickTitle => 'Quick actions (pick 4)';
+  String get widgetQuickTitle => 'Quick Actions (Pick 4)';
 
   @override
   String get widgetQuickHint =>
@@ -439,7 +439,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noticeTitle => 'Notices';
 
   @override
-  String get noticeLoginTitle => 'Login required for notices';
+  String get noticeLoginTitle => 'Login Required for Notices';
 
   @override
   String get noticeLoginMessage =>
@@ -467,7 +467,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get noMoreNotices => 'No more notices';
 
   @override
-  String get homeworkLoginTitle => 'Login required to sync homework';
+  String get homeworkLoginTitle => 'Login Required to Sync Homework';
 
   @override
   String get homeworkLoginMessage =>
@@ -497,13 +497,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get scoreQuery => 'Grades Inquiry';
+  String get scoreQuery => 'Grades';
 
   @override
   String get currentSemester => 'Current Semester';
 
   @override
-  String get noScoreData => 'No grade records for this semester';
+  String get noScoreData => 'No grades available for this semester';
 
   @override
   String scoreCredit(String credit) {
@@ -617,7 +617,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sendFailedCheckPermission =>
-      'Send failed: Please check notification permissions';
+      'Failed to send: please check notification permissions';
 
   @override
   String get aiSettingsSaved => '✅ Agent settings saved';
@@ -674,7 +674,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signBack => 'Check Out';
 
   @override
-  String get signInSuccess => 'Check-in successful! Enjoy your study.';
+  String get signInSuccess => 'Check-in successful! Enjoy your study session.';
 
   @override
   String signInFailed(String error) {
@@ -690,7 +690,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get thinkAgain => 'Think Again';
+  String get thinkAgain => 'Keep Seat';
 
   @override
   String get confirmSignBack => 'Confirm Check-out';
@@ -729,10 +729,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayTimetable => 'Today\'s Schedule';
 
   @override
-  String get tomorrowAgenda => 'Tomorrow\'s agenda';
+  String get tomorrowAgenda => 'Tomorrow\'s Agenda';
 
   @override
-  String get todayAgenda => 'Today\'s agenda';
+  String get todayAgenda => 'Today\'s Agenda';
 
   @override
   String get timetableLoginRequiredTitle => 'Login Required for Schedule';
@@ -883,7 +883,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refreshTimetable => 'Refresh Timetable';
 
   @override
-  String get timetableSettings => 'Timetable settings';
+  String get timetableSettings => 'Timetable Settings';
 
   @override
   String get notSet => 'Not set';
@@ -919,7 +919,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timetableInfoIncomplete => 'Timetable information is incomplete';
 
   @override
-  String get pleaseReDownloadTimetable => 'Please re-download timetable';
+  String get pleaseReDownloadTimetable =>
+      'Please refresh or re-download timetable';
 
   @override
   String get deadlinePrefix => 'Deadline';
@@ -1259,7 +1260,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get clearAllAdjustmentsConfirmContent =>
-      'Restores the timetable to original educational system data.';
+      'Restores the schedule to the original university timetable.';
 
   @override
   String get clear => 'Clear';
@@ -1323,7 +1324,7 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get noDeadlineHomework => 'Homework without deadline';
+  String get noDeadlineHomework => 'No-Deadline Homework';
 
   @override
   String get homeworkLoggingInWait => '⏳ Logging in, please wait...';
@@ -1359,10 +1360,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inputCourseHint => 'Enter course name';
 
   @override
-  String get remark => 'Remark';
+  String get remark => 'Notes';
 
   @override
-  String get addRemarkHint => 'Add remark';
+  String get addRemarkHint => 'Add notes';
 
   @override
   String get funcEvaluation => 'Teaching Evaluation';
@@ -1410,7 +1411,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get endDateCannotBeInFuture => 'End date cannot be in the future';
 
   @override
-  String get dateRangeMaxOneMonth => 'Date range cannot exceed one month!';
+  String get dateRangeMaxOneMonth => 'Date range cannot exceed one month.';
 
   @override
   String get startDate => 'Start Date';
@@ -1484,13 +1485,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rechargeCardSuccessElectricityFailed =>
-      'Card top-up succeeded, but electricity recharge failed';
+      'Card top-up succeeded, but electricity payment failed';
 
   @override
   String get paymentSuccess => 'Payment Successful';
 
   @override
-  String get recharging => 'Recharging...';
+  String get recharging => 'Processing top-up...';
 
   @override
   String get paying => 'Paying...';
@@ -1538,7 +1539,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadListFailedRetry => 'Failed to load list, please retry';
 
   @override
-  String get pleaseSelectCompleteRoom => 'Please select complete room info';
+  String get pleaseSelectCompleteRoom => 'Please select complete room details';
 
   @override
   String get payElectricityCampusCard => 'Pay Electricity (Campus Card)';
@@ -1547,11 +1548,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get payElectricity => 'Pay Electricity';
 
   @override
-  String get rechargeFailedRetry => 'Recharge failed, please retry';
+  String get rechargeFailedRetry => 'Top-up failed, please try again';
 
   @override
   String rechargeFailedWithReason(String reason) {
-    return 'Recharge failed: $reason';
+    return 'Top-up failed: $reason';
   }
 
   @override
@@ -1565,13 +1566,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get electricityRechargeSuccess => 'Electricity recharge successful';
+  String get electricityRechargeSuccess => 'Electricity top-up successful';
 
   @override
-  String get electricityRechargeFailed => 'Electricity recharge failed';
+  String get electricityRechargeFailed => 'Electricity top-up failed';
 
   @override
-  String get electricityRechargeTitle => 'Electricity Recharge';
+  String get electricityRechargeTitle => 'Electricity Top-up';
 
   @override
   String get currentRechargeRoom => 'Current Room';
@@ -1734,19 +1735,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get anonymous => 'Anonymous';
 
   @override
-  String get expectedDepartment => 'Expected Handling Department';
+  String get expectedDepartment => 'Preferred Department';
 
   @override
   String get handlingDepartment => 'Handling Department';
 
   @override
-  String get expectedResolveTime => 'Expected Resolve Time';
+  String get expectedResolveTime => 'Requested Resolution Date';
 
   @override
   String get acceptedTime => 'Accepted Time';
 
   @override
-  String get finishedTime => 'Finished Time';
+  String get finishedTime => 'Resolution Time';
 
   @override
   String get appealContent => 'Appeal Content';
@@ -1762,7 +1763,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sunshineNotice =>
-      'Welcome to provide advice and suggestions for school development. Fields marked with * are required.\nGeneral issues are handled within 1–3 working days; complex issues within 7 working days. Please do not submit duplicates.';
+      'We welcome feedback and suggestions for campus development. Fields marked with * are required.\nGeneral issues are resolved within 1–3 business days; complex issues within 7 business days. Please do not submit duplicate appeals.';
 
   @override
   String get confirmSubmitAppeal => 'Confirm Appeal Submission';
@@ -1817,7 +1818,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gotIt => 'Got it';
 
   @override
-  String get letterTypeRequired => 'Letter Type *';
+  String get letterTypeRequired => 'Appeal Category *';
 
   @override
   String get handlingDepartmentRequired => 'Handling Department *';
@@ -1853,7 +1854,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pleaseEnterValidEmail => 'Please enter a valid email address';
 
   @override
-  String get expectedResolveTimeOptional => 'Expected Resolve Time (Optional)';
+  String get expectedResolveTimeOptional =>
+      'Requested Resolution Date (Optional)';
 
   @override
   String get clearDate => 'Clear Date';
@@ -1875,7 +1877,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loadFailedCheckNetwork =>
-      'Loading failed, please check network and retry';
+      'Failed to load. Please check network and try again';
 
   @override
   String get statusInProgress => 'In Progress';
@@ -1895,7 +1897,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Failed to read sunshine data, please check login status and try again';
 
   @override
-  String get sunshineDataFormatError => 'Sunshine data format error';
+  String get sunshineDataFormatError => 'Invalid Sunshine Service data format';
 
   @override
   String get sunshineTicketNotFound => 'Appeal ticket details not found';
@@ -1906,11 +1908,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ssoExpiredRelogin =>
-      'SSO login expired, please return to profile and re-login';
+      'SSO session expired. Please return to Profile and log in again.';
 
   @override
   String get sunshineSessionExpired =>
-      'Sunshine session expired, please re-login and try again';
+      'Sunshine Service session expired. Please log in again and try again.';
 
   @override
   String get noDepartmentsAvailable =>
@@ -1926,7 +1928,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get studentWorkQuestionnaire => 'Student Questionnaire';
 
   @override
-  String get pendingQuestionnaires => 'Pending questionnaires';
+  String get pendingQuestionnaires => 'Pending Questionnaires';
 
   @override
   String get statusSubmitted => 'Submitted';
@@ -1938,7 +1940,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusPendingFill => 'Pending';
 
   @override
-  String get questionnaireDataError => 'Questionnaire data error';
+  String get questionnaireDataError => 'Invalid questionnaire data';
 
   @override
   String pleaseFillQuestion(String title) {
@@ -1969,15 +1971,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get studentSystemSessionExpired =>
-      'Student system session expired, please re-login and retry';
+      'Student Affairs session expired. Please log in again and try again.';
 
   @override
   String get readQuestionnaireDataFailed =>
-      'Failed to read questionnaire data, please check login status';
+      'Failed to load questionnaire data. Please check login status and try again.';
 
   @override
   String get questionnaireListFormatError =>
-      'Questionnaire list data format error';
+      'Invalid questionnaire list format';
 
   @override
   String get questionnaireMissingTaskId =>
@@ -1987,7 +1989,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaveApplication => 'Leave Application';
 
   @override
-  String get pleaseFillRemark => 'Please enter remark';
+  String get pleaseFillRemark => 'Please enter notes';
 
   @override
   String get leaveType => 'Leave Type';
@@ -2050,10 +2052,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get leaveProvince => 'Leave Province';
 
   @override
-  String get leaveMaterials => 'Leave Materials';
+  String get leaveMaterials => 'Supporting Documents';
 
   @override
-  String get leaveMaterialsHint => 'Optional, tap to choose from gallery';
+  String get leaveMaterialsHint => 'Optional, tap to select from gallery';
 
   @override
   String get removeAttachment => 'Remove Attachment';
@@ -2076,17 +2078,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get endTimeMustBeAfterStartTime =>
-      'End time must be after start time!';
+      'End time must be after start time.';
 
   @override
   String get durationCalculateFailedReselect =>
       'Duration calculation failed, please reselect start and end times';
 
   @override
-  String get durationMustBeInteger => 'Leave duration must be an integer!';
+  String get durationMustBeInteger => 'Leave duration must be an integer.';
 
   @override
-  String get pleaseEnterValidDuration => 'Please enter a valid leave duration!';
+  String get pleaseEnterValidDuration => 'Please enter a valid leave duration.';
 
   @override
   String get pleaseFillLeaveReason => 'Please enter leave reason';
@@ -2118,13 +2120,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to cancel this leave request?';
 
   @override
-  String get revoke => 'Revoke';
+  String get revoke => 'Cancel Request';
 
   @override
-  String get revokedSuccess => 'Revoked successfully';
+  String get revokedSuccess => 'Cancelled successfully';
 
   @override
-  String get revokeFailedRetry => 'Failed to revoke, please try again later';
+  String get revokeFailedRetry =>
+      'Failed to cancel request, please try again later';
 
   @override
   String get yes => 'Yes';
@@ -2155,7 +2158,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get attachment => 'Attachment';
 
   @override
-  String get auditStatus => 'Audit Status';
+  String get auditStatus => 'Approval Status';
 
   @override
   String get leaveDetails => 'Leave Details';
@@ -2166,10 +2169,10 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get revokeApplication => 'Revoke Request';
+  String get revokeApplication => 'Cancel Request';
 
   @override
-  String get statusPendingAudit => 'Pending';
+  String get statusPendingAudit => 'Pending Approval';
 
   @override
   String get statusAuditing => 'In Review';
@@ -2182,7 +2185,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String confirmRevokeLeaveItem(String type, String timeRange) {
-    return 'Are you sure you want to revoke \"$type\" ($timeRange)?';
+    return 'Are you sure you want to cancel \"$type\" ($timeRange)?';
   }
 
   @override
@@ -2198,7 +2201,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryStatusAway => 'Away';
 
   @override
-  String get libraryStatusCanCheckIn => 'Can Check-in';
+  String get libraryStatusCanCheckIn => 'Check-in Open';
 
   @override
   String get libraryStatusFinished => 'Finished';
@@ -2207,7 +2210,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get libraryStatusCancelled => 'Cancelled';
 
   @override
-  String get checkInSuccessEnjoy => 'Check-in successful! Enjoy your study.';
+  String get checkInSuccessEnjoy =>
+      'Check-in successful! Enjoy your study session.';
 
   @override
   String checkInFailedWithReason(String reason) {
@@ -2278,7 +2282,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reservationNotice =>
-      'Please check in on time. Overdue check-ins will be marked as violations.';
+      'Please check in on time. Unchecked reservations will be recorded as violations.';
 
   @override
   String get reservationFailed => 'Reservation Failed';
@@ -2563,31 +2567,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairsTitle => 'Campus Repairs';
 
   @override
-  String get repairsQuickReport => 'Choose a repair type';
+  String get repairsQuickReport => 'Report an Issue';
 
   @override
   String get repairsQuickReportHint =>
       'Use native forms instead of opening the web page';
 
   @override
-  String get repairsMyOrders => 'My work orders';
+  String get repairsMyOrders => 'My Work Orders';
 
   @override
   String get repairsMyOrdersHint =>
       'Work-order status is synchronized with campus repairs';
 
   @override
-  String get repairsInProgress => 'In progress';
+  String get repairsInProgress => 'In Progress';
 
   @override
   String get repairsCompleted => 'Completed';
 
   @override
-  String get repairsHeroTitle => 'Campus service, repaired in one tap';
+  String get repairsHeroTitle => 'Campus Repairs, Made Simple';
 
   @override
   String get repairsHeroSubtitle =>
-      'Native forms with synchronized work-order status. Choose the service type that best matches your issue.';
+      'Submit issues using native forms with real-time status tracking. Select the category that best matches your issue.';
 
   @override
   String get repairsNoCompleted => 'No completed work orders';
@@ -2621,7 +2625,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairsSelectValue => 'Select';
 
   @override
-  String get repairsSubmit => 'Submit work order';
+  String get repairsSubmit => 'Submit Work Order';
 
   @override
   String get repairsSubmitting => 'Submitting…';
@@ -2630,13 +2634,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairsOrderDetail => 'Work order details';
 
   @override
-  String get repairsOrderNumber => 'Number';
+  String get repairsOrderNumber => 'Work Order #';
 
   @override
   String get repairsOrderStatus => 'Status';
 
   @override
-  String get repairsOrderType => 'Service';
+  String get repairsOrderType => 'Service Type';
 
   @override
   String get repairsDepartment => 'Department';
@@ -2657,7 +2661,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairsNoDrafts => 'No drafts';
 
   @override
-  String get repairsSaveDraft => 'Save draft';
+  String get repairsSaveDraft => 'Save Draft';
 
   @override
   String get repairsSavingDraft => 'Saving draft…';
@@ -2672,7 +2676,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairsCancellingOrder => 'Cancelling…';
 
   @override
-  String get repairsCancelConfirmTitle => 'Cancel repair order?';
+  String get repairsCancelConfirmTitle => 'Cancel Repair Order?';
 
   @override
   String get repairsCancelConfirmMessage =>
@@ -2682,10 +2686,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairsCancelSuccess => 'Repair order has been cancelled';
 
   @override
-  String get repairsApplicant => 'Applicant';
+  String get repairsApplicant => 'Requester';
 
   @override
-  String get repairsApplicantDepartment => 'Applicant department';
+  String get repairsApplicantDepartment => 'Requester Department';
 
   @override
   String get repairsPhone => 'Phone';
@@ -2709,13 +2713,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get repairsPriority => 'Priority';
 
   @override
-  String get repairsCurrentNode => 'Current step';
+  String get repairsCurrentNode => 'Current Step';
 
   @override
-  String get repairsCompletedAt => 'Completed';
+  String get repairsCompletedAt => 'Date Completed';
 
   @override
-  String get repairsActivityTimeline => 'Activity history';
+  String get repairsActivityTimeline => 'Activity History';
 
   @override
   String get repairsAttachments => 'Attachments';
@@ -2748,18 +2752,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get dataSyncSettings => 'Data';
 
   @override
-  String get dataBackup => 'Export data';
+  String get dataBackup => 'Export Data';
 
   @override
   String get backupSecurityTip =>
-      'Backup excludes login credentials, but includes your custom AI key. Keep it safe.';
+      'Backup excludes login passwords, but includes your custom AI API key. Please keep it safe.';
 
   @override
   String get backupShareText => 'My ChillEast data backup';
 
   @override
   String get backupExportSuccess =>
-      'Backup exported, choose where to save or share';
+      'Backup exported. You can save or share it.';
 
   @override
   String backupExportFailed(String error) {
@@ -2767,17 +2771,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get dataImport => 'Import data';
+  String get dataImport => 'Import Data';
 
   @override
-  String get dataImportConfirmTitle => 'Confirm restore?';
+  String get dataImportConfirmTitle => 'Confirm Restore?';
 
   @override
   String get dataImportConfirmMessage =>
       'Restoring will overwrite current settings and local data. Continue?';
 
   @override
-  String get dataImportSuccess => 'Backup restored';
+  String get dataImportSuccess => 'Backup restored successfully';
 
   @override
   String dataImportFailed(String error) {
@@ -2792,20 +2796,20 @@ class AppLocalizationsEn extends AppLocalizations {
       'Backup was created by a newer app version, please update first';
 
   @override
-  String get cloudBackupAutoSync => 'Auto sync';
+  String get cloudBackupAutoSync => 'Auto-sync';
 
   @override
-  String get cloudBackupAutoSyncSubtitle => 'Via Chaoxing cloud disk';
+  String get cloudBackupAutoSyncSubtitle => 'Via Chaoxing Cloud Drive';
 
   @override
-  String get cloudSyncPromptTitle => 'Enable auto sync';
+  String get cloudSyncPromptTitle => 'Enable Auto-sync';
 
   @override
   String get cloudSyncPromptMessage =>
-      'Auto-sync timetable, homework and other local data to Chaoxing cloud disk. You can turn it off anytime in Settings.';
+      'Automatically sync schedule, homework, and local data to Chaoxing Cloud Drive so you never lose them. You can turn this off anytime in Settings.';
 
   @override
-  String get cloudSyncPromptEnable => 'Enable now';
+  String get cloudSyncPromptEnable => 'Enable Now';
 
   @override
   String get bookSearch => 'Book Search';
@@ -2871,7 +2875,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statusInLibrary => 'Available';
 
   @override
-  String get statusBorrowed => '借出';
+  String get statusBorrowed => 'Borrowed';
 
   @override
   String get search => 'Search';
@@ -2934,7 +2938,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ehallCompleted => 'Completed';
 
   @override
-  String get ehallNoOrders => 'No application records yet';
+  String get ehallNoOrders => 'No applications yet';
 
   @override
   String get ehallFavorites => 'Favorites';
@@ -2951,13 +2955,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ehallSessionExpired =>
-      'Service Hall session expired, please log in again';
+      'Service Hall session expired. Please log in again.';
 
   @override
   String get ehallExternalJumpPrompt => 'Opening external service';
 
   @override
-  String get ehallOpenNativeLeave => 'Open in Native Leave App';
+  String get ehallOpenNativeLeave => 'Open in Leave Requests';
 
   @override
   String get examTimePrefix => 'Exam Time';
@@ -3072,5 +3076,151 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscriptionTutorialContent =>
-      '• Apple Calendar (iPhone / iPad / Mac):\nTap \'Subscribe in Calendar\' above, or in Calendar app choose \'Add Subscribed Calendar\' and paste the link.\n\n• Google Calendar:\nOn the web, click \'+\' next to \'Other calendars\', choose \'From URL\', and paste the link.\n\n• Microsoft Outlook:\nSelect \'Add Calendar\' -> \'Subscribe from web\', enter the link and save.';
+      '• Apple Calendar (iPhone / iPad / Mac):\nTap \'Subscribe in Calendar\' above, or in Calendar app choose \'Add Subscribed Calendar\' and paste the link.\n\n• Google Calendar:\nOn the web, click \'+\' next to \'Other calendars\', choose \'From URL\', and paste the link.\n\n• Microsoft Outlook:\nSelect \'Add Calendar\' -> \'Subscribe from web\', enter the link and save.\n\n• Note:\nThe subscription link includes all adjusted classes and stays up-to-date automatically whenever changes are made.';
+
+  @override
+  String get onboardingWelcomeTitle => 'Welcome to ChillEast';
+
+  @override
+  String get onboardingWelcomeSubtitle =>
+      'A modern campus life companion designed for HUNAU students';
+
+  @override
+  String get onboardingSkip => 'Skip';
+
+  @override
+  String get onboardingNext => 'Next';
+
+  @override
+  String get onboardingStart => 'Get Started';
+
+  @override
+  String get onboardingGoToLogin => 'Go to Login';
+
+  @override
+  String get onboardingGuideTitle => 'Welcome Guide & Feature Tour';
+
+  @override
+  String get onboardingGuideSubtitle =>
+      'Quickly explore ChillEast core features and tips';
+
+  @override
+  String get onboardingSlide1Tag => 'Timetable & Schedule';
+
+  @override
+  String get onboardingSlide1Title => 'Smart Timetable & Live Updates';
+
+  @override
+  String get onboardingSlide1Desc =>
+      'Fully automated timetable sync from the academic portal with adjustment rules. Live updates and desktop widgets keep your day in view.';
+
+  @override
+  String get onboardingSlide2Tag => 'Study Assistant';
+
+  @override
+  String get onboardingSlide2Title => 'Homework Sync & DDL Alerts';
+
+  @override
+  String get onboardingSlide2Desc =>
+      'Seamlessly sync Chaoxing homework with deadline countdowns and configurable reminder alerts to stay on top of coursework.';
+
+  @override
+  String get onboardingSlide3Tag => 'Campus Services';
+
+  @override
+  String get onboardingSlide3Title => 'All-in-One Campus Services';
+
+  @override
+  String get onboardingSlide3Desc =>
+      'Library seat booking reminders, campus card balance and transactions, dormitory electricity alerts all in one place.';
+
+  @override
+  String get onboardingSlide4Tag => 'Cross-Platform';
+
+  @override
+  String get onboardingSlide4Title => 'Calendar Subscription & Cloud Backup';
+
+  @override
+  String get onboardingSlide4Desc =>
+      'One-click Webcal subscription for phone, watch, and computer calendars. Encrypted cloud backup keeps your data safe across devices.';
+
+  @override
+  String postLoginSetupStep(int current, int total) {
+    return 'Step $current of $total';
+  }
+
+  @override
+  String get postLoginSetupSkip => 'Skip';
+
+  @override
+  String get postLoginSetupEnable => 'Enable';
+
+  @override
+  String get courseReminderPromptMessage =>
+      'Receive notifications before class starts to remind you of the classroom.';
+
+  @override
+  String get postLoginSetupNext => 'Enable';
+
+  @override
+  String get postLoginSetupFinish => 'Enable';
+
+  @override
+  String get postLoginSetupFinishWithoutEnable => 'Skip';
+
+  @override
+  String get timetableAutoSyncPromptTitle => 'Timetable Auto-Sync';
+
+  @override
+  String get timetableAutoSyncPromptMessage =>
+      'Automatically fetch from the educational system to keep your timetable up to date.';
+
+  @override
+  String get timetableAutoSyncPromptBadge => 'Recommended';
+
+  @override
+  String get homeworkReminderPromptTitle => 'Homework Deadline Reminder';
+
+  @override
+  String get homeworkReminderPromptMessage =>
+      'Receive notifications before homework deadlines to avoid missing submissions.';
+
+  @override
+  String get homeworkReminderPromptBadge => 'Advance Reminder';
+
+  @override
+  String get libraryReminderPromptTitle => 'Library Seat Reminder';
+
+  @override
+  String get libraryReminderPromptMessage =>
+      'Send notifications before reservation time slots to prevent missing appointments.';
+
+  @override
+  String get libraryReminderPromptBadge => 'Advance Reminder';
+
+  @override
+  String get timetableSubscriptionPromptTitle =>
+      'Timetable Calendar Subscription';
+
+  @override
+  String get timetableSubscriptionPromptMessage =>
+      'Generate a Webcal subscription to import into system calendar and Google Calendar with one click.';
+
+  @override
+  String get timetableSubscriptionPromptBadge => 'Cross-Platform Sync';
+
+  @override
+  String get useLiveActivityPrompt => 'Use Live Activities';
+
+  @override
+  String get startGuide => 'Start Setup Guide';
+
+  @override
+  String get postLoginDoneTitle => 'All Set!';
+
+  @override
+  String get postLoginDoneMessage => 'Welcome to ChillEast.';
+
+  @override
+  String get postLoginDoneButton => 'Finish';
 }
