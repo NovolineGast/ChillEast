@@ -3119,8 +3119,20 @@ class AppLocalizationsHsn extends AppLocalizations {
   String get postLoginDoneTitle => '大功告成！';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」。';
+  String get postLoginDoneMessage => '欢迎使用「自在东湖」，更多选项请到「设置」里头去看。';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => '搞完';
+
+  @override
+  String get analyticsAnonymousTitle => '允许匿名统计';
+
+  @override
+  String get analyticsAnonymousSubtitle => '光用绝对匿名方式，统计你用的版本。';
+
+  @override
+  String get analyticsPromptTitle => '允许匿名统计';
+
+  @override
+  String get analyticsPromptSubtitle => '光用绝对匿名方式，统计你用的版本。';
 }

@@ -3277,11 +3277,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get startGuide => 'Lancer le guide';
 
   @override
-  String get postLoginDoneTitle => 'C\'est terminé !';
+  String get postLoginDoneTitle => 'Tout est prêt !';
 
   @override
-  String get postLoginDoneMessage => 'Bienvenue sur ChillEast !';
+  String get postLoginDoneMessage =>
+      'Bienvenue sur ChillEast. Pour plus d\'options, rendez-vous dans les « Paramètres ».';
 
   @override
   String get postLoginDoneButton => 'Terminer';
+
+  @override
+  String get analyticsAnonymousTitle => 'Autoriser les statistiques anonymes';
+
+  @override
+  String get analyticsAnonymousSubtitle =>
+      'Comptabilise la version de votre application de manière strictement anonyme.';
+
+  @override
+  String get analyticsPromptTitle => 'Autoriser les statistiques anonymes';
+
+  @override
+  String get analyticsPromptSubtitle =>
+      'Comptabilise la version de votre application de manière strictement anonyme.';
 }

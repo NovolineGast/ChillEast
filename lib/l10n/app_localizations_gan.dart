@@ -3120,8 +3120,20 @@ class AppLocalizationsGan extends AppLocalizations {
   String get postLoginDoneTitle => '大功告成！';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」。';
+  String get postLoginDoneMessage => '欢迎使用「自在东湖」，更多选项请走到「设置」里向去望。';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => '搞妥';
+
+  @override
+  String get analyticsAnonymousTitle => '准许匿名统计';
+
+  @override
+  String get analyticsAnonymousSubtitle => '只用绝对匿名法子，统计你用哩版本。';
+
+  @override
+  String get analyticsPromptTitle => '准许匿名统计';
+
+  @override
+  String get analyticsPromptSubtitle => '只用绝对匿名法子，统计你用哩版本。';
 }

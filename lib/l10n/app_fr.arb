@@ -988,7 +988,11 @@
   "timetableSubscriptionPromptBadge": "Synchronisation universelle",
   "useLiveActivityPrompt": "Activer les activités en direct",
   "startGuide": "Lancer le guide",
-  "postLoginDoneTitle": "C'est terminé !",
-  "postLoginDoneMessage": "Bienvenue sur ChillEast !",
-  "postLoginDoneButton": "Terminer"
+  "postLoginDoneTitle": "Tout est prêt !",
+  "postLoginDoneMessage": "Bienvenue sur ChillEast. Pour plus d'options, rendez-vous dans les « Paramètres ».",
+  "postLoginDoneButton": "Terminer",
+  "analyticsAnonymousTitle": "Autoriser les statistiques anonymes",
+  "analyticsAnonymousSubtitle": "Comptabilise la version de votre application de manière strictement anonyme.",
+  "analyticsPromptTitle": "Autoriser les statistiques anonymes",
+  "analyticsPromptSubtitle": "Comptabilise la version de votre application de manière strictement anonyme."
 }

@@ -3145,11 +3145,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get startGuide => 'ガイドを開始';
 
   @override
-  String get postLoginDoneTitle => '準備が完了しました！';
+  String get postLoginDoneTitle => '準備完了！';
 
   @override
-  String get postLoginDoneMessage => '「自在東湖」へようこそ。快適なキャンパスライフをお楽しみください。';
+  String get postLoginDoneMessage => 'ChillEast へようこそ。その他のオプションは「設定」をご確認ください。';
 
   @override
   String get postLoginDoneButton => '完了';
+
+  @override
+  String get analyticsAnonymousTitle => '匿名統計を許可';
+
+  @override
+  String get analyticsAnonymousSubtitle => '完全に匿名化された方法でのみ、ご利用のアプリバージョンを集計します。';
+
+  @override
+  String get analyticsPromptTitle => '匿名統計を許可';
+
+  @override
+  String get analyticsPromptSubtitle => '完全に匿名化された方法でのみ、ご利用のアプリバージョンを集計します。';
 }

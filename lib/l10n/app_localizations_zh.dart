@@ -3119,10 +3119,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get postLoginDoneTitle => '大功告成！';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」。';
+  String get postLoginDoneMessage => '欢迎使用「自在东湖」，更多选项请访问「设置」。';
 
   @override
   String get postLoginDoneButton => '完成';
+
+  @override
+  String get analyticsAnonymousTitle => '允许匿名统计';
+
+  @override
+  String get analyticsAnonymousSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+
+  @override
+  String get analyticsPromptTitle => '允许匿名统计';
+
+  @override
+  String get analyticsPromptSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
 }
 
 /// The translations for Chinese, as used in Hong Kong (`zh_HK`).
@@ -6242,10 +6254,22 @@ class AppLocalizationsZhHk extends AppLocalizationsZh {
   String get postLoginDoneTitle => '大功告成！';
 
   @override
-  String get postLoginDoneMessage => '歡迎使用「自在東湖」。';
+  String get postLoginDoneMessage => '歡迎使用「自在東湖」，更多選項請前往「設定」。';
 
   @override
   String get postLoginDoneButton => '完成';
+
+  @override
+  String get analyticsAnonymousTitle => '允許匿名統計';
+
+  @override
+  String get analyticsAnonymousSubtitle => '僅使用絕對匿名方式，統計您的使用版本。';
+
+  @override
+  String get analyticsPromptTitle => '允許匿名統計';
+
+  @override
+  String get analyticsPromptSubtitle => '僅使用絕對匿名方式，統計您的使用版本。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -9365,10 +9389,22 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get postLoginDoneTitle => '大功告成！';
 
   @override
-  String get postLoginDoneMessage => '歡迎使用「自在東湖」。';
+  String get postLoginDoneMessage => '歡迎使用「自在東湖」，更多選項請前往「設定」。';
 
   @override
   String get postLoginDoneButton => '完成';
+
+  @override
+  String get analyticsAnonymousTitle => '允許匿名統計';
+
+  @override
+  String get analyticsAnonymousSubtitle => '僅使用絕對匿名方式，統計您的使用版本。';
+
+  @override
+  String get analyticsPromptTitle => '允許匿名統計';
+
+  @override
+  String get analyticsPromptSubtitle => '僅使用絕對匿名方式，統計您的使用版本。';
 }
 
 /// The translations for Chinese (`zh_hefei`).
@@ -12352,4 +12388,25 @@ class AppLocalizationsZhHefei extends AppLocalizationsZh {
   @override
   String get subscriptionTutorialContent =>
       '• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，贴上来链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，贴上来链接并存起来。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并存起来。\n\n• 提示：\n订阅链接包含调停后的统统课程，若有调课或教务更新，订阅源会自动保持最新。';
+
+  @override
+  String get postLoginDoneTitle => '大功告成！';
+
+  @override
+  String get postLoginDoneMessage => '欢迎使「自在东湖」，还要别滴选项请奔「设定」里去。';
+
+  @override
+  String get postLoginDoneButton => '搞定';
+
+  @override
+  String get analyticsAnonymousTitle => '准许匿名统计';
+
+  @override
+  String get analyticsAnonymousSubtitle => '只用绝对匿名法子，统计你用滴版本。';
+
+  @override
+  String get analyticsPromptTitle => '准许匿名统计';
+
+  @override
+  String get analyticsPromptSubtitle => '只用绝对匿名法子，统计你用滴版本。';
 }

@@ -3278,8 +3278,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String get postLoginDoneTitle => '¡Todo listo!';
 
   @override
-  String get postLoginDoneMessage => 'Te damos la bienvenida a «ChillEast».';
+  String get postLoginDoneMessage =>
+      '¡Te damos la bienvenida a ChillEast! Para más opciones, visita «Ajustes».';
 
   @override
-  String get postLoginDoneButton => 'Finalizar';
+  String get postLoginDoneButton => 'Listo';
+
+  @override
+  String get analyticsAnonymousTitle => 'Permitir estadísticas anónimas';
+
+  @override
+  String get analyticsAnonymousSubtitle =>
+      'Recopila la versión de la app de forma totalmente anónima.';
+
+  @override
+  String get analyticsPromptTitle => 'Permitir estadísticas anónimas';
+
+  @override
+  String get analyticsPromptSubtitle =>
+      'Recopila la versión de la app de forma totalmente anónima.';
 }

@@ -3247,8 +3247,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get postLoginDoneTitle => 'Всё готово!';
 
   @override
-  String get postLoginDoneMessage => 'Добро пожаловать в ChillEast!';
+  String get postLoginDoneMessage =>
+      'Добро пожаловать в ChillEast! Дополнительные параметры доступны в «Настройках».';
 
   @override
   String get postLoginDoneButton => 'Готово';
+
+  @override
+  String get analyticsAnonymousTitle => 'Разрешить анонимную статистику';
+
+  @override
+  String get analyticsAnonymousSubtitle =>
+      'Подсчитывает используемую версию приложения строго анонимным способом.';
+
+  @override
+  String get analyticsPromptTitle => 'Разрешить анонимную статистику';
+
+  @override
+  String get analyticsPromptSubtitle =>
+      'Подсчитывает используемую версию приложения строго анонимным способом.';
 }
