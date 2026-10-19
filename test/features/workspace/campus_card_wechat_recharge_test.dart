@@ -52,7 +52,7 @@ void main() {
   "resultData": {
     "partnerjourno": "datalook2026090312480399372",
     "mweb_url": "https://wx.tenpay.com/cgi-bin/mmpayweb-bin/checkmweb?prepay_id=wx187094599930909c450000034620263000&ct=1788410895&sign=BgAAvqBKUn_-LjADD9wcE9j1LeBIwKq5HRFVFjc6vth99oY&package=4153149418",
-    "openid": "06f1536a9362311bae112cd6651d13f0",
+    "openid": "00000000000000000000000000000000",
     "returnurl": "http%253A%252F%252Ffin-serv.hunau.edu.cn%252Fcommon%252FpaySuccess%253Fidserial%253D202440800000",
     "redirect_url": "http://fin-serv1.hunau.edu.cn/",
     "prepay_id": "wx187094599930909c450000034620263000"

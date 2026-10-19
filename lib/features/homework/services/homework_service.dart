@@ -103,7 +103,7 @@ class HomeworkService {
   }
 
   /// 将安卓端的特殊跳转 URL 转换为手机网页版 URL
-  /// 原: https://mooc1-api.chaoxing.com/mooc-ans/android/mtaskmsgspecial?taskrefId=51740957&msgId=0&courseId=261566913&userId=342380530&clazzId=142140293&type=work&enc_task=642d4dfcd6c101ee5f32b86ec2212f91
+  /// 原: https://mooc1-api.chaoxing.com/mooc-ans/android/mtaskmsgspecial?taskrefId=51740957&msgId=0&courseId=261566913&userId=100000000&clazzId=142140293&type=work&enc_task=642d4dfcd6c101ee5f32b86ec2212f91
   /// 现: https://mooc1-api.chaoxing.com/mooc-ans/work/phone/task-work?taskrefId=51740957&courseId=261566913&classId=142140293&ut=s
   String _transformDataUrl(String url) {
     if (url.isEmpty) return '';

@@ -203,8 +203,8 @@ void main() {
     });
 
     test('HAR submission MD5 signature generation matches HAR Entry 12', () {
-      // Data extracted from debug/图书馆快速预约.har Entry 12 & Entry 0
-      const submitEnc = '4aa684d0956a4310933b37c777ccc2d4_342380530';
+      // Mocked submission enc key and signature generation
+      const submitEnc = 'mock_enc_secret_key_100000000';
       final paramObj = <String, dynamic>{
         'roomId': 14100,
         'startTime': '17:00',
@@ -224,8 +224,7 @@ void main() {
       final raw = parts.join('');
       final enc = md5.convert(utf8.encode(raw)).toString();
 
-      // Verified from HAR file entry 12: enc=8880b5eb16c1c39798b6882fb7073187
-      expect(enc, '8880b5eb16c1c39798b6882fb7073187');
+      expect(enc, 'fe6d00e16a9507827463b247286ff595');
     });
 
     testWidgets(

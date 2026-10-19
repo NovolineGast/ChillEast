@@ -303,19 +303,19 @@ void main() {
   group('CloudiskService.parseSession', () {
     const html = '''
       <script>
-      rootdir = "1040921812082581504";
-      const _token = "930e5385a80fe00fcedd018b0502c004";
-      const encstr = "d34171a3f77471befaf2ef6f66cfcb34"
-      const currentPuid = "342380530";
+      rootdir = "1000000000000000001";
+      const _token = "00000000000000000000000000000001";
+      const encstr = "00000000000000000000000000000002"
+      const currentPuid = "100000000";
       </script>
     ''';
 
     test('extracts session constants', () {
       final s = CloudiskService.parseSession(html);
-      expect(s.puid, '342380530');
-      expect(s.rootDirId, '1040921812082581504');
-      expect(s.enc, 'd34171a3f77471befaf2ef6f66cfcb34');
-      expect(s.token, '930e5385a80fe00fcedd018b0502c004');
+      expect(s.puid, '100000000');
+      expect(s.rootDirId, '1000000000000000001');
+      expect(s.enc, '00000000000000000000000000000002');
+      expect(s.token, '00000000000000000000000000000001');
     });
 
     test('throws auth error on login page', () {
@@ -329,18 +329,18 @@ void main() {
       // 真实首页文末 script 之前散落着 var p_auth_token = ""、
       // cx_p_token = "…"、href="?p_auth_token=" 等干扰串（见 HAR）。
       const trapped = '''
-        <script>var p_auth_token = ""; cx_p_token = "11b6581db641bc297b2936a1802063c2";</script>
+        <script>var p_auth_token = ""; cx_p_token = "00000000000000000000000000000003";</script>
         <a href="/pcuserpan/squareIndex?customRootId=&p_auth_token=">x</a>
         <script>
-        const rootdir = "1040921812082581504";
-        const _token = "930e5385a80fe00fcedd018b0502c004";
-        const encstr = "d34171a3f77471befaf2ef6f66cfcb34"
-        const currentPuid = "342380530";
+        const rootdir = "1000000000000000001";
+        const _token = "00000000000000000000000000000001";
+        const encstr = "00000000000000000000000000000002"
+        const currentPuid = "100000000";
         </script>
       ''';
       final s = CloudiskService.parseSession(trapped);
-      expect(s.token, '930e5385a80fe00fcedd018b0502c004');
-      expect(s.puid, '342380530');
+      expect(s.token, '00000000000000000000000000000001');
+      expect(s.puid, '100000000');
     });
   });
 
