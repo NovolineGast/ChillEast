@@ -1003,6 +1003,10 @@
   "useLiveActivityPrompt": "Use Live Activities",
   "startGuide": "Start Setup Guide",
   "postLoginDoneTitle": "All Set!",
-  "postLoginDoneMessage": "Welcome to ChillEast.",
-  "postLoginDoneButton": "Finish"
+  "postLoginDoneMessage": "Welcome to ChillEast. For more options, please visit Settings.",
+  "postLoginDoneButton": "Finish",
+  "analyticsAnonymousTitle": "Allow Anonymous Statistics",
+  "analyticsAnonymousSubtitle": "Counts your app version using an absolutely anonymous method.",
+  "analyticsPromptTitle": "Allow Anonymous Statistics",
+  "analyticsPromptSubtitle": "Counts your app version using an absolutely anonymous method."
 }

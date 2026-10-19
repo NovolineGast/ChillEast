@@ -3,10 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/services/analytics_service.dart';
 import '../../../core/services/course_live_service.dart';
 import '../../../core/services/flyme_live_service.dart';
 import '../../../core/services/notification_service.dart';
 import '../../../core/utils/l10n_extension.dart';
+import '../../../core/widgets/brand_switch.dart';
 import '../../profile/providers/settings_provider.dart';
 import '../../profile/services/backup_provider_refresh.dart';
 import '../services/cloud_backup_manager.dart';
@@ -77,12 +79,16 @@ class _CloudSyncPromptScreenState
   bool _liveSupported = false;
   bool _isFlyme = false;
   bool _useLiveActivity = true;
+  bool _analyticsEnabled = true;
 
   @override
   void initState() {
     super.initState();
     _checkLiveSupport();
     _loadExistingSettings();
+    AnalyticsService.isEnabled().then((val) {
+      if (mounted) setState(() => _analyticsEnabled = val);
+    });
   }
 
   void _loadExistingSettings() {
@@ -554,12 +560,80 @@ class _CloudSyncPromptScreenState
                 imageAsset: 'assets/images/done.png',
                 title: l10n.postLoginDoneTitle,
                 message: l10n.postLoginDoneMessage,
+                bottomLeadingWidget: _buildAnalyticsSwitch(context),
                 showSkipButton: false,
                 showArrowIcon: false,
                 enableButtonText: l10n.postLoginDoneButton,
                 onEnable: _dismiss,
                 onSkip: _dismiss,
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAnalyticsSwitch(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = context.l10n;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: _busy
+            ? null
+            : () {
+                final next = !_analyticsEnabled;
+                setState(() => _analyticsEnabled = next);
+                AnalyticsService.setEnabled(next);
+              },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 2),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      l10n.analyticsPromptTitle,
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color:
+                            isDark ? Colors.white : const Color(0xFF202124),
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      l10n.analyticsPromptSubtitle,
+                      style: TextStyle(
+                        fontSize: 11,
+                        color:
+                            isDark ? Colors.white60 : const Color(0xFF5F6368),
+                        height: 1.25,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 4),
+              BrandSwitch(
+                value: _analyticsEnabled,
+                onChanged: _busy
+                    ? null
+                    : (val) {
+                        setState(() => _analyticsEnabled = val);
+                        AnalyticsService.setEnabled(val);
+                      },
+              ),
+              const SizedBox(width: 8),
             ],
           ),
         ),
@@ -644,6 +718,7 @@ class _CloudSyncPromptScreenState
     required String title,
     required String message,
     Widget? extraWidget,
+    Widget? bottomLeadingWidget,
     bool showSkipButton = true,
     bool showArrowIcon = true,
     String? enableButtonText,
@@ -712,14 +787,15 @@ class _CloudSyncPromptScreenState
 
               const SizedBox(height: 24),
 
-              // 底部操作按钮栏 (右对齐，跳过在开启左侧，箭头在开启右侧)
-              Align(
-                alignment: Alignment.centerRight,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    // 跳过按钮 (文字在开启按钮左边)
-                    if (showSkipButton) ...[
+              // 底部操作按钮栏 (左侧可放辅助部件如统计开关，右侧为跳过和开启/完成)
+              Row(
+                children: [
+                  if (bottomLeadingWidget != null)
+                    Expanded(child: bottomLeadingWidget)
+                  else
+                    const Spacer(),
+                  // 跳过按钮 (文字在开启按钮左边)
+                  if (showSkipButton) ...[
                       TextButton(
                         onPressed: _busy ? null : onSkip,
                         style: TextButton.styleFrom(
@@ -791,8 +867,7 @@ class _CloudSyncPromptScreenState
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 28),
+                const SizedBox(height: 28),
             ],
           ),
         ),
