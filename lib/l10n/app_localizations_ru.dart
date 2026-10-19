@@ -3104,140 +3104,147 @@ class AppLocalizationsRu extends AppLocalizations {
       '• Apple Календарь (iPhone / iPad / Mac):\nНажмите «Подписаться в Календаре» выше или в приложении Календарь выберите «Добавить подписку на календарь» и вставьте ссылку.\n\n• Google Календарь:\nВ веб-версии нажмите «+» рядом с «Другие календари», выберите «По URL» и вставьте ссылку.\n\n• Microsoft Outlook:\nВыберите «Добавить календарь» → «Подписаться из Интернета», вставьте ссылку и сохраните.\n\n• Примечание:\nСсылка содержит актуальное расписание с учетом всех переносов и отмен. При изменениях календарь обновится автоматически.';
 
   @override
-  String get onboardingWelcomeTitle => '欢迎使用 ChillEast';
+  String get onboardingWelcomeTitle => 'Добро пожаловать в ChillEast';
 
   @override
-  String get onboardingWelcomeSubtitle => '专为湖南农业大学学子打造的现代化校园生活助手';
+  String get onboardingWelcomeSubtitle =>
+      'Современный помощник для студентов Хунаньского аграрного университета';
 
   @override
-  String get onboardingSkip => '跳过';
+  String get onboardingSkip => 'Пропустить';
 
   @override
-  String get onboardingNext => '下一步';
+  String get onboardingNext => 'Далее';
 
   @override
-  String get onboardingStart => '开始使用';
+  String get onboardingStart => 'Начать';
 
   @override
-  String get onboardingGoToLogin => '去登录';
+  String get onboardingGoToLogin => 'Войти';
 
   @override
-  String get onboardingGuideTitle => '迎新导览与功能介绍';
+  String get onboardingGuideTitle => 'Знакомство с приложением';
 
   @override
-  String get onboardingGuideSubtitle => '快速了解 ChillEast 的核心功能与使用技巧';
+  String get onboardingGuideSubtitle =>
+      'Узнайте о ключевых возможностях и полезных функциях ChillEast';
 
   @override
-  String get onboardingSlide1Tag => '课表与日程';
+  String get onboardingSlide1Tag => 'Расписание и планы';
 
   @override
-  String get onboardingSlide1Title => '智能课表 · 桌面实况';
+  String get onboardingSlide1Title => 'Умное расписание · Live Activities';
 
   @override
   String get onboardingSlide1Desc =>
-      '全自动同步教务课表，智能对齐调停补变动。配合桌面实况与小组件，随时随地查看精彩日程。';
+      'Автоматическая синхронизация с учебным порталом с учетом переносов и отмен занятий. Интерактивные виджеты и Live Activities помогут всегда держать расписание под рукой.';
 
   @override
-  String get onboardingSlide2Tag => '学业助手';
+  String get onboardingSlide2Tag => 'Учеба и задания';
 
   @override
-  String get onboardingSlide2Title => '作业同步 · 智能预警';
+  String get onboardingSlide2Title => 'Синхронизация заданий · Напоминания';
 
   @override
   String get onboardingSlide2Desc =>
-      '无缝同步超星学习通作业，倒计时清晰直观。支持自定义截止前提醒，告别拖延与作业遗漏。';
+      'Синхронизация домашних заданий из Chaoxing с наглядным таймером дедлайнов. Настраиваемые уведомления помогут сдать всё вовремя.';
 
   @override
-  String get onboardingSlide3Tag => '校园服务';
+  String get onboardingSlide3Tag => 'Сервисы кампуса';
 
   @override
-  String get onboardingSlide3Title => '校园生活 · 一站通办';
+  String get onboardingSlide3Title => 'Жизнь в кампусе · Всё в одном месте';
 
   @override
-  String get onboardingSlide3Desc => '图书馆选座到期提醒、一卡通账单余额明细、宿舍电费余量预警，日常校园事务一手掌握。';
+  String get onboardingSlide3Desc =>
+      'Напоминания о бронировании мест в библиотеке, баланс кампусной карты и учет расходов, контроль баланса электричества в общежитии — все повседневные дела под контролем.';
 
   @override
-  String get onboardingSlide4Tag => '多端同步';
+  String get onboardingSlide4Tag => 'Синхронизация';
 
   @override
-  String get onboardingSlide4Title => '日历订阅 · 云端备份';
+  String get onboardingSlide4Title => 'Подписка на календарь · Резервные копии';
 
   @override
   String get onboardingSlide4Desc =>
-      '一键生成 Webcal 日历订阅，无缝连接手机、手表与电脑；云端自动加密备份，多设备漫游换机无忧。';
+      'Подписка Webcal в один клик для календарей на смартфоне, часах и компьютере. Зашифрованная резервная копия в облаке сохранит ваши данные при смене устройства.';
 
   @override
   String postLoginSetupStep(int current, int total) {
-    return '第 $current / $total 步';
+    return 'Шаг $current из $total';
   }
 
   @override
-  String get postLoginSetupSkip => '跳过';
+  String get postLoginSetupSkip => 'Пропустить';
 
   @override
-  String get postLoginSetupEnable => '开启';
+  String get postLoginSetupEnable => 'Включить';
 
   @override
-  String get courseReminderPromptMessage => '在课程开始前通知提醒上课教室。';
+  String get courseReminderPromptMessage =>
+      'Напоминания о предстоящих парах с указанием аудитории.';
 
   @override
-  String get postLoginSetupNext => '开启';
+  String get postLoginSetupNext => 'Включить';
 
   @override
-  String get postLoginSetupFinish => '开启';
+  String get postLoginSetupFinish => 'Включить';
 
   @override
-  String get postLoginSetupFinishWithoutEnable => '跳过';
+  String get postLoginSetupFinishWithoutEnable => 'Пропустить';
 
   @override
-  String get timetableAutoSyncPromptTitle => '课表自动同步';
+  String get timetableAutoSyncPromptTitle => 'Автосинхронизация расписания';
 
   @override
-  String get timetableAutoSyncPromptMessage => '自动拉取教务系统，时刻获取最新课表。';
+  String get timetableAutoSyncPromptMessage =>
+      'Автоматическая загрузка расписания из учебной системы для поддержания данных в актуальном состоянии.';
 
   @override
-  String get timetableAutoSyncPromptBadge => '推荐开启';
+  String get timetableAutoSyncPromptBadge => 'Рекомендуется';
 
   @override
-  String get homeworkReminderPromptTitle => '作业截止提醒';
+  String get homeworkReminderPromptTitle => 'Напоминания о дедлайнах';
 
   @override
-  String get homeworkReminderPromptMessage => '作业截止前通知提醒，避免错过作业提交。';
+  String get homeworkReminderPromptMessage =>
+      'Уведомления перед окончанием срока сдачи заданий, чтобы ничего не пропустить.';
 
   @override
-  String get homeworkReminderPromptBadge => '提前预警';
+  String get homeworkReminderPromptBadge => 'Заранее';
 
   @override
-  String get libraryReminderPromptTitle => '图书馆座位提醒';
+  String get libraryReminderPromptTitle => 'Напоминание о месте в библиотеке';
 
   @override
-  String get libraryReminderPromptMessage => '预约时段开始前发送通知，防止错过预约';
+  String get libraryReminderPromptMessage =>
+      'Уведомление перед началом бронирования места для своевременной отметки.';
 
   @override
-  String get libraryReminderPromptBadge => '提前提醒';
+  String get libraryReminderPromptBadge => 'Напоминание';
 
   @override
-  String get timetableSubscriptionPromptTitle => '课表日历订阅';
+  String get timetableSubscriptionPromptTitle => 'Подписка на календарь';
 
   @override
   String get timetableSubscriptionPromptMessage =>
-      '生成 Webcal 订阅，一键导入系统日历与 Google Calendar。';
+      'Создание ссылки Webcal для синхронизации расписания с системным календарем и Google Календарем.';
 
   @override
-  String get timetableSubscriptionPromptBadge => '全平台日程同步';
+  String get timetableSubscriptionPromptBadge => 'Все платформы';
 
   @override
-  String get useLiveActivityPrompt => '使用实时活动';
+  String get useLiveActivityPrompt => 'Интерактивные виджеты (Live Activities)';
 
   @override
-  String get startGuide => '开始引导';
+  String get startGuide => 'Начать настройку';
 
   @override
-  String get postLoginDoneTitle => '大功告成！';
+  String get postLoginDoneTitle => 'Всё готово!';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」。';
+  String get postLoginDoneMessage => 'Добро пожаловать в ChillEast!';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => 'Готово';
 }

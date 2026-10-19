@@ -6101,6 +6101,145 @@ class AppLocalizationsZhHk extends AppLocalizationsZh {
   @override
   String get subscriptionTutorialContent =>
       '• Apple 日曆 (iPhone / iPad / Mac)：\n點擊上方「在日曆中訂閲」，或在日曆應用程式中選擇「加入訂閲日曆」，貼上連結即可。\n\n• Google 日曆：\n在網頁端點擊「其他日曆」旁的「+」號，選擇「透過網址」，貼上連結並儲存。\n\n• Outlook / 微軟日曆：\n選擇「新增日曆」-「從 Web 訂閲」，輸入連結並儲存。\n\n• 提示：\n訂閲連結包含調停後的全部課程，如有調課或教務更新，訂閲源將自動保持最新。';
+
+  @override
+  String get onboardingWelcomeTitle => '歡迎使用 ChillEast';
+
+  @override
+  String get onboardingWelcomeSubtitle => '專為湖南農業大學學子打造的現代化校園生活助手';
+
+  @override
+  String get onboardingSkip => '跳過';
+
+  @override
+  String get onboardingNext => '下一步';
+
+  @override
+  String get onboardingStart => '開始使用';
+
+  @override
+  String get onboardingGoToLogin => '前往登入';
+
+  @override
+  String get onboardingGuideTitle => '迎新導覽與功能介紹';
+
+  @override
+  String get onboardingGuideSubtitle => '快速了解 ChillEast 的核心功能與使用技巧';
+
+  @override
+  String get onboardingSlide1Tag => '課表與日程';
+
+  @override
+  String get onboardingSlide1Title => '智能課表 · 桌面實況';
+
+  @override
+  String get onboardingSlide1Desc =>
+      '全自動同步教務課表，智慧對齊調課、停課與補課變動。配合桌面實況與小工具，隨時隨地查看精彩日程。';
+
+  @override
+  String get onboardingSlide2Tag => '學業助手';
+
+  @override
+  String get onboardingSlide2Title => '作業同步 · 智能預警';
+
+  @override
+  String get onboardingSlide2Desc =>
+      '無縫同步超星學習通作業，倒數計時清晰直觀。支援自訂截止前提醒，告別拖延與作業遺漏。';
+
+  @override
+  String get onboardingSlide3Tag => '校園服務';
+
+  @override
+  String get onboardingSlide3Title => '校園生活 · 一站通辦';
+
+  @override
+  String get onboardingSlide3Desc =>
+      '圖書館選座到期提醒、校園卡帳單與餘額明細、宿舍電費餘額預警，日常校園事務一手掌握。';
+
+  @override
+  String get onboardingSlide4Tag => '多端同步';
+
+  @override
+  String get onboardingSlide4Title => '日曆訂閲 · 雲端備份';
+
+  @override
+  String get onboardingSlide4Desc =>
+      '一鍵生成 Webcal 日曆訂閲，無縫連接手機、手錶與電腦；雲端自動加密備份，多裝置漫遊換機無憂。';
+
+  @override
+  String postLoginSetupStep(int current, int total) {
+    return '第 $current / $total 步';
+  }
+
+  @override
+  String get postLoginSetupSkip => '跳過';
+
+  @override
+  String get postLoginSetupEnable => '開啟';
+
+  @override
+  String get courseReminderPromptMessage => '在課程開始前通知提醒上課教室。';
+
+  @override
+  String get postLoginSetupNext => '開啟';
+
+  @override
+  String get postLoginSetupFinish => '開啟';
+
+  @override
+  String get postLoginSetupFinishWithoutEnable => '跳過';
+
+  @override
+  String get timetableAutoSyncPromptTitle => '課表自動同步';
+
+  @override
+  String get timetableAutoSyncPromptMessage => '自動同步教務系統，隨時獲取最新課表。';
+
+  @override
+  String get timetableAutoSyncPromptBadge => '建議開啟';
+
+  @override
+  String get homeworkReminderPromptTitle => '作業截止提醒';
+
+  @override
+  String get homeworkReminderPromptMessage => '作業截止前發送通知提醒，避免錯過作業提交。';
+
+  @override
+  String get homeworkReminderPromptBadge => '提前預警';
+
+  @override
+  String get libraryReminderPromptTitle => '圖書館座位提醒';
+
+  @override
+  String get libraryReminderPromptMessage => '預約時段開始前發送通知，防止錯過預約';
+
+  @override
+  String get libraryReminderPromptBadge => '提前提醒';
+
+  @override
+  String get timetableSubscriptionPromptTitle => '課表日曆訂閲';
+
+  @override
+  String get timetableSubscriptionPromptMessage =>
+      '生成 Webcal 訂閲，一鍵匯入系統日曆與 Google 日曆。';
+
+  @override
+  String get timetableSubscriptionPromptBadge => '全平台日程同步';
+
+  @override
+  String get useLiveActivityPrompt => '使用實時活動';
+
+  @override
+  String get startGuide => '開始導覽';
+
+  @override
+  String get postLoginDoneTitle => '大功告成！';
+
+  @override
+  String get postLoginDoneMessage => '歡迎使用「自在東湖」。';
+
+  @override
+  String get postLoginDoneButton => '完成';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -9082,6 +9221,145 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get subscriptionTutorialContent =>
       '• Apple 行事曆 (iPhone / iPad / Mac)：\n點擊上方「在行事曆中訂閱」，或在行事曆 App 中選擇「加入已訂閱的行事曆」，貼上連結即可。\n\n• Google 日曆：\n在網頁端點擊「其他日曆」旁的「+」號，選擇「透過網址」，貼上連結並儲存。\n\n• Outlook / 微軟行事曆：\n選擇「新增行事曆」-「從 Web 訂閱」，輸入連結並儲存。\n\n• 提示：\n訂閱連結包含調課停課後的全部課程，若有調課或教務更新，訂閱來源會自動保持最新。';
+
+  @override
+  String get onboardingWelcomeTitle => '歡迎使用 ChillEast';
+
+  @override
+  String get onboardingWelcomeSubtitle => '專為湖南農業大學學子打造的現代化校園生活助手';
+
+  @override
+  String get onboardingSkip => '略過';
+
+  @override
+  String get onboardingNext => '下一步';
+
+  @override
+  String get onboardingStart => '開始使用';
+
+  @override
+  String get onboardingGoToLogin => '前往登入';
+
+  @override
+  String get onboardingGuideTitle => '迎新導覽與功能介紹';
+
+  @override
+  String get onboardingGuideSubtitle => '快速了解 ChillEast 的核心功能與使用技巧';
+
+  @override
+  String get onboardingSlide1Tag => '課表與日程';
+
+  @override
+  String get onboardingSlide1Title => '智慧課表 · 即時動態';
+
+  @override
+  String get onboardingSlide1Desc =>
+      '全自動同步教務課表，智慧對齊調課停課變動。搭配即時動態與桌面小工具，隨時隨地掌握精彩日程。';
+
+  @override
+  String get onboardingSlide2Tag => '學業助手';
+
+  @override
+  String get onboardingSlide2Title => '作業同步 · 智慧預警';
+
+  @override
+  String get onboardingSlide2Desc =>
+      '無縫同步超星學習通作業，倒數計時清晰直觀。支援自訂截止前提醒，告別拖延與作業遺漏。';
+
+  @override
+  String get onboardingSlide3Tag => '校園服務';
+
+  @override
+  String get onboardingSlide3Title => '校園生活 · 一站通辦';
+
+  @override
+  String get onboardingSlide3Desc =>
+      '圖書館預約選位到期提醒、校園卡帳單餘額明細、宿舍電費餘額預警，日常校園事務一手掌握。';
+
+  @override
+  String get onboardingSlide4Tag => '跨平台同步';
+
+  @override
+  String get onboardingSlide4Title => '行事曆訂閱 · 雲端備份';
+
+  @override
+  String get onboardingSlide4Desc =>
+      '一鍵產生 Webcal 行事曆訂閱，無縫連接手機、手錶與電腦；雲端自動加密備份，多裝置同步換機無憂。';
+
+  @override
+  String postLoginSetupStep(int current, int total) {
+    return '第 $current / $total 步';
+  }
+
+  @override
+  String get postLoginSetupSkip => '略過';
+
+  @override
+  String get postLoginSetupEnable => '開啟';
+
+  @override
+  String get courseReminderPromptMessage => '在課程開始前推播提醒上課教室。';
+
+  @override
+  String get postLoginSetupNext => '開啟';
+
+  @override
+  String get postLoginSetupFinish => '開啟';
+
+  @override
+  String get postLoginSetupFinishWithoutEnable => '略過';
+
+  @override
+  String get timetableAutoSyncPromptTitle => '課表自動同步';
+
+  @override
+  String get timetableAutoSyncPromptMessage => '自動同步教務系統，隨時取得最新課表。';
+
+  @override
+  String get timetableAutoSyncPromptBadge => '建議開啟';
+
+  @override
+  String get homeworkReminderPromptTitle => '作業截止提醒';
+
+  @override
+  String get homeworkReminderPromptMessage => '作業截止前推播提醒，避免錯過作業繳交。';
+
+  @override
+  String get homeworkReminderPromptBadge => '提前預警';
+
+  @override
+  String get libraryReminderPromptTitle => '圖書館座位提醒';
+
+  @override
+  String get libraryReminderPromptMessage => '預約時段開始前發送推播通知，避免錯過預約時間';
+
+  @override
+  String get libraryReminderPromptBadge => '提前提醒';
+
+  @override
+  String get timetableSubscriptionPromptTitle => '課表行事曆訂閱';
+
+  @override
+  String get timetableSubscriptionPromptMessage =>
+      '產生 Webcal 訂閱，一鍵匯入系統行事曆與 Google 日曆。';
+
+  @override
+  String get timetableSubscriptionPromptBadge => '全平台日程同步';
+
+  @override
+  String get useLiveActivityPrompt => '使用即時動態';
+
+  @override
+  String get startGuide => '開始導覽';
+
+  @override
+  String get postLoginDoneTitle => '大功告成！';
+
+  @override
+  String get postLoginDoneMessage => '歡迎使用「自在東湖」。';
+
+  @override
+  String get postLoginDoneButton => '完成';
 }
 
 /// The translations for Chinese (`zh_hefei`).

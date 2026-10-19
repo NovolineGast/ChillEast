@@ -3102,7 +3102,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingGuideSubtitle =>
-      'Quickly explore ChillEast core features and tips';
+      'Quickly explore ChillEast\'s core features and tips';
 
   @override
   String get onboardingSlide1Tag => 'Timetable & Schedule';
@@ -3112,13 +3112,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSlide1Desc =>
-      'Fully automated timetable sync from the academic portal with adjustment rules. Live updates and desktop widgets keep your day in view.';
+      'Fully automated timetable sync from the academic portal with adjustment rules. Live updates and home screen widgets keep your day in view.';
 
   @override
   String get onboardingSlide2Tag => 'Study Assistant';
 
   @override
-  String get onboardingSlide2Title => 'Homework Sync & DDL Alerts';
+  String get onboardingSlide2Title => 'Homework Sync & Deadline Alerts';
 
   @override
   String get onboardingSlide2Desc =>
@@ -3132,7 +3132,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get onboardingSlide3Desc =>
-      'Library seat booking reminders, campus card balance and transactions, dormitory electricity alerts all in one place.';
+      'Library seat reminders, campus card balances, and dorm electricity alerts—all in one place.';
 
   @override
   String get onboardingSlide4Tag => 'Cross-Platform';
@@ -3157,7 +3157,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get courseReminderPromptMessage =>
-      'Receive notifications before class starts to remind you of the classroom.';
+      'Receive reminders before class starts with your classroom location.';
 
   @override
   String get postLoginSetupNext => 'Enable';
@@ -3173,7 +3173,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timetableAutoSyncPromptMessage =>
-      'Automatically fetch from the educational system to keep your timetable up to date.';
+      'Automatically sync with the academic portal to keep your timetable up to date.';
 
   @override
   String get timetableAutoSyncPromptBadge => 'Recommended';
@@ -3183,20 +3183,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get homeworkReminderPromptMessage =>
-      'Receive notifications before homework deadlines to avoid missing submissions.';
+      'Get notified before homework deadlines so you never miss a submission.';
 
   @override
-  String get homeworkReminderPromptBadge => 'Advance Reminder';
+  String get homeworkReminderPromptBadge => 'Early Alerts';
 
   @override
   String get libraryReminderPromptTitle => 'Library Seat Reminder';
 
   @override
   String get libraryReminderPromptMessage =>
-      'Send notifications before reservation time slots to prevent missing appointments.';
+      'Receive notifications before your reservation starts so you never miss check-in.';
 
   @override
-  String get libraryReminderPromptBadge => 'Advance Reminder';
+  String get libraryReminderPromptBadge => 'Early Reminder';
 
   @override
   String get timetableSubscriptionPromptTitle =>
@@ -3204,7 +3204,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get timetableSubscriptionPromptMessage =>
-      'Generate a Webcal subscription to import into system calendar and Google Calendar with one click.';
+      'Generate a Webcal link to sync your classes with Apple Calendar, Google Calendar, and more.';
 
   @override
   String get timetableSubscriptionPromptBadge => 'Cross-Platform Sync';

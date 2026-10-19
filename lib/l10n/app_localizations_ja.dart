@@ -3011,140 +3011,142 @@ class AppLocalizationsJa extends AppLocalizations {
       '• Apple カレンダー (iPhone / iPad / Mac):\n上の「カレンダーで購読」をタップするか、カレンダーアプリで「照会カレンダーを追加」を選択し、リンクを貼り付けます。\n\n• Google カレンダー:\nウェブ版で「他のカレンダー」の横にある「＋」をクリックし、「URL から追加」を選択してリンクを貼り付けて保存します。\n\n• Outlook / Microsoft カレンダー:\n「カレンダーの追加」→「Web から購読」を選択し、リンクを入力して保存します。\n\n• ヒント:\n購読リンクには休講・補講などが反映された最新の時間割が含まれており、変更があった場合も自動的に更新されます。';
 
   @override
-  String get onboardingWelcomeTitle => '欢迎使用 ChillEast';
+  String get onboardingWelcomeTitle => 'ChillEast へようこそ';
 
   @override
-  String get onboardingWelcomeSubtitle => '专为湖南农业大学学子打造的现代化校园生活助手';
+  String get onboardingWelcomeSubtitle => '湖南農業大学の学生のために作られたモダンなキャンパス生活アシスタント';
 
   @override
-  String get onboardingSkip => '跳过';
+  String get onboardingSkip => 'スキップ';
 
   @override
-  String get onboardingNext => '下一步';
+  String get onboardingNext => '次へ';
 
   @override
-  String get onboardingStart => '开始使用';
+  String get onboardingStart => 'はじめる';
 
   @override
-  String get onboardingGoToLogin => '去登录';
+  String get onboardingGoToLogin => 'ログインへ';
 
   @override
-  String get onboardingGuideTitle => '迎新导览与功能介绍';
+  String get onboardingGuideTitle => 'ガイドツアーと機能紹介';
 
   @override
-  String get onboardingGuideSubtitle => '快速了解 ChillEast 的核心功能与使用技巧';
+  String get onboardingGuideSubtitle => 'ChillEast の主な機能と便利な使い方をご紹介します';
 
   @override
-  String get onboardingSlide1Tag => '课表与日程';
+  String get onboardingSlide1Tag => '時間割と予定';
 
   @override
-  String get onboardingSlide1Title => '智能课表 · 桌面实况';
+  String get onboardingSlide1Title => 'スマート時間割 · ライブアクティビティ';
 
   @override
   String get onboardingSlide1Desc =>
-      '全自动同步教务课表，智能对齐调停补变动。配合桌面实况与小组件，随时随地查看精彩日程。';
+      '教務システムから時間割を自動同期し、休講や振替にもスマートに対応。ライブアクティビティやウィジェットと連携して、いつでも次の授業や予定を確認できます。';
 
   @override
-  String get onboardingSlide2Tag => '学业助手';
+  String get onboardingSlide2Tag => '学習サポート';
 
   @override
-  String get onboardingSlide2Title => '作业同步 · 智能预警';
+  String get onboardingSlide2Title => '課題同期 · 締め切りアラート';
 
   @override
   String get onboardingSlide2Desc =>
-      '无缝同步超星学习通作业，倒计时清晰直观。支持自定义截止前提醒，告别拖延与作业遗漏。';
+      'Chaoxing（学習通）の課題をスムーズに同期し、締め切りまでのカウントダウンを一目で確認。事前通知リマインダーで提出忘れを防ぎます。';
 
   @override
-  String get onboardingSlide3Tag => '校园服务';
+  String get onboardingSlide3Tag => 'キャンパスサービス';
 
   @override
-  String get onboardingSlide3Title => '校园生活 · 一站通办';
+  String get onboardingSlide3Title => 'キャンパス生活 · オールインワン';
 
   @override
-  String get onboardingSlide3Desc => '图书馆选座到期提醒、一卡通账单余额明细、宿舍电费余量预警，日常校园事务一手掌握。';
+  String get onboardingSlide3Desc =>
+      '図書館の座席予約リマインダー、学生証残高・利用明細、寮の電気代残量アラートなど、学内の日常をこれひとつで管理できます。';
 
   @override
-  String get onboardingSlide4Tag => '多端同步';
+  String get onboardingSlide4Tag => 'マルチデバイス連携';
 
   @override
-  String get onboardingSlide4Title => '日历订阅 · 云端备份';
+  String get onboardingSlide4Title => 'カレンダー購読 · クラウドバックアップ';
 
   @override
   String get onboardingSlide4Desc =>
-      '一键生成 Webcal 日历订阅，无缝连接手机、手表与电脑；云端自动加密备份，多设备漫游换机无忧。';
+      'Webcalカレンダー購読をワンタップで作成し、スマートフォン・スマートウォッチ・PCと連携。クラウド自動暗号化バックアップで機種変更時も安心です。';
 
   @override
   String postLoginSetupStep(int current, int total) {
-    return '第 $current / $total 步';
+    return 'ステップ $current / $total';
   }
 
   @override
-  String get postLoginSetupSkip => '跳过';
+  String get postLoginSetupSkip => 'スキップ';
 
   @override
-  String get postLoginSetupEnable => '开启';
+  String get postLoginSetupEnable => 'オンにする';
 
   @override
-  String get courseReminderPromptMessage => '在课程开始前通知提醒上课教室。';
+  String get courseReminderPromptMessage => '授業開始前に教室と講義のリマインダー通知を受け取ります。';
 
   @override
-  String get postLoginSetupNext => '开启';
+  String get postLoginSetupNext => 'オンにする';
 
   @override
-  String get postLoginSetupFinish => '开启';
+  String get postLoginSetupFinish => 'オンにする';
 
   @override
-  String get postLoginSetupFinishWithoutEnable => '跳过';
+  String get postLoginSetupFinishWithoutEnable => 'スキップ';
 
   @override
-  String get timetableAutoSyncPromptTitle => '课表自动同步';
+  String get timetableAutoSyncPromptTitle => '時間割を自動同期';
 
   @override
-  String get timetableAutoSyncPromptMessage => '自动拉取教务系统，时刻获取最新课表。';
+  String get timetableAutoSyncPromptMessage =>
+      '教務システムから時間割を自動取得し、常に最新のスケジュールを保ちます。';
 
   @override
-  String get timetableAutoSyncPromptBadge => '推荐开启';
+  String get timetableAutoSyncPromptBadge => 'おすすめ';
 
   @override
-  String get homeworkReminderPromptTitle => '作业截止提醒';
+  String get homeworkReminderPromptTitle => '課題締め切りリマインダー';
 
   @override
-  String get homeworkReminderPromptMessage => '作业截止前通知提醒，避免错过作业提交。';
+  String get homeworkReminderPromptMessage => '課題の締め切り前に通知でリマインドし、提出遅れを防ぎます。';
 
   @override
-  String get homeworkReminderPromptBadge => '提前预警';
+  String get homeworkReminderPromptBadge => '事前アラート';
 
   @override
-  String get libraryReminderPromptTitle => '图书馆座位提醒';
+  String get libraryReminderPromptTitle => '図書館座席リマインダー';
 
   @override
-  String get libraryReminderPromptMessage => '预约时段开始前发送通知，防止错过预约';
+  String get libraryReminderPromptMessage => '予約時間帯の開始前に通知を送信し、チェックイン忘れを防ぎます。';
 
   @override
-  String get libraryReminderPromptBadge => '提前提醒';
+  String get libraryReminderPromptBadge => '事前アラート';
 
   @override
-  String get timetableSubscriptionPromptTitle => '课表日历订阅';
+  String get timetableSubscriptionPromptTitle => '時間割カレンダー購読';
 
   @override
   String get timetableSubscriptionPromptMessage =>
-      '生成 Webcal 订阅，一键导入系统日历与 Google Calendar。';
+      'Webcal購読リンクを作成し、システムカレンダーやGoogleカレンダーにワンタップで連携します。';
 
   @override
-  String get timetableSubscriptionPromptBadge => '全平台日程同步';
+  String get timetableSubscriptionPromptBadge => '全端末カレンダー同期';
 
   @override
-  String get useLiveActivityPrompt => '使用实时活动';
+  String get useLiveActivityPrompt => 'ライブアクティビティを使用';
 
   @override
-  String get startGuide => '开始引导';
+  String get startGuide => 'ガイドを開始';
 
   @override
-  String get postLoginDoneTitle => '大功告成！';
+  String get postLoginDoneTitle => '準備が完了しました！';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」。';
+  String get postLoginDoneMessage => '「自在東湖」へようこそ。快適なキャンパスライフをお楽しみください。';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => '完了';
 }
