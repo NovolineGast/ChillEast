@@ -1601,7 +1601,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     if (pending.isEmpty) return const SizedBox.shrink();
 
-    final display = pending.take(5).toList();
+    // 首页最多展示 3 条，其余进作业页看
+    final display = pending.take(3).toList();
     final locale = Localizations.localeOf(context).toString();
 
     return _buildMergedSection(
@@ -2142,115 +2143,109 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         borderRadius: BorderRadius.circular(6),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              const Padding(
-                padding: EdgeInsets.only(top: 2),
-                child: Icon(
-                  Icons.bolt_outlined,
-                  size: 22,
-                  color: Color(0xFFFF9800),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (int idx = 0; idx < roomSlots.length; idx++) ...[
-                      if (idx > 0) const SizedBox(height: 12),
-                      () {
-                        final slot = roomSlots[idx];
-                        final room = eleState.rooms[slot]!;
-                        final roomDisplayName =
-                            room.roomName.isNotEmpty ? room.roomName : room.roomId;
-                        final eleTitle = room.areaName.isNotEmpty
-                            ? room.areaName
-                            : context.l10n.dormitoryElectricity;
-                        final String eleSubtitle;
-                        if (room.buildingName.isNotEmpty) {
-                          eleSubtitle = room.buildingName.endsWith(roomDisplayName)
-                              ? room.buildingName
-                              : '${room.buildingName} $roomDisplayName';
-                        } else {
-                          eleSubtitle = roomDisplayName;
-                        }
+              for (int idx = 0; idx < roomSlots.length; idx++) ...[
+                if (idx > 0) const SizedBox(height: 12),
+                () {
+                  final slot = roomSlots[idx];
+                  final room = eleState.rooms[slot]!;
+                  final roomDisplayName =
+                      room.roomName.isNotEmpty ? room.roomName : room.roomId;
+                  final eleTitle = room.areaName.isNotEmpty
+                      ? room.areaName
+                      : context.l10n.dormitoryElectricity;
+                  final String eleSubtitle;
+                  if (room.buildingName.isNotEmpty) {
+                    eleSubtitle = room.buildingName.endsWith(roomDisplayName)
+                        ? room.buildingName
+                        : '${room.buildingName} $roomDisplayName';
+                  } else {
+                    eleSubtitle = roomDisplayName;
+                  }
 
-                        final balanceInfo = (slot < eleState.balances.length)
-                            ? eleState.balances[slot]
-                            : null;
-                        final balanceText = balanceInfo != null
-                            ? '¥${_formatElectricityBalance(balanceInfo.balance)}'
-                            : (eleState.isLoading ? '...' : '¥--');
+                  final balanceInfo = (slot < eleState.balances.length)
+                      ? eleState.balances[slot]
+                      : null;
+                  final balanceText = balanceInfo != null
+                      ? '¥${_formatElectricityBalance(balanceInfo.balance)}'
+                      : (eleState.isLoading ? '...' : '¥--');
 
-                        final double? eleBal = balanceInfo != null
-                            ? double.tryParse(balanceInfo.balance)
-                            : null;
-                        final bool isLowBalance = eleBal != null && eleBal <= 10.0;
-                        final Color eleBalanceColor = isLowBalance
-                            ? const Color(0xFFE53935)
-                            : (isDark ? Colors.white : const Color(0xFF202124));
+                  final double? eleBal = balanceInfo != null
+                      ? double.tryParse(balanceInfo.balance)
+                      : null;
+                  final bool isLowBalance = eleBal != null && eleBal <= 10.0;
+                  final Color eleBalanceColor = isLowBalance
+                      ? const Color(0xFFE53935)
+                      : (isDark ? Colors.white : const Color(0xFF202124));
 
-                        return InkWell(
-                          borderRadius: BorderRadius.circular(4),
-                          onTap: () => _openElectricity(context, initialSlot: slot),
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 2),
-                            child: Row(
+                  return InkWell(
+                    borderRadius: BorderRadius.circular(4),
+                    onTap: () => _openElectricity(context, initialSlot: slot),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          if (idx == 0)
+                            const Icon(
+                              Icons.bolt_outlined,
+                              size: 22,
+                              color: Color(0xFFFF9800),
+                            )
+                          else
+                            const SizedBox(width: 22),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
                               children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Text(
-                                        eleTitle,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                          color: isDark
-                                              ? Colors.white
-                                              : const Color(0xFF222222),
-                                        ),
-                                      ),
-                                      if (eleSubtitle.isNotEmpty) ...[
-                                        const SizedBox(height: 3),
-                                        Text(
-                                          eleSubtitle,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: isDark
-                                                ? Colors.white60
-                                                : Colors.black54,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
                                 Text(
-                                  balanceText,
+                                  eleTitle,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                    color: eleBalanceColor,
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark
+                                        ? Colors.white
+                                        : const Color(0xFF222222),
                                   ),
                                 ),
+                                if (eleSubtitle.isNotEmpty) ...[
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    eleSubtitle,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 13,
+                                      color: isDark
+                                          ? Colors.white60
+                                          : Colors.black54,
+                                    ),
+                                  ),
+                                ],
                               ],
                             ),
                           ),
-                        );
-                      }(),
-                    ],
-                  ],
-                ),
-              ),
+                          const SizedBox(width: 12),
+                          Text(
+                            balanceText,
+                            style: TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.bold,
+                              color: eleBalanceColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }(),
+              ],
             ],
           ),
         ),

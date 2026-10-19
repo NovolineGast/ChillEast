@@ -494,83 +494,116 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
     final isExpanded = _expandedIndex == slot;
     final card = _cardSlots[slot];
 
-    if (!isExpanded) {
-      // 收缩状态：单行条状展示
-      final String roomDesc;
-      final String? balanceVal;
-      if (card.selectedRoom != null) {
-        roomDesc = '${card.selectedArea?.name} - ${card.selectedBuilding?.name} - ${card.selectedRoom?.name}';
-        balanceVal = card.balanceInfo != null
-            ? '${card.balanceInfo!.balance}元'
-            : (card.isLoadingBalance ? '...元' : '--元');
-      } else {
-        roomDesc = '宿舍 ${slot + 1} (${context.l10n.noRoomSelectedYet})';
-        balanceVal = null;
-      }
-
-      return InkWell(
-        onTap: () {
-          setState(() {
-            _expandedIndex = slot;
-          });
-        },
-        borderRadius: BorderRadius.circular(6),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
-          decoration: BoxDecoration(
-            color: isDark ? themeColor.withValues(alpha: 0.08) : amberColor.withValues(alpha: 0.04),
-            borderRadius: BorderRadius.circular(6),
-            border: Border.all(
-              color: isDark ? themeColor.withValues(alpha: 0.2) : amberColor.withValues(alpha: 0.2),
-            ),
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  roomDesc,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              if (balanceVal != null) ...[
-                const SizedBox(width: 8),
-                Text(
-                  balanceVal,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? Colors.white : Colors.black87,
-                  ),
-                ),
-              ],
-              const SizedBox(width: 8),
-              Icon(
-                Icons.keyboard_arrow_down,
-                size: 18,
-                color: isDark ? Colors.white54 : Colors.black45,
-              ),
-            ],
-          ),
-        ),
-      );
+    final String roomDesc;
+    final String? balanceVal;
+    if (card.selectedRoom != null) {
+      roomDesc = '${card.selectedArea?.name} - ${card.selectedBuilding?.name} - ${card.selectedRoom?.name}';
+      balanceVal = card.balanceInfo != null
+          ? '${card.balanceInfo!.balance}元'
+          : (card.isLoadingBalance ? '...元' : '--元');
+    } else {
+      roomDesc = '宿舍 ${slot + 1} (${context.l10n.noRoomSelectedYet})';
+      balanceVal = null;
     }
 
-    // 展开状态：完整卡片
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOutCubic,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark ? themeColor.withValues(alpha: isExpanded ? 0.1 : 0.08) : amberColor.withValues(alpha: isExpanded ? 0.05 : 0.04),
+        borderRadius: BorderRadius.circular(6),
+        border: Border.all(
+          color: isDark ? themeColor.withValues(alpha: 0.2) : amberColor.withValues(alpha: 0.2),
+        ),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(6),
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          switchInCurve: Curves.easeInOutCubic,
+          switchOutCurve: Curves.easeInOutCubic,
+          layoutBuilder: (currentChild, previousChildren) {
+            return Stack(
+              alignment: Alignment.topCenter,
+              children: <Widget>[
+                ...previousChildren,
+                if (currentChild != null) currentChild,
+              ],
+            );
+          },
+          transitionBuilder: (child, animation) {
+            return FadeTransition(
+              opacity: animation,
+              child: SizeTransition(
+                sizeFactor: animation,
+                alignment: Alignment.topCenter,
+                child: child,
+              ),
+            );
+          },
+          child: isExpanded
+              ? _buildExpandedCardContent(slot, isDark, card)
+              : _buildCollapsedCardContent(slot, isDark, roomDesc, balanceVal),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCollapsedCardContent(int slot, bool isDark, String roomDesc, String? balanceVal) {
+    return InkWell(
+      key: ValueKey('collapsed_inkwell_$slot'),
+      onTap: () {
+        setState(() {
+          _expandedIndex = slot;
+        });
+      },
+      borderRadius: BorderRadius.circular(6),
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 13),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                roomDesc,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (balanceVal != null) ...[
+              const SizedBox(width: 8),
+              Text(
+                balanceVal,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
+              ),
+            ],
+            const SizedBox(width: 8),
+            Icon(
+              Icons.keyboard_arrow_down,
+              size: 18,
+              color: isDark ? Colors.white54 : Colors.black45,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildExpandedCardContent(int slot, bool isDark, _CardSlotState card) {
     return Container(
+      key: ValueKey('expanded_content_$slot'),
       width: double.infinity,
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? themeColor.withValues(alpha: 0.1) : amberColor.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(color: isDark ? themeColor.withValues(alpha: 0.2) : amberColor.withValues(alpha: 0.2)),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -705,6 +738,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
           const SizedBox(height: 16),
           // 3 Dropdown boxes inside card
           _buildRoomSelectionBox(
+            slot,
             context.l10n.campusArea,
             _areas.map((e) => e.name).toList(),
             card.selectedArea?.name,
@@ -712,6 +746,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
           ),
           const SizedBox(height: 12),
           _buildRoomSelectionBox(
+            slot,
             context.l10n.dormBuilding,
             card.buildings.map((e) => e.name).toList(),
             card.selectedBuilding?.name,
@@ -719,6 +754,7 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
           ),
           const SizedBox(height: 12),
           _buildRoomSelectionBox(
+            slot,
             context.l10n.dormRoom,
             card.rooms.map((e) => e.name).toList(),
             card.selectedRoom?.name,
@@ -942,10 +978,10 @@ class _ElectricityRechargeScreenState extends ConsumerState<ElectricityRechargeS
     );
   }
 
-  Widget _buildRoomSelectionBox(String label, List<String> items, String? current, Function(String?) onChanged) {
+  Widget _buildRoomSelectionBox(int slot, String label, List<String> items, String? current, Function(String?) onChanged) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return DropdownButtonFormField<String>(
-      key: ValueKey('${label}_$current'),
+      key: ValueKey('${slot}_${label}_$current'),
       initialValue: items.contains(current) ? current : null,
       decoration: InputDecoration(
         labelText: label,
