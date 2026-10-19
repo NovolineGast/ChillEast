@@ -265,6 +265,7 @@ class CloudBackupManager {
       'courseLiveEnabled',
       'flymeLiveEnabled',
       'timetableAutoSyncEnabled',
+      'timetableShowEndTime',
       'manualFirstWeekMonday',
       'electricityRoom',
     ];

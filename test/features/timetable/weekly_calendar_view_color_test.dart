@@ -14,6 +14,7 @@ void main() {
 
   Widget buildTestWidget({
     required List<CourseModel> courses,
+    bool showEndTime = false,
     VoidCallback? onColorChanged,
   }) {
     return MaterialApp(
@@ -25,6 +26,7 @@ void main() {
           courses: courses,
           firstWeekMonday:
               DateTime.now().subtract(Duration(days: DateTime.now().weekday - 1)),
+          showEndTime: showEndTime,
           onCourseColorChanged: onColorChanged,
         ),
       ),
@@ -143,5 +145,31 @@ void main() {
     expect(positioned.bottom, equals(0));
     expect(positioned.right, equals(0));
     expect(positioned.top, isNull);
+  });
+
+  testWidgets('WeeklyCalendarView respects showEndTime setting', (tester) async {
+    const testCourse = CourseModel(
+      id: '1',
+      name: '高等数学',
+      teacher: '张老师',
+      classroom: '理科楼101',
+      weeks: '1-16',
+      periods: '01-02',
+      dayOfWeek: 1,
+      startPeriod: 1,
+      endPeriod: 2,
+    );
+
+    // 默认 showEndTime: false，只显示上课时间，不显示下课时间
+    await tester.pumpWidget(buildTestWidget(courses: [testCourse], showEndTime: false));
+    await tester.pumpAndSettle();
+    expect(find.text('08:00'), findsOneWidget);
+    expect(find.text('09:40'), findsNothing);
+
+    // showEndTime: true 时，同时显示下课时间
+    await tester.pumpWidget(buildTestWidget(courses: [testCourse], showEndTime: true));
+    await tester.pumpAndSettle();
+    expect(find.text('08:00'), findsOneWidget);
+    expect(find.text('09:40'), findsOneWidget);
   });
 }

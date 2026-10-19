@@ -476,6 +476,7 @@
   "timetableSettings": "上堂表",
   "notSet": "仲未设定",
   "timetableAutoSync": "自动同步上堂表",
+  "timetableShowEndTime": "喺周視圖顯示落堂時間",
   "disableAutoSyncTitle": "关咗自动同步？",
   "disableAutoSyncMessage": "关咗之后会删咗本地上堂表（调堂、停堂等规则会保留），如果想睇课表，可以揿课表页右上角刷新按钮自己手动同步。",
   "localTimetableDeleted": "本地上堂表已经删咗",

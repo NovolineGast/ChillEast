@@ -278,6 +278,7 @@
   "timetableSettings": "Ajustes del horario",
   "notSet": "Sin definir",
   "timetableAutoSync": "Sincronización automática del horario",
+  "timetableShowEndTime": "Mostrar hora de finalización en vista semanal",
   "disableAutoSyncTitle": "¿Desactivar sincronización automática?",
   "disableAutoSyncMessage": "Al desactivarla se eliminará el horario local (se conservarán las reprogramaciones y cancelaciones). Para ver tu horario, toca el botón de actualizar en la página del horario para sincronizar manualmente.",
   "localTimetableDeleted": "Horario local eliminado",

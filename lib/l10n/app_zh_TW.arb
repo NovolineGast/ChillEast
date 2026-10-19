@@ -285,6 +285,7 @@
   "timetableSettings": "課表",
   "notSet": "未設定",
   "timetableAutoSync": "自動同步課表",
+  "timetableShowEndTime": "週視圖中顯示下課時間",
   "disableAutoSyncTitle": "關閉自動同步？",
   "disableAutoSyncMessage": "關閉後將刪除本機課表（調課、停課等規則會保留），如需檢視課表，可點擊課表頁右上角重新整理按鈕手動同步。",
   "localTimetableDeleted": "本機課表已刪除",

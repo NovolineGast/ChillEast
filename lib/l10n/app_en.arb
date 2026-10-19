@@ -278,6 +278,7 @@
   "timetableSettings": "Timetable Settings",
   "notSet": "Not set",
   "timetableAutoSync": "Auto-sync timetable",
+  "timetableShowEndTime": "Show class end times in week view",
   "disableAutoSyncTitle": "Turn off auto-sync?",
   "disableAutoSyncMessage": "Turning off will delete the local timetable (reschedule and suspension rules will be kept). To view your timetable, tap the refresh button on the timetable page to sync manually.",
   "localTimetableDeleted": "Local timetable deleted",

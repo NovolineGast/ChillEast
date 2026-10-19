@@ -873,6 +873,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get timetableAutoSync => '自动同步课表';
 
   @override
+  String get timetableShowEndTime => '周视图中显示下课时间';
+
+  @override
   String get disableAutoSyncTitle => '关闭自动同步？';
 
   @override
@@ -3989,6 +3992,9 @@ class AppLocalizationsZhHk extends AppLocalizationsZh {
 
   @override
   String get timetableAutoSync => '自動同步課表';
+
+  @override
+  String get timetableShowEndTime => '週視圖中顯示下課時間';
 
   @override
   String get disableAutoSyncTitle => '關閉自動同步？';
@@ -7111,6 +7117,9 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   String get timetableAutoSync => '自動同步課表';
 
   @override
+  String get timetableShowEndTime => '週視圖中顯示下課時間';
+
+  @override
   String get disableAutoSyncTitle => '關閉自動同步？';
 
   @override
@@ -10229,6 +10238,9 @@ class AppLocalizationsZhHefei extends AppLocalizationsZh {
 
   @override
   String get timetableAutoSync => '课表自家同步';
+
+  @override
+  String get timetableShowEndTime => '周视图里显下课时间';
 
   @override
   String get disableAutoSyncTitle => '关掉自家同步？';

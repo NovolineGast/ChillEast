@@ -905,6 +905,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get timetableAutoSync => 'Sincronização automática da grade horária';
 
   @override
+  String get timetableShowEndTime =>
+      'Mostrar horário de término na visualização semanal';
+
+  @override
   String get disableAutoSyncTitle => 'Desativar sincronização automática?';
 
   @override

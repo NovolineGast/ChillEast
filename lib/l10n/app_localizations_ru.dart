@@ -902,6 +902,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get timetableAutoSync => 'Автосинхронизация расписания';
 
   @override
+  String get timetableShowEndTime =>
+      'Показывать время окончания занятий в недельном виде';
+
+  @override
   String get disableAutoSyncTitle => 'Отключить автосинхронизацию?';
 
   @override

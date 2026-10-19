@@ -1787,6 +1787,12 @@ abstract class AppLocalizations {
   /// **'自动同步课表'**
   String get timetableAutoSync;
 
+  /// No description provided for @timetableShowEndTime.
+  ///
+  /// In zh, this message translates to:
+  /// **'周视图中显示下课时间'**
+  String get timetableShowEndTime;
+
   /// No description provided for @disableAutoSyncTitle.
   ///
   /// In zh, this message translates to:

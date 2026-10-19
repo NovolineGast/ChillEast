@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/utils/l10n_extension.dart';
 import '../../../core/widgets/brand_switch.dart';
 import '../../timetable/services/timetable_subscription_service.dart';
@@ -57,35 +57,6 @@ class _TimetableSubscriptionScreenState
     }
   }
 
-  Future<void> _handleOpenInCalendar(String uuid) async {
-    final webcalUrl = TimetableSubscriptionService.buildWebcalUrl(uuid);
-    final uri = Uri.parse(webcalUrl);
-    final l10n = context.l10n;
-
-    try {
-      final launched = await launchUrl(
-        uri,
-        mode: LaunchMode.externalApplication,
-      );
-      if (!launched && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.openInCalendarFailed),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.openInCalendarFailed),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-      }
-    }
-  }
 
   Future<void> _handleResetUrl() async {
     if (_isResetting) return;
@@ -245,34 +216,22 @@ class _TimetableSubscriptionScreenState
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  // 操作按钮组
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
+                  const SizedBox(height: 8),
+                  // 操作按钮组：只保留复制链接和重置链接，同一行右对齐并对齐样式
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      FilledButton.tonalIcon(
+                      TextButton.icon(
                         onPressed: () => _handleCopyUrl(subscriptionUrl),
                         icon: const Icon(Icons.copy_rounded, size: 18),
                         label: Text(l10n.copySubscriptionUrl),
-                        style: FilledButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
+                        style: TextButton.styleFrom(
+                          foregroundColor: isDark
+                              ? Colors.white70
+                              : const Color(0xFF5F6368),
                         ),
                       ),
-                      FilledButton.tonalIcon(
-                        onPressed: () => _handleOpenInCalendar(uuid),
-                        icon: const Icon(
-                            Icons.calendar_month_outlined,
-                            size: 18),
-                        label: Text(l10n.openInCalendar),
-                        style: FilledButton.styleFrom(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                        ),
-                      ),
+                      const SizedBox(width: 4),
                       TextButton.icon(
                         onPressed: _isResetting ? null : _handleResetUrl,
                         icon: const Icon(Icons.refresh_rounded, size: 18),
