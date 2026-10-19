@@ -8,16 +8,26 @@ import 'package:ChillEast/features/profile/services/backup_export_service.dart';
 
 void main() {
   group('BackupExportService.parseBackupJson', () {
-    test('accepts a valid backup payload', () {
-      final raw = jsonEncode({
+    test('accepts valid legacy and modern backup payloads', () {
+      final legacyRaw = jsonEncode({
         'format': 'chilleast-backup',
         'version': 1,
         'settings': {},
         'localData': {},
       });
-      final parsed = BackupExportService.parseBackupJson(raw);
-      expect(parsed['format'], 'chilleast-backup');
-      expect(parsed['version'], 1);
+      final parsedLegacy = BackupExportService.parseBackupJson(legacyRaw);
+      expect(parsedLegacy['format'], 'chilleast-backup');
+      expect(parsedLegacy['version'], 1);
+
+      final modernRaw = jsonEncode({
+        'format': 'chilleast-modern',
+        'version': 1,
+        'settings': {},
+        'localData': {},
+      });
+      final parsedModern = BackupExportService.parseBackupJson(modernRaw);
+      expect(parsedModern['format'], 'chilleast-modern');
+      expect(parsedModern['version'], 1);
     });
 
     test('rejects non-JSON text', () {

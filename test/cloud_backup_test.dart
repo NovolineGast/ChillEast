@@ -136,101 +136,171 @@ void main() {
     });
   });
 
-  group('Sidecar and Companion sync', () {
-    test('pickSidecarEntry identifies chilleast-sidecar-v2.json', () {
+  group('CloudBackupManager.buildModernFileName', () {
+    test('formats prefix + timestamp without slot letter', () {
+      expect(
+        CloudBackupManager.buildModernFileName(DateTime(2026, 9, 26, 9, 30, 15)),
+        'chilleast-modern-20260926-093015.json',
+      );
+    });
+
+    test('lexicographic order matches chronological order', () {
+      final earlier = CloudBackupManager.buildModernFileName(
+          DateTime(2026, 9, 26, 9, 30, 15));
+      final later = CloudBackupManager.buildModernFileName(
+          DateTime(2026, 9, 26, 9, 31, 2));
+      expect(earlier.compareTo(later) < 0, isTrue);
+    });
+  });
+
+  group('CloudBackupManager.parseModernFileName', () {
+    test('round-trips buildModernFileName', () {
+      const name = 'chilleast-modern-20260926-093015.json';
+      final parsed = CloudBackupManager.parseModernFileName(name);
+      expect(parsed, isNotNull);
+      expect(parsed!.stamp, '20260926-093015');
+    });
+
+    test('rejects foreign and legacy names', () {
+      expect(CloudBackupManager.parseModernFileName('pubspec.yaml'), isNull);
+      expect(
+          CloudBackupManager.parseModernFileName('chilleast-backup-b-20260926-093015.json'),
+          isNull);
+      expect(
+          CloudBackupManager.parseModernFileName('chilleast-modern-b-20260926-093015.json'),
+          isNull);
+    });
+  });
+
+  group('CloudBackupManager.pickLatestModernBackupEntry', () {
+    test('picks newest modern backup entry by stamp', () {
       final entries = [
         {
-          'id': 'sc-1',
-          'name': 'chilleast-sidecar-v2.json',
-          'encryptedId': 'enc-sc',
+          'id': 'mod-old',
+          'name': 'chilleast-modern-20260925-100000.json',
+          'encryptedId': 'enc-1',
           'puid': '1',
         },
         {
-          'id': 'b-1',
-          'name': 'chilleast-backup-b-20260926-093015.json',
-          'encryptedId': 'enc-b',
+          'id': 'mod-new',
+          'name': 'chilleast-modern-20260926-100000.json',
+          'encryptedId': 'enc-2',
+          'puid': '1',
+        },
+        {
+          'id': 'leg-1',
+          'name': 'chilleast-backup-b-20260927-100000.json',
+          'encryptedId': 'enc-3',
           'puid': '1',
         },
       ];
-      final sc = CloudBackupManager.pickSidecarEntry(entries);
-      expect(sc, isNotNull);
-      expect(sc!['resid'], 'sc-1');
-      expect(sc['name'], 'chilleast-sidecar-v2.json');
+      final latest = CloudBackupManager.pickLatestModernBackupEntry(entries);
+      expect(latest, isNotNull);
+      expect(latest!['resid'], 'mod-new');
+      expect(latest['stamp'], '20260926-100000');
     });
+  });
 
-    test('buildSidecarData extracts version-specific fields', () {
-      final backup = {
-        'format': 'chilleast-backup',
+  group('CloudBackupManager.pickStaleModernEntries', () {
+    List<Map<String, dynamic>> fiveModernBackups() => [
+          {
+            'id': 'm-1',
+            'name': 'chilleast-modern-20260928-120000.json',
+            'encryptedId': 'enc-1',
+            'puid': '1',
+          },
+          {
+            'id': 'm-2',
+            'name': 'chilleast-modern-20260927-120000.json',
+            'encryptedId': 'enc-2',
+            'puid': '1',
+          },
+          {
+            'id': 'm-3',
+            'name': 'chilleast-modern-20260926-120000.json',
+            'encryptedId': 'enc-3',
+            'puid': '1',
+          },
+          {
+            'id': 'm-4',
+            'name': 'chilleast-modern-20260925-120000.json',
+            'encryptedId': 'enc-4',
+            'puid': '1',
+          },
+          {
+            'id': 'm-5',
+            'name': 'chilleast-modern-20260924-120000.json',
+            'encryptedId': 'enc-5',
+            'puid': '1',
+          },
+        ];
+
+    test('retains strictly 3 latest modern backups', () {
+      final stale = CloudBackupManager.pickStaleModernEntries(
+          fiveModernBackups(), 'm-1');
+      expect(stale.map((e) => e['resid']), ['m-4', 'm-5']);
+    });
+  });
+
+  group('CloudBackupManager.mergeModernWithLegacy', () {
+    test('merges newer legacy settings into modern backup while preserving modern features', () {
+      final modern = {
+        'format': 'chilleast-modern',
+        'version': 1,
         'settings': {
-          'customCourseColors': {'c1': 0xFF00FF},
-          'timetableSubscription': {'enabled': true, 'uuid': 'sub-uuid'},
-          'electricityRoom2': {'room': '102'},
+          'languageCode': 'zh',
+          'courseReminderMinutes': 10,
+          'customCourseColors': {'c1': 0x123456},
+          'timetableSubscription': {'enabled': true, 'uuid': 'sub-1'},
+          'electricityRoom2': {'room': '602'},
           'appearance': {
+            'homeItems': ['a'],
             'feedAutoSort': true,
           },
         },
         'localData': {
+          'timetableIcs': 'OLD ICS',
           'examList': [
-            {'id': 'ex-1', 'title': '期末考'}
+            {'id': 'ex-1', 'title': '考研数学'}
           ],
           'aiMemories': [
-            {'id': 'mem-1', 'content': '寝室601'}
+            {'id': 'mem-1', 'content': '常坐东区二楼'}
           ],
         },
       };
 
-      final sidecar = CloudBackupManager.buildSidecarData(backup);
-      expect(sidecar['format'], 'chilleast-sidecar');
-      expect(sidecar['customCourseColors'], {'c1': 0xFF00FF});
-      expect(sidecar['timetableSubscription']['uuid'], 'sub-uuid');
-      expect(sidecar['electricityRoom2'], {'room': '102'});
-      expect(sidecar['feedAutoSort'], isTrue);
-      expect((sidecar['examList'] as List).first['id'], 'ex-1');
-      expect((sidecar['aiMemories'] as List).first['id'], 'mem-1');
-    });
-
-    test('mergeSidecar complements missing fields from sidecar into old main backup', () {
-      // 老版本 main 1.0.12 生成的主快照（缺失新字段）
-      final oldBackup = {
+      final newerLegacy = {
         'format': 'chilleast-backup',
         'version': 1,
         'settings': {
-          'languageCode': 'zh',
-          'courseReminderMinutes': 15,
-          'appearance': {'homeItems': []},
+          'languageCode': 'en',
+          'courseReminderMinutes': 30,
+          'appearance': {
+            'homeItems': ['a', 'b'],
+          },
         },
         'localData': {
-          'timetableIcs': 'BEGIN:VCALENDAR...',
-          'courses': [],
+          'timetableIcs': 'NEW ICS FROM OLD PHONE',
         },
       };
 
-      final sidecar = {
-        'format': 'chilleast-sidecar',
-        'version': 2,
-        'customCourseColors': {'c1': 0x123456},
-        'timetableSubscription': {'enabled': true, 'uuid': 'uuid-123'},
-        'electricityRoom2': {'room': '305'},
-        'feedAutoSort': true,
-        'examList': [
-          {'id': 'ex-99', 'title': '高等数学'}
-        ],
-        'aiMemories': [
-          {'id': 'mem-99', 'content': '自习室三楼'}
-        ],
-      };
+      final merged = CloudBackupManager.mergeModernWithLegacy(modern, newerLegacy);
+      expect(merged['format'], 'chilleast-modern');
 
-      final merged = CloudBackupManager.mergeSidecar(oldBackup, sidecar);
       final settings = merged['settings'] as Map<String, dynamic>;
       final localData = merged['localData'] as Map<String, dynamic>;
 
-      expect(settings['languageCode'], 'zh');
+      expect(settings['languageCode'], 'en');
+      expect(settings['courseReminderMinutes'], 30);
+      expect(settings['appearance']['homeItems'], ['a', 'b']);
+      expect(localData['timetableIcs'], 'NEW ICS FROM OLD PHONE');
+
       expect(settings['customCourseColors'], {'c1': 0x123456});
-      expect(settings['timetableSubscription']['uuid'], 'uuid-123');
-      expect(settings['electricityRoom2'], {'room': '305'});
+      expect(settings['timetableSubscription']['uuid'], 'sub-1');
+      expect(settings['electricityRoom2'], {'room': '602'});
       expect(settings['appearance']['feedAutoSort'], isTrue);
-      expect((localData['examList'] as List).first['id'], 'ex-99');
-      expect((localData['aiMemories'] as List).first['id'], 'mem-99');
+      expect((localData['examList'] as List).first['id'], 'ex-1');
+      expect((localData['aiMemories'] as List).first['id'], 'mem-1');
     });
   });
 

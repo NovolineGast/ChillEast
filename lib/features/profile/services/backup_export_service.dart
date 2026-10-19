@@ -26,11 +26,19 @@ import '../providers/appearance_provider.dart';
 ///（打包时 --dart-define=DEFAULT_AI_API_KEY 注入）不同时，才会一并导出，
 /// 方便换机恢复；默认 Key 本身不会写入备份。
 class BackupExportService {
-  static const String backupFormat = 'chilleast-backup';
+  static const String legacyBackupFormat = 'chilleast-backup';
+  static const String modernBackupFormat = 'chilleast-modern';
+  static const String backupFormat = modernBackupFormat;
   static const int backupVersion = 1;
 
+  static bool isSupportedFormat(String? format) =>
+      format == modernBackupFormat || format == legacyBackupFormat;
+
   /// 组装备份 JSON（纯 Map，可直接 jsonEncode）。
-  static Future<Map<String, dynamic>> buildBackupData() async {
+  /// [format] 默认走现代轨 'chilleast-modern'，导出文件走 'chilleast-backup'。
+  static Future<Map<String, dynamic>> buildBackupData({
+    String format = modernBackupFormat,
+  }) async {
     final prefs = await SharedPreferences.getInstance();
     final secure = SecureStorageHelper();
 
@@ -58,7 +66,7 @@ class BackupExportService {
     } catch (_) {}
 
     return {
-      'format': backupFormat,
+      'format': format,
       'version': backupVersion,
       'exportedAt': DateTime.now().toIso8601String(),
       'appVersion': appVersion,
@@ -118,8 +126,9 @@ class BackupExportService {
   }
 
   /// 组装备份 JSON 并写入临时文件，返回文件路径。
+  /// 手动导出统一写入 legacyBackupFormat ('chilleast-backup')，确保老版本 main 亦可顺利手动导入。
   static Future<String> writeBackupFile() async {
-    final data = await buildBackupData();
+    final data = await buildBackupData(format: legacyBackupFormat);
     final tempDir = await getTemporaryDirectory();
     final stamp = DateTime.now().toIso8601String().replaceAll(':', '-');
     final file = File('${tempDir.path}/chilleast-backup-$stamp.json');
@@ -148,7 +157,7 @@ class BackupExportService {
     if (decoded is! Map<String, dynamic>) {
       throw const FormatException('不是有效的备份文件');
     }
-    if (decoded['format'] != backupFormat) {
+    if (!isSupportedFormat(decoded['format']?.toString())) {
       throw const FormatException('不是自在东湖备份文件');
     }
     final version = decoded['version'];
@@ -176,7 +185,7 @@ class BackupExportService {
   /// - 云端有本地没有的项：当它不存在（直接过滤丢弃）。
   static Future<void> applyBackupData(Map<String, dynamic> backup) async {
     // 先校验，避免写一半才发现版本不对
-    if (backup['format'] != backupFormat) {
+    if (!isSupportedFormat(backup['format']?.toString())) {
       throw const FormatException('不是自在东湖备份文件');
     }
     final settings = backup['settings'] is Map
