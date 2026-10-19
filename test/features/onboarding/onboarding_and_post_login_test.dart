@@ -7,6 +7,7 @@ import 'package:ChillEast/core/utils/fallback_localizations_delegate.dart';
 import 'package:ChillEast/features/auth/screens/login_screen.dart';
 import 'package:ChillEast/features/cloudisk/screens/cloud_sync_prompt_screen.dart';
 import 'package:ChillEast/features/cloudisk/services/cloud_backup_manager.dart';
+import 'package:ChillEast/features/home/screens/main_scaffold.dart';
 import 'package:ChillEast/features/onboarding/providers/onboarding_provider.dart';
 import 'package:ChillEast/features/onboarding/screens/onboarding_screen.dart';
 import 'package:ChillEast/features/profile/providers/settings_provider.dart';
@@ -192,9 +193,9 @@ void main() {
       expect(fracBox.widthFactor, 0.5);
       expect(fracBox.alignment, Alignment.bottomLeft);
 
-      // No progress bar, no close icon, no step text
+      // No progress bar, close icon is present, no step text
       expect(find.byType(LinearProgressIndicator), findsNothing);
-      expect(find.byIcon(Icons.close_rounded), findsNothing);
+      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
 
       // Advance to Step 2: 课表自动同步
       await tester.tap(find.text('跳过'));
@@ -273,6 +274,123 @@ void main() {
 
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getBool(CloudBackupManager.promptDecidedKey), isTrue);
+      expect(
+        prefs.getInt(CloudSyncPromptScreen.kLastSeenGuideVersionKey),
+        equals(CloudSyncPromptScreen.kCurrentOnboardingGuideVersion),
+      );
+    });
+
+    testWidgets('CloudSyncPromptScreen can be closed via top-right close button', (tester) async {
+      await tester.pumpWidget(
+        _buildTestApp(
+          child: const CloudSyncPromptScreen(),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byIcon(Icons.close_rounded), findsOneWidget);
+      await tester.tap(find.byIcon(Icons.close_rounded));
+      await tester.pumpAndSettle();
+
+      final prefs = await SharedPreferences.getInstance();
+      expect(prefs.getBool(CloudBackupManager.promptDecidedKey), isTrue);
+      expect(
+        prefs.getInt(CloudSyncPromptScreen.kLastSeenGuideVersionKey),
+        equals(CloudSyncPromptScreen.kCurrentOnboardingGuideVersion),
+      );
+    });
+
+    testWidgets('CloudSyncPromptScreen pre-fills existing settings', (tester) async {
+      await tester.pumpWidget(
+        _buildTestApp(
+          child: const CloudSyncPromptScreen(),
+          overrides: [
+            settingsProvider.overrideWith(
+              (ref) => _MockSettingsNotifier(
+                initialState: SettingsState(
+                  reminderMinutes: 20,
+                  homeworkReminderHours: 12.0,
+                  libraryReminderMinutes: 15,
+                  courseLiveEnabled: true,
+                  flymeLiveEnabled: false,
+                  timetableAutoSyncEnabled: true,
+                  cloudBackupAutoSyncEnabled: true,
+                  timetableSubscriptionEnabled: true,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Go to Step 3: 上课提醒
+      await tester.tap(find.text('跳过'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('跳过'));
+      await tester.pumpAndSettle();
+
+      // Should be prefilled with 20min
+      expect(find.text('20分钟前'), findsOneWidget);
+
+      // Go to Step 4: 作业截止提醒
+      await tester.tap(find.text('跳过'));
+      await tester.pumpAndSettle();
+
+      // Should be prefilled with 12h
+      expect(find.text('12小时前'), findsOneWidget);
+
+      // Go to Step 5: 图书馆座位提醒
+      await tester.tap(find.text('跳过'));
+      await tester.pumpAndSettle();
+
+      // Should be prefilled with 15min
+      expect(find.text('15分钟前'), findsOneWidget);
+    });
+  });
+
+  group('MainScaffold Version-based Guide Popup Tests', () {
+    testWidgets('MainScaffold automatically pops up CloudSyncPromptScreen if lastSeenVersion < current', (tester) async {
+      SharedPreferences.setMockInitialValues({});
+      await tester.pumpWidget(
+        _buildTestApp(
+          child: const MainScaffold(),
+          overrides: [
+            authStateProvider.overrideWith((ref) => _MockAuthNotifier(
+                  AuthState.authenticated(username: '20230001'),
+                )),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byType(CloudSyncPromptScreen), findsOneWidget);
+
+      // Drain remaining timers before tearDown
+      await tester.pump(const Duration(seconds: 4));
+    });
+
+    testWidgets('MainScaffold does NOT pop up CloudSyncPromptScreen if lastSeenVersion >= current', (tester) async {
+      SharedPreferences.setMockInitialValues({
+        CloudSyncPromptScreen.kLastSeenGuideVersionKey: CloudSyncPromptScreen.kCurrentOnboardingGuideVersion,
+      });
+      await tester.pumpWidget(
+        _buildTestApp(
+          child: const MainScaffold(),
+          overrides: [
+            authStateProvider.overrideWith((ref) => _MockAuthNotifier(
+                  AuthState.authenticated(username: '20230001'),
+                )),
+          ],
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+      expect(find.byType(CloudSyncPromptScreen), findsNothing);
+
+      // Drain remaining timers before tearDown
+      await tester.pump(const Duration(seconds: 4));
     });
   });
 }
@@ -285,6 +403,12 @@ class _MockAuthNotifier extends StateNotifier<AuthState> implements AuthNotifier
 }
 
 class _MockSettingsNotifier extends SettingsNotifier {
+  _MockSettingsNotifier({SettingsState? initialState}) : super() {
+    if (initialState != null) {
+      state = initialState;
+    }
+  }
+
   @override
   Future<void> rescheduleNotifications() async {}
 

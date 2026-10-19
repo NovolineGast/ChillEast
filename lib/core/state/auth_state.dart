@@ -531,10 +531,12 @@ class AuthNotifier extends StateNotifier<AuthState> {
         isInitialized: true,
       );
 
-      // 手动登录成功且未做过同步推荐决策时，推一屏推荐页
+      // 手动登录成功且未看过当前版本引导时，推一屏推荐向导
       try {
         final prefs = await SharedPreferences.getInstance();
-        if (prefs.getBool(CloudBackupManager.promptDecidedKey) != true) {
+        final lastSeen =
+            prefs.getInt(CloudSyncPromptScreen.kLastSeenGuideVersionKey) ?? 0;
+        if (lastSeen < CloudSyncPromptScreen.kCurrentOnboardingGuideVersion) {
           _ref.read(cloudSyncPromptPendingProvider.notifier).state = true;
         }
       } catch (_) {}

@@ -19,6 +19,12 @@ final cloudSyncPromptPendingProvider = StateProvider<bool>((ref) => false);
 class CloudSyncPromptScreen extends ConsumerStatefulWidget {
   const CloudSyncPromptScreen({super.key});
 
+  /// 当前引导流程版本号。每次重大引导升级/加步时自增，
+  /// 使得所有已登录用户在更新后均能弹出浏览一次。
+  static const int kCurrentOnboardingGuideVersion = 1;
+  static const String kLastSeenGuideVersionKey =
+      'last_seen_onboarding_guide_version';
+
   /// 带有下往上淡入动画的全屏弹窗路由
   static Route route() {
     return PageRouteBuilder(
@@ -76,6 +82,32 @@ class _CloudSyncPromptScreenState
   void initState() {
     super.initState();
     _checkLiveSupport();
+    _loadExistingSettings();
+  }
+
+  void _loadExistingSettings() {
+    try {
+      final settings = ref.read(settingsProvider);
+      const courseOptions = [5, 10, 20, 30, 40, 50, 60];
+      if (courseOptions.contains(settings.reminderMinutes)) {
+        _selectedCourseMinutes = settings.reminderMinutes;
+      }
+      const hwOptions = [0.5, 1.0, 2.0, 6.0, 12.0, 24.0, 48.0];
+      if (hwOptions.contains(settings.homeworkReminderHours)) {
+        _selectedHwHours = settings.homeworkReminderHours;
+      }
+      const libOptions = [5, 10, 15, 20, 30, 60];
+      if (libOptions.contains(settings.libraryReminderMinutes)) {
+        _selectedLibMinutes = settings.libraryReminderMinutes;
+      }
+      if (settings.courseLiveEnabled || settings.flymeLiveEnabled) {
+        _useLiveActivity = true;
+      } else if (settings.reminderMinutes > 0) {
+        _useLiveActivity = false;
+      }
+    } catch (e) {
+      debugPrint('⚠️ 加载已有配置失败: $e');
+    }
   }
 
   Future<void> _checkLiveSupport() async {
@@ -89,16 +121,25 @@ class _CloudSyncPromptScreenState
     }
   }
 
-  Future<void> _dismiss() async {
+  Future<void> _recordGuideSeen() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(CloudBackupManager.promptDecidedKey, true);
+      await prefs.setInt(
+        CloudSyncPromptScreen.kLastSeenGuideVersionKey,
+        CloudSyncPromptScreen.kCurrentOnboardingGuideVersion,
+      );
     } catch (_) {}
     ref.read(cloudSyncPromptPendingProvider.notifier).state = false;
+  }
+
+  Future<void> _dismiss() async {
+    if (_busy) return;
+    await _recordGuideSeen();
     if (!mounted) return;
     setState(() => _allowPop = true);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) Navigator.of(context).pop();
+      if (mounted) Navigator.of(context).maybePop();
     });
   }
 
@@ -138,15 +179,17 @@ class _CloudSyncPromptScreenState
   // 步骤 2：课表自动同步
   Future<void> _handleStepTimetableSync(bool enable) async {
     if (_busy) return;
-    setState(() => _busy = true);
-    try {
-      await ref
-          .read(settingsProvider.notifier)
-          .setTimetableAutoSyncEnabled(enable);
-    } catch (e) {
-      debugPrint('⚠️ 课表自动同步开关设置失败: $e');
-    } finally {
-      if (mounted) setState(() => _busy = false);
+    if (enable) {
+      setState(() => _busy = true);
+      try {
+        await ref
+            .read(settingsProvider.notifier)
+            .setTimetableAutoSyncEnabled(true);
+      } catch (e) {
+        debugPrint('⚠️ 课表自动同步开关设置失败: $e');
+      } finally {
+        if (mounted) setState(() => _busy = false);
+      }
     }
     _nextPage();
   }
@@ -181,25 +224,25 @@ class _CloudSyncPromptScreenState
   // 步骤 3：上课提醒
   Future<void> _handleStepCourseReminder(bool enable) async {
     if (_busy) return;
-    setState(() => _busy = true);
-    try {
-      if (enable) {
+    if (enable) {
+      setState(() => _busy = true);
+      try {
         await _requestNotificationPermissionIfNeeded();
-      }
-      await ref
-          .read(settingsProvider.notifier)
-          .setReminderMinutes(enable ? _selectedCourseMinutes : 0);
-      if (enable && _liveSupported && _useLiveActivity) {
-        if (_isFlyme) {
-          await ref.read(settingsProvider.notifier).setFlymeLiveEnabled(true);
-        } else {
-          await ref.read(settingsProvider.notifier).setCourseLiveEnabled(true);
+        await ref
+            .read(settingsProvider.notifier)
+            .setReminderMinutes(_selectedCourseMinutes);
+        if (_liveSupported && _useLiveActivity) {
+          if (_isFlyme) {
+            await ref.read(settingsProvider.notifier).setFlymeLiveEnabled(true);
+          } else {
+            await ref.read(settingsProvider.notifier).setCourseLiveEnabled(true);
+          }
         }
+      } catch (e) {
+        debugPrint('⚠️ 上课提醒设置失败: $e');
+      } finally {
+        if (mounted) setState(() => _busy = false);
       }
-    } catch (e) {
-      debugPrint('⚠️ 上课提醒设置失败: $e');
-    } finally {
-      if (mounted) setState(() => _busy = false);
     }
     _nextPage();
   }
@@ -207,18 +250,18 @@ class _CloudSyncPromptScreenState
   // 步骤 4：作业截止提醒
   Future<void> _handleStepHomeworkReminder(bool enable) async {
     if (_busy) return;
-    setState(() => _busy = true);
-    try {
-      if (enable) {
+    if (enable) {
+      setState(() => _busy = true);
+      try {
         await _requestNotificationPermissionIfNeeded();
+        await ref
+            .read(settingsProvider.notifier)
+            .setHomeworkReminderHours(_selectedHwHours);
+      } catch (e) {
+        debugPrint('⚠️ 作业提醒设置失败: $e');
+      } finally {
+        if (mounted) setState(() => _busy = false);
       }
-      await ref
-          .read(settingsProvider.notifier)
-          .setHomeworkReminderHours(enable ? _selectedHwHours : 0.0);
-    } catch (e) {
-      debugPrint('⚠️ 作业提醒设置失败: $e');
-    } finally {
-      if (mounted) setState(() => _busy = false);
     }
     _nextPage();
   }
@@ -226,18 +269,18 @@ class _CloudSyncPromptScreenState
   // 步骤 5：图书馆座位提醒
   Future<void> _handleStepLibraryReminder(bool enable) async {
     if (_busy) return;
-    setState(() => _busy = true);
-    try {
-      if (enable) {
+    if (enable) {
+      setState(() => _busy = true);
+      try {
         await _requestNotificationPermissionIfNeeded();
+        await ref
+            .read(settingsProvider.notifier)
+            .setLibraryReminderMinutes(_selectedLibMinutes);
+      } catch (e) {
+        debugPrint('⚠️ 图书馆提醒设置失败: $e');
+      } finally {
+        if (mounted) setState(() => _busy = false);
       }
-      await ref
-          .read(settingsProvider.notifier)
-          .setLibraryReminderMinutes(enable ? _selectedLibMinutes : 0);
-    } catch (e) {
-      debugPrint('⚠️ 图书馆提醒设置失败: $e');
-    } finally {
-      if (mounted) setState(() => _busy = false);
     }
     _nextPage();
   }
@@ -245,15 +288,17 @@ class _CloudSyncPromptScreenState
   // 步骤 6：课表日历订阅
   Future<void> _handleStepTimetableSubscription(bool enable) async {
     if (_busy) return;
-    setState(() => _busy = true);
-    try {
-      await ref
-          .read(settingsProvider.notifier)
-          .setTimetableSubscriptionEnabled(enable);
-    } catch (e) {
-      debugPrint('⚠️ 课表订阅设置失败: $e');
-    } finally {
-      if (mounted) setState(() => _busy = false);
+    if (enable) {
+      setState(() => _busy = true);
+      try {
+        await ref
+            .read(settingsProvider.notifier)
+            .setTimetableSubscriptionEnabled(true);
+      } catch (e) {
+        debugPrint('⚠️ 课表订阅设置失败: $e');
+      } finally {
+        if (mounted) setState(() => _busy = false);
+      }
     }
     _nextPage();
   }
@@ -301,7 +346,12 @@ class _CloudSyncPromptScreenState
     ];
 
     return PopScope(
-      canPop: _allowPop,
+      canPop: !_busy,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) {
+          _recordGuideSeen();
+        }
+      },
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
@@ -323,6 +373,16 @@ class _CloudSyncPromptScreenState
                           ),
                 )
               : null,
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.close_rounded,
+                color: isDark ? Colors.white70 : const Color(0xFF5F6368),
+              ),
+              tooltip: l10n.close,
+              onPressed: _busy ? null : _dismiss,
+            ),
+          ],
         ),
         body: SafeArea(
           child: PageView(

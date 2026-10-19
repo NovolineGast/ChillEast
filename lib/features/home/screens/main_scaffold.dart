@@ -87,6 +87,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   // AI 助理交互状态
   bool _isAiMode = false;
   bool _promptPushed = false;
+  bool _guideCheckedThisSession = false;
   String? _selectedImagePath;
   final TextEditingController _aiInputController = TextEditingController();
   final FocusNode _aiInputFocusNode = FocusNode();
@@ -117,9 +118,10 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
       setState(() {});
     });
 
-    // 桌面小组件点进来时，取原生暂存的动作并路由
+    // 桌面小组件点进来时，取原生暂存的动作并路由；同时检查开始引导更新
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _consumeWidgetAction();
+      _checkOnboardingGuide();
     });
     
     // 延迟检查更新，避免干扰启动
@@ -128,6 +130,37 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
         UpdateService().checkUpdate(context);
       }
     });
+  }
+
+  /// 检查是否需要给已登录用户展示本次更新的「开始引导」
+  Future<void> _checkOnboardingGuide() async {
+    if (_guideCheckedThisSession) return;
+    _guideCheckedThisSession = true;
+
+    final authState = ref.read(authStateProvider);
+    if (!authState.hasAccount) return;
+    if (_promptPushed || ref.read(cloudSyncPromptPendingProvider)) return;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final lastSeen =
+          prefs.getInt(CloudSyncPromptScreen.kLastSeenGuideVersionKey) ?? 0;
+      if (lastSeen < CloudSyncPromptScreen.kCurrentOnboardingGuideVersion) {
+        if (!mounted) return;
+        // 等待界面首帧过渡稳定
+        await Future.delayed(const Duration(milliseconds: 300));
+        if (!mounted ||
+            _promptPushed ||
+            ref.read(cloudSyncPromptPendingProvider)) {
+          return;
+        }
+        _promptPushed = true;
+        await Navigator.of(context).push(CloudSyncPromptScreen.route());
+        _promptPushed = false;
+      }
+    } catch (e) {
+      debugPrint('⚠️ 检查引导版本失败: $e');
+    }
   }
 
   Future<void> _initHitokoto() async {
@@ -193,13 +226,14 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> with TickerProvider
   void _pushCloudSyncPrompt() {
     if (_promptPushed) return;
     _promptPushed = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       if (!ref.read(cloudSyncPromptPendingProvider)) {
         _promptPushed = false;
         return;
       }
-      Navigator.of(context).push(CloudSyncPromptScreen.route());
+      await Navigator.of(context).push(CloudSyncPromptScreen.route());
+      _promptPushed = false;
     });
   }
 
