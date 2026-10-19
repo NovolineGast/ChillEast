@@ -3120,20 +3120,20 @@ class AppLocalizationsYue extends AppLocalizations {
   String get postLoginDoneTitle => '大功告成！';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」，更多选项请访问「设置」。';
+  String get postLoginDoneMessage => '歡迎使用「自在東湖」，更多選項請去「設定」。';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => '搞掂';
 
   @override
-  String get analyticsAnonymousTitle => '允许匿名统计';
+  String get analyticsAnonymousTitle => '允許匿名統計';
 
   @override
-  String get analyticsAnonymousSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsAnonymousSubtitle => '淨係用絕對匿名嘅方式，統計你用緊嘅版本。';
 
   @override
-  String get analyticsPromptTitle => '允许匿名统计';
+  String get analyticsPromptTitle => '允許匿名統計';
 
   @override
-  String get analyticsPromptSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsPromptSubtitle => '淨係用絕對匿名嘅方式，統計你用緊嘅版本。';
 }

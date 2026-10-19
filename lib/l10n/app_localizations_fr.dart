@@ -3266,23 +3266,26 @@ class AppLocalizationsFr extends AppLocalizations {
   String get startGuide => '开始引导';
 
   @override
-  String get postLoginDoneTitle => '大功告成！';
+  String get postLoginDoneTitle => 'Tout est prêt !';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」，更多选项请访问「设置」。';
+  String get postLoginDoneMessage =>
+      'Bienvenue sur ChillEast. Pour plus d\'options, rendez-vous dans les « Paramètres ».';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => 'Terminer';
 
   @override
-  String get analyticsAnonymousTitle => '允许匿名统计';
+  String get analyticsAnonymousTitle => 'Autoriser les statistiques anonymes';
 
   @override
-  String get analyticsAnonymousSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsAnonymousSubtitle =>
+      'Comptabilise la version de votre application de manière strictement anonyme.';
 
   @override
-  String get analyticsPromptTitle => '允许匿名统计';
+  String get analyticsPromptTitle => 'Autoriser les statistiques anonymes';
 
   @override
-  String get analyticsPromptSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsPromptSubtitle =>
+      'Comptabilise la version de votre application de manière strictement anonyme.';
 }

@@ -950,5 +950,12 @@
   "resetSubscriptionConfirmTitle": "購読リンクを再生成しますか？",
   "resetSubscriptionConfirmMessage": "再生成するとこれまでの購読URLは無効になり、クラウド上の旧データは削除されます。各端末で新しいURLを再登録する必要があります。続行しますか？",
   "subscriptionTutorialTitle": "外部カレンダーの購読方法",
-  "subscriptionTutorialContent": "• Apple カレンダー (iPhone / iPad / Mac):\n上の「カレンダーで購読」をタップするか、カレンダーアプリで「照会カレンダーを追加」を選択し、リンクを貼り付けます。\n\n• Google カレンダー:\nウェブ版で「他のカレンダー」の横にある「＋」をクリックし、「URL から追加」を選択してリンクを貼り付けて保存します。\n\n• Outlook / Microsoft カレンダー:\n「カレンダーの追加」→「Web から購読」を選択し、リンクを入力して保存します。\n\n• ヒント:\n購読リンクには休講・補講などが反映された最新の時間割が含まれており、変更があった場合も自動的に更新されます。"
+  "subscriptionTutorialContent": "• Apple カレンダー (iPhone / iPad / Mac):\n上の「カレンダーで購読」をタップするか、カレンダーアプリで「照会カレンダーを追加」を選択し、リンクを貼り付けます。\n\n• Google カレンダー:\nウェブ版で「他のカレンダー」の横にある「＋」をクリックし、「URL から追加」を選択してリンクを貼り付けて保存します。\n\n• Outlook / Microsoft カレンダー:\n「カレンダーの追加」→「Web から購読」を選択し、リンクを入力して保存します。\n\n• ヒント:\n購読リンクには休講・補講などが反映された最新の時間割が含まれており、変更があった場合も自動的に更新されます。",
+  "postLoginDoneTitle": "準備完了！",
+  "postLoginDoneMessage": "ChillEast へようこそ。その他のオプションは「設定」をご確認ください。",
+  "postLoginDoneButton": "完了",
+  "analyticsAnonymousTitle": "匿名統計を許可",
+  "analyticsAnonymousSubtitle": "完全に匿名化された方法でのみ、ご利用のアプリバージョンを集計します。",
+  "analyticsPromptTitle": "匿名統計を許可",
+  "analyticsPromptSubtitle": "完全に匿名化された方法でのみ、ご利用のアプリバージョンを集計します。"
 }

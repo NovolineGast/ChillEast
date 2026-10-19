@@ -3246,23 +3246,26 @@ class AppLocalizationsPt extends AppLocalizations {
   String get startGuide => '开始引导';
 
   @override
-  String get postLoginDoneTitle => '大功告成！';
+  String get postLoginDoneTitle => 'Tudo pronto!';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」，更多选项请访问「设置」。';
+  String get postLoginDoneMessage =>
+      'Boas-vindas ao ChillEast! Para mais opções, acesse «Configurações».';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => 'Concluir';
 
   @override
-  String get analyticsAnonymousTitle => '允许匿名统计';
+  String get analyticsAnonymousTitle => 'Permitir estatísticas anônimas';
 
   @override
-  String get analyticsAnonymousSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsAnonymousSubtitle =>
+      'Contabiliza a versão do seu aplicativo de forma estritamente anônima.';
 
   @override
-  String get analyticsPromptTitle => '允许匿名统计';
+  String get analyticsPromptTitle => 'Permitir estatísticas anônimas';
 
   @override
-  String get analyticsPromptSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsPromptSubtitle =>
+      'Contabiliza a versão do seu aplicativo de forma estritamente anônima.';
 }

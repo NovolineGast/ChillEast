@@ -3121,20 +3121,20 @@ class AppLocalizationsWuu extends AppLocalizations {
   String get postLoginDoneTitle => '大功告成！';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」，更多选项请访问「设置」。';
+  String get postLoginDoneMessage => '欢迎使用「自在东湖」，还要更多选项请跑「设定」里厢看。';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => '做毕';
 
   @override
   String get analyticsAnonymousTitle => '允许匿名统计';
 
   @override
-  String get analyticsAnonymousSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsAnonymousSubtitle => '只用绝对匿名方式，统计侬用个版本。';
 
   @override
   String get analyticsPromptTitle => '允许匿名统计';
 
   @override
-  String get analyticsPromptSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsPromptSubtitle => '只用绝对匿名方式，统计侬用个版本。';
 }

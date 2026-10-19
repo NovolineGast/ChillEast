@@ -6119,6 +6119,27 @@ class AppLocalizationsZhHk extends AppLocalizationsZh {
   @override
   String get subscriptionTutorialContent =>
       '• Apple 日曆 (iPhone / iPad / Mac)：\n點擊上方「在日曆中訂閲」，或在日曆應用程式中選擇「加入訂閲日曆」，貼上連結即可。\n\n• Google 日曆：\n在網頁端點擊「其他日曆」旁的「+」號，選擇「透過網址」，貼上連結並儲存。\n\n• Outlook / 微軟日曆：\n選擇「新增日曆」-「從 Web 訂閲」，輸入連結並儲存。\n\n• 提示：\n訂閲連結包含調停後的全部課程，如有調課或教務更新，訂閲源將自動保持最新。';
+
+  @override
+  String get postLoginDoneTitle => '大功告成！';
+
+  @override
+  String get postLoginDoneMessage => '歡迎使用「自在東湖」，更多選項請前往「設定」。';
+
+  @override
+  String get postLoginDoneButton => '完成';
+
+  @override
+  String get analyticsAnonymousTitle => '允許匿名統計';
+
+  @override
+  String get analyticsAnonymousSubtitle => '僅使用絕對匿名方式，統計您的使用版本。';
+
+  @override
+  String get analyticsPromptTitle => '允許匿名統計';
+
+  @override
+  String get analyticsPromptSubtitle => '僅使用絕對匿名方式，統計您的使用版本。';
 }
 
 /// The translations for Chinese, as used in Taiwan (`zh_TW`).
@@ -9103,6 +9124,27 @@ class AppLocalizationsZhTw extends AppLocalizationsZh {
   @override
   String get subscriptionTutorialContent =>
       '• Apple 行事曆 (iPhone / iPad / Mac)：\n點擊上方「在行事曆中訂閱」，或在行事曆 App 中選擇「加入已訂閱的行事曆」，貼上連結即可。\n\n• Google 日曆：\n在網頁端點擊「其他日曆」旁的「+」號，選擇「透過網址」，貼上連結並儲存。\n\n• Outlook / 微軟行事曆：\n選擇「新增行事曆」-「從 Web 訂閱」，輸入連結並儲存。\n\n• 提示：\n訂閱連結包含調課停課後的全部課程，若有調課或教務更新，訂閱來源會自動保持最新。';
+
+  @override
+  String get postLoginDoneTitle => '大功告成！';
+
+  @override
+  String get postLoginDoneMessage => '歡迎使用「自在東湖」，更多選項請前往「設定」。';
+
+  @override
+  String get postLoginDoneButton => '完成';
+
+  @override
+  String get analyticsAnonymousTitle => '允許匿名統計';
+
+  @override
+  String get analyticsAnonymousSubtitle => '僅使用絕對匿名方式，統計您的使用版本。';
+
+  @override
+  String get analyticsPromptTitle => '允許匿名統計';
+
+  @override
+  String get analyticsPromptSubtitle => '僅使用絕對匿名方式，統計您的使用版本。';
 }
 
 /// The translations for Chinese (`zh_hefei`).
@@ -12086,4 +12128,25 @@ class AppLocalizationsZhHefei extends AppLocalizationsZh {
   @override
   String get subscriptionTutorialContent =>
       '• Apple 日历 (iPhone / iPad / Mac)：\n点击上方「在日历中订阅」，或在日历应用中选择「添加订阅日历」，贴上来链接即可。\n\n• Google 日历：\n在网页端点击「其他日历」旁的「+」号，选择「通过网址」，贴上来链接并存起来。\n\n• Outlook / 微软日历：\n选择「添加日历」-「从 Web 订阅」，输入链接并存起来。\n\n• 提示：\n订阅链接包含调停后的统统课程，若有调课或教务更新，订阅源会自动保持最新。';
+
+  @override
+  String get postLoginDoneTitle => '大功告成！';
+
+  @override
+  String get postLoginDoneMessage => '欢迎使「自在东湖」，还要别滴选项请奔「设定」里去。';
+
+  @override
+  String get postLoginDoneButton => '搞定';
+
+  @override
+  String get analyticsAnonymousTitle => '准许匿名统计';
+
+  @override
+  String get analyticsAnonymousSubtitle => '只用绝对匿名法子，统计你用滴版本。';
+
+  @override
+  String get analyticsPromptTitle => '准许匿名统计';
+
+  @override
+  String get analyticsPromptSubtitle => '只用绝对匿名法子，统计你用滴版本。';
 }

@@ -3143,23 +3143,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get startGuide => '开始引导';
 
   @override
-  String get postLoginDoneTitle => '大功告成！';
+  String get postLoginDoneTitle => '準備完了！';
 
   @override
-  String get postLoginDoneMessage => '欢迎使用「自在东湖」，更多选项请访问「设置」。';
+  String get postLoginDoneMessage => 'ChillEast へようこそ。その他のオプションは「設定」をご確認ください。';
 
   @override
-  String get postLoginDoneButton => '完成';
+  String get postLoginDoneButton => '完了';
 
   @override
-  String get analyticsAnonymousTitle => '允许匿名统计';
+  String get analyticsAnonymousTitle => '匿名統計を許可';
 
   @override
-  String get analyticsAnonymousSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsAnonymousSubtitle => '完全に匿名化された方法でのみ、ご利用のアプリバージョンを集計します。';
 
   @override
-  String get analyticsPromptTitle => '允许匿名统计';
+  String get analyticsPromptTitle => '匿名統計を許可';
 
   @override
-  String get analyticsPromptSubtitle => '仅使用绝对匿名方式，统计您的使用版本。';
+  String get analyticsPromptSubtitle => '完全に匿名化された方法でのみ、ご利用のアプリバージョンを集計します。';
 }

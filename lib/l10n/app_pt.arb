@@ -936,5 +936,12 @@
   "resetSubscriptionConfirmTitle": "Redefinir link de assinatura?",
   "resetSubscriptionConfirmMessage": "O link de assinatura atual se tornará inválido imediatamente e a grade antiga na nuvem será excluída. Você precisará adicionar o novo link em todos os seus dispositivos inscritos. Deseja continuar?",
   "subscriptionTutorialTitle": "Como assinar em calendários externos",
-  "subscriptionTutorialContent": "• Apple Calendar (iPhone / iPad / Mac):\nToque em 'Assinar no Calendário' acima ou, no aplicativo Calendário, escolha 'Adicionar Calendário Assinado' e cole o link.\n\n• Google Agenda:\nNa versão web, clique no '+' ao lado de 'Outras agendas', escolha 'Do URL' e cole o link.\n\n• Microsoft Outlook:\nSelecione 'Adicionar calendário' -> 'Assinar pela Web', insira o link e salve.\n\n• Dica:\nO link de assinatura inclui todas as aulas e alterações. Caso haja remarcações ou atualizações acadêmicas, o feed será mantido atualizado automaticamente."
+  "subscriptionTutorialContent": "• Apple Calendar (iPhone / iPad / Mac):\nToque em 'Assinar no Calendário' acima ou, no aplicativo Calendário, escolha 'Adicionar Calendário Assinado' e cole o link.\n\n• Google Agenda:\nNa versão web, clique no '+' ao lado de 'Outras agendas', escolha 'Do URL' e cole o link.\n\n• Microsoft Outlook:\nSelecione 'Adicionar calendário' -> 'Assinar pela Web', insira o link e salve.\n\n• Dica:\nO link de assinatura inclui todas as aulas e alterações. Caso haja remarcações ou atualizações acadêmicas, o feed será mantido atualizado automaticamente.",
+  "postLoginDoneTitle": "Tudo pronto!",
+  "postLoginDoneMessage": "Boas-vindas ao ChillEast! Para mais opções, acesse «Configurações».",
+  "postLoginDoneButton": "Concluir",
+  "analyticsAnonymousTitle": "Permitir estatísticas anônimas",
+  "analyticsAnonymousSubtitle": "Contabiliza a versão do seu aplicativo de forma estritamente anônima.",
+  "analyticsPromptTitle": "Permitir estatísticas anônimas",
+  "analyticsPromptSubtitle": "Contabiliza a versão do seu aplicativo de forma estritamente anônima."
 }

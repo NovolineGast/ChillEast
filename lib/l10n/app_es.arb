@@ -936,5 +936,12 @@
   "resetSubscriptionConfirmTitle": "¿Restablecer enlace de suscripción?",
   "resetSubscriptionConfirmMessage": "Al restablecerlo, el enlace de suscripción actual dejará de ser válido de inmediato y el archivo remoto se eliminará. Deberás volver a suscribirte en todos tus dispositivos. ¿Deseas continuar?",
   "subscriptionTutorialTitle": "Guía de suscripción en calendarios externos",
-  "subscriptionTutorialContent": "• Apple Calendar (iPhone / iPad / Mac):\nToca «Suscribirse en Calendario» arriba o, en la app Calendario, selecciona «Añadir calendario con suscripción» y pega el enlace.\n\n• Google Calendar:\nEn la web, pulsa «+» junto a «Otros calendarios», selecciona «Desde una URL», pega el enlace y guarda.\n\n• Microsoft Outlook:\nSelecciona «Añadir calendario» -> «Suscribirse desde la web», introduce el enlace y guarda.\n\n• Nota:\nEl enlace incluye todas las clases y reprogramaciones. Si hay modificaciones académicas, la suscripción se mantendrá actualizada automáticamente."
+  "subscriptionTutorialContent": "• Apple Calendar (iPhone / iPad / Mac):\nToca «Suscribirse en Calendario» arriba o, en la app Calendario, selecciona «Añadir calendario con suscripción» y pega el enlace.\n\n• Google Calendar:\nEn la web, pulsa «+» junto a «Otros calendarios», selecciona «Desde una URL», pega el enlace y guarda.\n\n• Microsoft Outlook:\nSelecciona «Añadir calendario» -> «Suscribirse desde la web», introduce el enlace y guarda.\n\n• Nota:\nEl enlace incluye todas las clases y reprogramaciones. Si hay modificaciones académicas, la suscripción se mantendrá actualizada automáticamente.",
+  "postLoginDoneTitle": "¡Todo listo!",
+  "postLoginDoneMessage": "¡Te damos la bienvenida a ChillEast! Para más opciones, visita «Ajustes».",
+  "postLoginDoneButton": "Listo",
+  "analyticsAnonymousTitle": "Permitir estadísticas anónimas",
+  "analyticsAnonymousSubtitle": "Recopila la versión de la app de forma totalmente anónima.",
+  "analyticsPromptTitle": "Permitir estadísticas anónimas",
+  "analyticsPromptSubtitle": "Recopila la versión de la app de forma totalmente anónima."
 }

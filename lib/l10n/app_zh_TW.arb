@@ -936,5 +936,12 @@
   "resetSubscriptionConfirmTitle": "重設訂閱連結",
   "resetSubscriptionConfirmMessage": "重設後舊的訂閱連結將立即失效，雲端舊課表將被刪除，您需要在訂閱的裝置中重新加入新連結。是否繼續？",
   "subscriptionTutorialTitle": "第三方行事曆訂閱指南",
-  "subscriptionTutorialContent": "• Apple 行事曆 (iPhone / iPad / Mac)：\n點擊上方「在行事曆中訂閱」，或在行事曆 App 中選擇「加入已訂閱的行事曆」，貼上連結即可。\n\n• Google 日曆：\n在網頁端點擊「其他日曆」旁的「+」號，選擇「透過網址」，貼上連結並儲存。\n\n• Outlook / 微軟行事曆：\n選擇「新增行事曆」-「從 Web 訂閱」，輸入連結並儲存。\n\n• 提示：\n訂閱連結包含調課停課後的全部課程，若有調課或教務更新，訂閱來源會自動保持最新。"
+  "subscriptionTutorialContent": "• Apple 行事曆 (iPhone / iPad / Mac)：\n點擊上方「在行事曆中訂閱」，或在行事曆 App 中選擇「加入已訂閱的行事曆」，貼上連結即可。\n\n• Google 日曆：\n在網頁端點擊「其他日曆」旁的「+」號，選擇「透過網址」，貼上連結並儲存。\n\n• Outlook / 微軟行事曆：\n選擇「新增行事曆」-「從 Web 訂閱」，輸入連結並儲存。\n\n• 提示：\n訂閱連結包含調課停課後的全部課程，若有調課或教務更新，訂閱來源會自動保持最新。",
+  "postLoginDoneTitle": "大功告成！",
+  "postLoginDoneMessage": "歡迎使用「自在東湖」，更多選項請前往「設定」。",
+  "postLoginDoneButton": "完成",
+  "analyticsAnonymousTitle": "允許匿名統計",
+  "analyticsAnonymousSubtitle": "僅使用絕對匿名方式，統計您的使用版本。",
+  "analyticsPromptTitle": "允許匿名統計",
+  "analyticsPromptSubtitle": "僅使用絕對匿名方式，統計您的使用版本。"
 }
