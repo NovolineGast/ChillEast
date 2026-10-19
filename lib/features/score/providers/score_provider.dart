@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/score_service.dart';
 import '../models/score_model.dart';
@@ -85,6 +86,57 @@ class ScoreNotifier extends StateNotifier<ScoreState> {
       );
     } catch (e) {
       _logger.e('Error fetching initial score data: $e');
+      if (kDebugMode) {
+        state = state.copyWith(
+          isLoading: false,
+          errorMessage: null,
+          semesters: [
+            SemesterModel(id: '2025-2026-2', name: '2025-2026-2', isActive: true),
+            SemesterModel(id: '2025-2026-1', name: '2025-2026-1'),
+          ],
+          selectedSemester: SemesterModel(id: '2025-2026-2', name: '2025-2026-2', isActive: true),
+          scores: [
+            ScoreModel(
+              courseName: '毛泽东思想和中国特色社会主义理论体系概论',
+              score: '93',
+              credit: '3.0',
+              examType: '正常考试',
+              curriculumAttributes: '必修',
+              courseNature: '公共必修课',
+              courseCode: 'B621L10002',
+            ),
+            ScoreModel(
+              courseName: '材料力学',
+              score: '78',
+              credit: '3.0',
+              examType: '正常考试',
+              curriculumAttributes: '必修',
+              courseNature: '专业必修课',
+              courseCode: 'B332L18300',
+            ),
+            ScoreModel(
+              courseName: '大学英语(3)',
+              score: '优秀',
+              credit: '3.5',
+              examType: '正常考试',
+              curriculumAttributes: '必修',
+              courseNature: '通识必修课',
+              courseCode: 'ENG2003',
+            ),
+            ScoreModel(
+              courseName: '高等数学A(1)',
+              score: '58',
+              credit: '5.0',
+              examType: '正常考试',
+              curriculumAttributes: '必修',
+              courseNature: '通识必修课',
+              courseCode: 'MATH1001',
+              dailyScore: '62',
+            ),
+          ],
+        );
+        return;
+      }
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
@@ -102,6 +154,27 @@ class ScoreNotifier extends StateNotifier<ScoreState> {
       );
     } catch (e) {
       _logger.e('Error changing semester to ${semester.id}: $e');
+      state = state.copyWith(isLoading: false, errorMessage: e.toString());
+    }
+  }
+
+  Future<void> refresh() async {
+    final sem = state.selectedSemester;
+    if (sem == null) {
+      await fetchInitialData();
+      return;
+    }
+
+    try {
+      state = state.copyWith(isLoading: true, errorMessage: null);
+      final scores = await _service.fetchScores(semester: sem.id);
+
+      state = state.copyWith(
+        isLoading: false,
+        scores: scores,
+      );
+    } catch (e) {
+      _logger.e('Error refreshing score data: $e');
       state = state.copyWith(isLoading: false, errorMessage: e.toString());
     }
   }
